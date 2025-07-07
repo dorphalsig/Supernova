@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/avatarCard"
+    android:layout_width="@dimen/avatar_size_large"
+    android:layout_height="@dimen/avatar_size_large"
+    android:layout_margin="@dimen/margin_small"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="@dimen/card_elevation"
+    app:cardBackgroundColor="@color/card_background"
+    style="@style/Widget.Supernova.Card">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Avatar Image -->
+        <ImageView
+            android:id="@+id/avatarImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/margin_small"
+            android:scaleType="centerCrop"
+            android:contentDescription="Avatar" />
+
+        <!-- Selection Indicator -->
+        <View
+            android:id="@+id/selectionIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/avatar_selection_overlay"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

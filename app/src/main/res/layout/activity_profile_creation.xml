@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grey_900">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/padding_xlarge">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Profile"
+            android:textColor="@color/white"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="@dimen/margin_xlarge"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Profile Creation Container -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/profileCreationCard"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_large"
+            app:cardBackgroundColor="@color/grey_700"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/titleTextView"
+            app:layout_constraintWidth_percent="0.7">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_xlarge">
+
+                <!-- Profile Name Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/profileNameInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Profile Name"
+                    android:textColorHint="@color/grey_400"
+                    app:boxBackgroundColor="@color/grey_800"
+                    app:boxStrokeColor="@color/purple_500"
+                    app:hintTextColor="@color/grey_400"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/profileNameEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/tv_text_size"
+                        android:nextFocusDown="@id/avatarRecyclerView" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Choose Avatar Label -->
+                <TextView
+                    android:id="@+id/chooseAvatarLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_large"
+                    android:layout_marginBottom="@dimen/margin_medium"
+                    android:text="Choose Avatar"
+                    android:textColor="@color/grey_300"
+                    android:textSize="@dimen/tv_text_size" />
+
+                <!-- Avatar Grid -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/avatarRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margin_large" />
+
+                <!-- PIN Section (shown conditionally) -->
+                <LinearLayout
+                    android:id="@+id/pinSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_medium"
+                        android:text="Set PIN (4 digits)"
+                        android:textColor="@color/grey_300"
+                        android:textSize="@dimen/tv_text_size" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="@dimen/margin_medium">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/pinInputLayout"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="@dimen/margin_medium"
+                            android:hint="PIN"
+                            android:textColorHint="@color/grey_400"
+                            app:boxBackgroundColor="@color/grey_800"
+                            app:boxStrokeColor="@color/purple_500"
+                            app:hintTextColor="@color/grey_400"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/pinEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberPassword"
+                                android:maxLength="4"
+                                android:textColor="@color/white"
+                                android:textSize="@dimen/tv_text_size" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/confirmPinInputLayout"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="Confirm PIN"
+                            android:textColorHint="@color/grey_400"
+                            app:boxBackgroundColor="@color/grey_800"
+                            app:boxStrokeColor="@color/purple_500"
+                            app:hintTextColor="@color/grey_400"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/confirmPinEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberPassword"
+                                android:maxLength="4"
+                                android:textColor="@color/white"
+                                android:textSize="@dimen/tv_text_size" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Save Button -->
+                <Button
+                    android:id="@+id/saveButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_medium"
+                    android:text="Save"
+                    android:textSize="@dimen/tv_text_size"
+                    android:enabled="false"
+                    style="@style/Widget.Supernova.Button" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:indeterminateTint="@color/purple_500"
+            app:layout_constraintBottom_toBottomOf="@id/profileCreationCard"
+            app:layout_constraintEnd_toEndOf="@id/profileCreationCard"
+            app:layout_constraintStart_toStartOf="@id/profileCreationCard"
+            app:layout_constraintTop_toTopOf="@id/profileCreationCard" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

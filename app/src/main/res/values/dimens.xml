@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TV Specific Dimensions -->
+    <dimen name="tv_text_size">18sp</dimen>
+    <dimen name="tv_text_size_large">24sp</dimen>
+    <dimen name="tv_text_size_small">14sp</dimen>
+
+    <!-- Button Dimensions -->
+    <dimen name="tv_button_height">56dp</dimen>
+    <dimen name="tv_button_width">200dp</dimen>
+    <dimen name="tv_button_padding">16dp</dimen>
+
+    <!-- Input Field Dimensions -->
+    <dimen name="tv_input_height">64dp</dimen>
+    <dimen name="tv_input_padding">16dp</dimen>
+    <dimen name="tv_input_margin">16dp</dimen>
+
+    <!-- Card Dimensions -->
+    <dimen name="card_corner_radius">12dp</dimen>
+    <dimen name="card_elevation">8dp</dimen>
+    <dimen name="profile_card_width">300dp</dimen>
+    <dimen name="profile_card_height">400dp</dimen>
+
+    <!-- Avatar Dimensions -->
+    <dimen name="avatar_size_small">48dp</dimen>
+    <dimen name="avatar_size_medium">96dp</dimen>
+    <dimen name="avatar_size_large">128dp</dimen>
+
+    <!-- Layout Margins and Padding -->
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_large">24dp</dimen>
+    <dimen name="margin_xlarge">32dp</dimen>
+
+    <dimen name="padding_small">8dp</dimen>
+    <dimen name="padding_medium">16dp</dimen>
+    <dimen name="padding_large">24dp</dimen>
+    <dimen name="padding_xlarge">32dp</dimen>
+
+    <!-- Logo Dimensions -->
+    <dimen name="logo_size">120dp</dimen>
+
+    <!-- Focus Animation -->
+    <dimen name="focus_scale">1.1</dimen>
+</resources>

@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Supernova</string>
+    <string name="choose_your_profile">Choose Your Profile</string>
+    <string name="loading_profiles">Loading profiles...</string>
+    <string name="add_profile">Add Profile</string>
+    <string name="profile_has_pin">Profile has PIN</string>
+    <string name="profile_name">Profile Name</string>
+    <string name="profile_avatar">Profile Avatar</string>
 </resources>
