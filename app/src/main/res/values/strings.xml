@@ -7,4 +7,23 @@
     <string name="profile_name">Profile Name</string>
     <string name="profile_avatar">Profile Avatar</string>
     <string name="instruction_select_profile">Use &#x25C0; or &#x25B6; to select</string>
+    <string name="create_profile">Create Profile</string>
+    <string name="choose_avatar">Choose Avatar</string>
+    <string name="set_pin_4_digits">Set PIN (4 digits)</string>
+    <string name="pin">PIN</string>
+    <string name="confirm_pin">Confirm PIN</string>
+    <string name="save">Save</string>
+    <string name="continue_">Continue</string>
+    <string name="initial_configuration">Initial Configuration</string>
+    <string name="portal">Portal:</string>
+    <string name="username">Username:</string>
+    <string name="password">Password:</string>
+    <string name="parental_lock">Parental Lock:</string>
+    <string name="enabled">Enabled</string>
+    <string name="avatar">Avatar</string>
+    <string name="authentication_failed_please_check_your_credentials">Authentication failed. Please check your credentials.</string>
+    <string name="connection_failed_please_check_your_portal_url">Connection failed. Please check your portal URL.</string>
+    <string name="network_error_">Network Error:</string>
+    <string name="invalid_user">Invalid username</string>
+    <string name="invalid_password">Invalid password</string>
 </resources>

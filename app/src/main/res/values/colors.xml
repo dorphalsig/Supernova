@@ -1,40 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Colors -->
+    <!-- Custom Supernova Color Palette -->
+    <color name="supernova_bg">#191b22</color>
+    <color name="supernova_surface">#23253a</color>
+    <color name="supernova_surface_variant">#313358</color>
+    <color name="supernova_on_surface">#f0f2fd</color>
+    <color name="supernova_on_surface_var">#aaaad6</color>
+    <color name="supernova_primary">#829afe</color>
+    <color name="supernova_primary_cont">#363c5c</color>
+    <color name="supernova_focus">#70b3fe</color>
+    <color name="supernova_accent">#ff7cae</color>
+    <color name="supernova_border">#829afe99</color>
+    <color name="supernova_lock_bg">#232344</color>
+    <color name="supernova_shadow">#0b0b1a66</color>
+
+    <!-- Legacy Colors (kept for backwards compatibility) -->
     <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6650A4</color>
-    <color name="purple_700">#FF3700B3</color>
+    <color name="purple_500">#829afe</color>
+    <color name="purple_700">#363c5c</color>
 
     <!-- Secondary Colors -->
-    <color name="blue_200">#FF81D4FA</color>
-    <color name="blue_500">#FF2196F3</color>
-    <color name="blue_700">#FF1976D2</color>
+    <color name="blue_200">#70b3fe</color>
+    <color name="blue_500">#829afe</color>
+    <color name="blue_700">#363c5c</color>
 
     <!-- Surface Colors -->
-    <color name="grey_50">#FFFAFAFA</color>
-    <color name="grey_100">#FFF5F5F5</color>
-    <color name="grey_200">#FFEEEEEE</color>
-    <color name="grey_300">#FFE0E0E0</color>
-    <color name="grey_400">#FFBDBDBD</color>
-    <color name="grey_500">#FF9E9E9E</color>
-    <color name="grey_600">#FF757575</color>
-    <color name="grey_700">#FF616161</color>
-    <color name="grey_800">#FF424242</color>
-    <color name="grey_900">#FF212121</color>
+    <color name="grey_50">#f0f2fd</color>
+    <color name="grey_100">#aaaad6</color>
+    <color name="grey_200">#313358</color>
+    <color name="grey_300">#aaaad6</color>
+    <color name="grey_400">#aaaad6</color>
+    <color name="grey_500">#aaaad6</color>
+    <color name="grey_600">#313358</color>
+    <color name="grey_700">#23253a</color>
+    <color name="grey_800">#23253a</color>
+    <color name="grey_900">#191b22</color>
 
     <!-- Basic Colors -->
     <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="white">#f0f2fd</color>
 
     <!-- Success/Error Colors -->
-    <color name="green_500">#FF4CAF50</color>
-    <color name="red_500">#FFF44336</color>
+    <color name="green_500">#4CAF50</color>
+    <color name="red_500">#ff7cae</color>
 
     <!-- Focus/Selection Colors -->
-    <color name="focus_color">#FF6650A4</color>
-    <color name="focus_background">#1A6650A4</color>
+    <color name="focus_color">#70b3fe</color>
+    <color name="focus_background">#1A70b3fe</color>
 
     <!-- Card Colors -->
-    <color name="card_background">#FF2C2C2C</color>
-    <color name="card_background_focused">#FF424242</color>
+    <color name="card_background">#23253a</color>
+    <color name="card_background_focused">#313358</color>
 </resources>

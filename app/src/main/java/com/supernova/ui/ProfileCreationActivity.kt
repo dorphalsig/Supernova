@@ -12,6 +12,7 @@ import com.supernova.data.database.SupernovaDatabase
 import com.supernova.data.entities.ProfileEntity
 import com.supernova.databinding.ActivityProfileCreationBinding
 import com.supernova.network.AvatarService
+import com.supernova.utils.AvatarPreloader
 import com.supernova.utils.SecureStorage
 import com.supernova.utils.ValidationUtils
 import kotlinx.coroutines.launch
@@ -21,12 +22,12 @@ class ProfileCreationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProfileCreationBinding
     private lateinit var secureStorage: SecureStorage
     private lateinit var avatarAdapter: AvatarAdapter
+    private lateinit var avatarPreloader: AvatarPreloader
     private val viewModel: ProfileCreationViewModel by viewModels {
         ProfileCreationViewModelFactory(SupernovaDatabase.getDatabase(this))
     }
 
     private var selectedAvatarUrl: String? = null
-    private var selectedAvatarBytes: ByteArray? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +35,7 @@ class ProfileCreationActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         secureStorage = SecureStorage(this)
+        avatarPreloader = AvatarPreloader(this)
 
         setupViews()
         setupAvatarGrid()
@@ -57,7 +59,7 @@ class ProfileCreationActivity : AppCompatActivity() {
     private fun setupAvatarGrid() {
         avatarAdapter = AvatarAdapter { avatarUrl ->
             selectedAvatarUrl = avatarUrl
-            downloadSelectedAvatar(avatarUrl)
+            binding.saveButton.isEnabled = true
         }
 
         binding.avatarRecyclerView.apply {
@@ -69,21 +71,8 @@ class ProfileCreationActivity : AppCompatActivity() {
     private fun observeViewModel() {
         viewModel.avatarUrls.observe(this, Observer { urls ->
             avatarAdapter.updateAvatars(urls)
-        })
-
-        viewModel.avatarDownload.observe(this, Observer { result ->
-            when {
-                result == null -> {
-                    // Show loading state if needed
-                }
-                result.isSuccess -> {
-                    selectedAvatarBytes = result.getOrNull()
-                    binding.saveButton.isEnabled = true
-                }
-                result.isFailure -> {
-                    showError("Failed to download avatar: ${result.exceptionOrNull()?.message}")
-                }
-            }
+            // Preload avatars in background after they're generated
+            avatarPreloader.preloadRandomAvatars(urls.size)
         })
 
         viewModel.profileCreation.observe(this, Observer { result ->
@@ -106,10 +95,6 @@ class ProfileCreationActivity : AppCompatActivity() {
         viewModel.generateAvatars()
     }
 
-    private fun downloadSelectedAvatar(avatarUrl: String) {
-        viewModel.downloadAvatar(avatarUrl)
-    }
-
     private fun createProfile() {
         val profileName = binding.profileNameEditText.text.toString()
 
@@ -125,7 +110,7 @@ class ProfileCreationActivity : AppCompatActivity() {
         val validName = nameValidation.getOrNull()!!
 
         // Check if avatar is selected
-        if (selectedAvatarBytes == null) {
+        if (selectedAvatarUrl == null) {
             showError("Please select an avatar")
             return
         }
@@ -155,7 +140,7 @@ class ProfileCreationActivity : AppCompatActivity() {
         val profile = ProfileEntity(
             name = validName,
             pin = pin,
-            avatar = selectedAvatarBytes!!
+            avatar = selectedAvatarUrl!! // Store URL instead of bytes
         )
 
         viewModel.createProfile(profile)
@@ -169,7 +154,7 @@ class ProfileCreationActivity : AppCompatActivity() {
 
     private fun setLoadingState(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        binding.saveButton.isEnabled = !isLoading && selectedAvatarBytes != null
+        binding.saveButton.isEnabled = !isLoading && selectedAvatarUrl != null
         binding.profileNameEditText.isEnabled = !isLoading
         binding.pinEditText.isEnabled = !isLoading
         binding.confirmPinEditText.isEnabled = !isLoading
@@ -182,13 +167,8 @@ class ProfileCreationActivity : AppCompatActivity() {
 
 class ProfileCreationViewModel(private val database: SupernovaDatabase) : ViewModel() {
 
-    private val avatarService = AvatarService.create()
-
     private val _avatarUrls = MutableLiveData<List<String>>()
     val avatarUrls: LiveData<List<String>> = _avatarUrls
-
-    private val _avatarDownload = MutableLiveData<Result<ByteArray>?>()
-    val avatarDownload: LiveData<Result<ByteArray>?> = _avatarDownload
 
     private val _profileCreation = MutableLiveData<ProfileCreationResult>()
     val profileCreation: LiveData<ProfileCreationResult> = _profileCreation
@@ -196,28 +176,6 @@ class ProfileCreationViewModel(private val database: SupernovaDatabase) : ViewMo
     fun generateAvatars() {
         val urls = AvatarService.generateRandomAvatarUrls(6) // 6 avatars as shown in mockup
         _avatarUrls.value = urls
-    }
-
-    fun downloadAvatar(url: String) {
-        _avatarDownload.value = null // null can represent loading state
-
-        viewModelScope.launch {
-            try {
-                val response = avatarService.downloadAvatar(url)
-                if (response.isSuccessful) {
-                    val bytes = response.body()?.bytes()
-                    if (bytes != null) {
-                        _avatarDownload.value = Result.success(bytes)
-                    } else {
-                        _avatarDownload.value = Result.failure(Exception("Empty response"))
-                    }
-                } else {
-                    _avatarDownload.value = Result.failure(Exception("Download failed"))
-                }
-            } catch (e: Exception) {
-                _avatarDownload.value = Result.failure(e)
-            }
-        }
     }
 
     fun createProfile(profile: ProfileEntity) {
@@ -245,12 +203,6 @@ class ProfileCreationViewModelFactory(
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
-
-//sealed class AvatarDownloadResult {
-//    data class Success(val bytes: ByteArray) : AvatarDownloadResult()
-//    data class Error(val message: String) : AvatarDownloadResult()
-//    object Loading : AvatarDownloadResult()
-//}
 
 sealed class ProfileCreationResult {
     object Success : ProfileCreationResult()

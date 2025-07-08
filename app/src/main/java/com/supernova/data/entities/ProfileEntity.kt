@@ -9,7 +9,7 @@ data class ProfileEntity(
     val id: Int = 0,
     val name: String,
     val pin: Int? = null,
-    val avatar: ByteArray
+    val avatar: String // Changed from ByteArray to String (URL)
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -20,7 +20,7 @@ data class ProfileEntity(
         if (id != other.id) return false
         if (name != other.name) return false
         if (pin != other.pin) return false
-        if (!avatar.contentEquals(other.avatar)) return false
+        if (avatar != other.avatar) return false
 
         return true
     }
@@ -29,7 +29,7 @@ data class ProfileEntity(
         var result = id
         result = 31 * result + name.hashCode()
         result = 31 * result + (pin ?: 0)
-        result = 31 * result + avatar.contentHashCode()
+        result = 31 * result + avatar.hashCode()
         return result
     }
 }

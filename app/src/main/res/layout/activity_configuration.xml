@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_900">
+    android:background="@color/supernova_bg">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -15,8 +15,8 @@
             android:id="@+id/titleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Initial Configuration"
-            android:textColor="@color/white"
+            android:text="@string/initial_configuration"
+            android:textColor="@color/supernova_on_surface"
             android:textSize="32sp"
             android:textStyle="bold"
             android:layout_marginBottom="@dimen/margin_xlarge"
@@ -56,11 +56,11 @@
                 android:id="@+id/portalInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Portal:"
-                android:textColorHint="@color/grey_400"
-                app:boxBackgroundColor="@color/grey_800"
-                app:boxStrokeColor="@color/purple_500"
-                app:hintTextColor="@color/grey_400"
+                android:hint="@string/portal"
+                android:textColorHint="@color/supernova_on_surface_var"
+                app:boxBackgroundColor="@color/supernova_surface_variant"
+                app:boxStrokeColor="@color/supernova_primary"
+                app:hintTextColor="@color/supernova_on_surface_var"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -68,7 +68,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textUri"
-                    android:textColor="@color/white"
+                    android:textColor="@color/supernova_on_surface"
                     android:textSize="@dimen/tv_text_size"
                     android:nextFocusDown="@id/usernameEditText" />
 
@@ -80,11 +80,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_medium"
-                android:hint="Username:"
-                android:textColorHint="@color/grey_400"
-                app:boxBackgroundColor="@color/grey_800"
-                app:boxStrokeColor="@color/purple_500"
-                app:hintTextColor="@color/grey_400"
+                android:hint="@string/username"
+                android:textColorHint="@color/supernova_on_surface_var"
+                app:boxBackgroundColor="@color/supernova_surface_variant"
+                app:boxStrokeColor="@color/supernova_primary"
+                app:hintTextColor="@color/supernova_on_surface_var"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -92,7 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
-                    android:textColor="@color/white"
+                    android:textColor="@color/supernova_on_surface"
                     android:textSize="@dimen/tv_text_size"
                     android:nextFocusDown="@id/passwordEditText" />
 
@@ -104,11 +104,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_medium"
-                android:hint="Password:"
-                android:textColorHint="@color/grey_400"
-                app:boxBackgroundColor="@color/grey_800"
-                app:boxStrokeColor="@color/purple_500"
-                app:hintTextColor="@color/grey_400"
+                android:hint="@string/password"
+                android:textColorHint="@color/supernova_on_surface_var"
+                app:boxBackgroundColor="@color/supernova_surface_variant"
+                app:boxStrokeColor="@color/supernova_primary"
+                app:hintTextColor="@color/supernova_on_surface_var"
                 app:passwordToggleEnabled="true"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
@@ -117,7 +117,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
-                    android:textColor="@color/white"
+                    android:textColor="@color/supernova_on_surface"
                     android:textSize="@dimen/tv_text_size"
                     android:nextFocusDown="@id/parentalLockCheckbox" />
 
@@ -135,23 +135,23 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Parental Lock:"
-                    android:textColor="@color/white"
+                    android:text="@string/parental_lock"
+                    android:textColor="@color/supernova_on_surface"
                     android:textSize="@dimen/tv_text_size" />
 
                 <CheckBox
                     android:id="@+id/parentalLockCheckbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:buttonTint="@color/purple_500"
+                    android:buttonTint="@color/supernova_primary"
                     android:nextFocusDown="@id/continueButton" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/margin_small"
-                    android:text="Enabled"
-                    android:textColor="@color/white"
+                    android:text="@string/enabled"
+                    android:textColor="@color/supernova_on_surface"
                     android:textSize="@dimen/tv_text_size" />
 
             </LinearLayout>
@@ -162,7 +162,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_xlarge"
-                android:text="Continue"
+                android:text="@string/continue_"
                 android:textSize="@dimen/tv_text_size"
                 style="@style/Widget.Supernova.Button" />
 
@@ -174,7 +174,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:indeterminateTint="@color/purple_500"
+            android:indeterminateTint="@color/supernova_primary"
             app:layout_constraintBottom_toBottomOf="@id/formContainer"
             app:layout_constraintEnd_toEndOf="@id/formContainer"
             app:layout_constraintStart_toStartOf="@id/formContainer"

@@ -14,6 +14,7 @@ import com.supernova.network.models.ApiResult
 import com.supernova.utils.SecureStorage
 import com.supernova.utils.ValidationUtils
 import androidx.lifecycle.viewModelScope
+import com.supernova.R
 import com.supernova.network.ApiService
 import kotlinx.coroutines.launch
 
@@ -59,7 +60,12 @@ class ConfigurationActivity : AppCompatActivity() {
                     handleSuccessfulTest()
                 }
                 is ApiResult.Error -> {
-                    showError(result.message)
+                    val errorMsg = when (result.message) {
+                        "AUTHENTICATION_FAILED" -> getString(R.string.authentication_failed_please_check_your_credentials)
+                        "CONNECTION_FAILED" -> getString(R.string.connection_failed_please_check_your_portal_url)
+                        else -> "${getString(R.string.network_error_)}  ${result.message}"
+                    }
+                    showError(errorMsg)
                 }
             }
         })
@@ -77,7 +83,7 @@ class ConfigurationActivity : AppCompatActivity() {
 
         val usernameValidation = ValidationUtils.validateUsername(username)
         if (usernameValidation.isFailure) {
-            val errorMessage = usernameValidation.exceptionOrNull()?.message ?: "Invalid username"
+            val errorMessage = usernameValidation.exceptionOrNull()?.message ?: getString(R.string.invalid_user)
             binding.usernameInputLayout.error = errorMessage
             return
         }
@@ -85,7 +91,7 @@ class ConfigurationActivity : AppCompatActivity() {
 
         val passwordValidation = ValidationUtils.validatePassword(password)
         if (passwordValidation.isFailure) {
-            val errorMessage = passwordValidation.exceptionOrNull()?.message ?: "Invalid password"
+            val errorMessage = passwordValidation.exceptionOrNull()?.message ?: getString(R.string.invalid_password)
             binding.passwordInputLayout.error = errorMessage
             return
         }
@@ -146,13 +152,13 @@ class ConfigurationViewModel : ViewModel() {
                     if (loginResponse?.userInfo?.auth == 1 && loginResponse.userInfo.status == "Active") {
                         _testResult.value = ApiResult.Success(Unit)
                     } else {
-                        _testResult.value = ApiResult.Error("Authentication failed. Please check your credentials.")
+                        _testResult.value = ApiResult.Error("AUTH_FAILED_MSG")
                     }
                 } else {
-                    _testResult.value = ApiResult.Error("Connection failed. Please check your portal URL.")
+                    _testResult.value = ApiResult.Error("CONNECTION_FAILED")
                 }
             } catch (e: Exception) {
-                _testResult.value = ApiResult.Error("Network error: ${e.message}")
+                _testResult.value = ApiResult.Error("${e.message}")
             }
         }
     }

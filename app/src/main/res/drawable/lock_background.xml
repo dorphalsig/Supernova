@@ -2,10 +2,10 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
 
-    <solid android:color="@color/grey_800" />
+    <solid android:color="@color/supernova_lock_bg" />
 
     <stroke
         android:width="2dp"
-        android:color="@color/purple_500" />
+        android:color="@color/supernova_border" />
 
 </shape>

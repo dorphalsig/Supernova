@@ -5,7 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.supernova.databinding.ItemAvatarBinding
 
 private class AvatarDiffCallback(
@@ -24,7 +25,6 @@ class AvatarAdapter(
     private val onAvatarClick: (String) -> Unit
 ) : RecyclerView.Adapter<AvatarAdapter.AvatarViewHolder>() {
 
-
     private var avatars: List<String> = emptyList()
     private var selectedPosition = -1
 
@@ -35,7 +35,6 @@ class AvatarAdapter(
         selectedPosition = -1
         diffResult.dispatchUpdatesTo(this)
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AvatarViewHolder {
         val binding = ItemAvatarBinding.inflate(
@@ -57,10 +56,13 @@ class AvatarAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(avatarUrl: String, isSelected: Boolean) {
-            Glide.with(binding.avatarImageView.context)
-                .load(avatarUrl)
-                .circleCrop()
-                .into(binding.avatarImageView)
+            // Use Coil for image loading
+            binding.avatarImageView.load(avatarUrl) {
+                transformations(CircleCropTransformation())
+                crossfade(true)
+                placeholder(android.R.drawable.ic_menu_gallery)
+                error(android.R.drawable.ic_menu_close_clear_cancel)
+            }
 
             // Show selection indicator
             binding.selectionIndicator.visibility = if (isSelected) {

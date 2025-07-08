@@ -9,7 +9,7 @@
     android:focusableInTouchMode="true"
     app:cardCornerRadius="@dimen/card_corner_radius"
     app:cardElevation="@dimen/card_elevation"
-    app:cardBackgroundColor="@color/card_background"
+    app:cardBackgroundColor="@color/supernova_surface"
     style="@style/Widget.Supernova.Card">
 
     <RelativeLayout
@@ -23,7 +23,7 @@
             android:layout_height="match_parent"
             android:layout_margin="@dimen/margin_small"
             android:scaleType="centerCrop"
-            android:contentDescription="Avatar" />
+            android:contentDescription="@string/avatar" />
 
         <!-- Selection Indicator -->
         <View

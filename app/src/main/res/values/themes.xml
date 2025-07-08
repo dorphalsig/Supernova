@@ -2,18 +2,18 @@
 <resources>
     <!-- Base Theme for Supernova -->
     <style name="Theme.Supernova" parent="Theme.Material3.Dark">
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimary">@color/supernova_primary</item>
+        <item name="colorPrimaryVariant">@color/supernova_primary_cont</item>
+        <item name="colorOnPrimary">@color/supernova_on_surface</item>
 
-        <item name="colorSecondary">@color/blue_200</item>
-        <item name="colorSecondaryVariant">@color/blue_700</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorSecondary">@color/supernova_focus</item>
+        <item name="colorSecondaryVariant">@color/supernova_primary_cont</item>
+        <item name="colorOnSecondary">@color/supernova_bg</item>
 
-        <item name="colorSurface">@color/grey_800</item>
-        <item name="colorOnSurface">@color/white</item>
-        <item name="android:colorBackground">@color/grey_900</item>
-        <item name="colorOnBackground">@color/white</item>
+        <item name="colorSurface">@color/supernova_surface</item>
+        <item name="colorOnSurface">@color/supernova_on_surface</item>
+        <item name="android:colorBackground">@color/supernova_bg</item>
+        <item name="colorOnBackground">@color/supernova_on_surface</item>
 
         <!-- TV Optimizations -->
         <item name="android:windowNoTitle">true</item>
@@ -22,9 +22,17 @@
         <item name="android:focusableInTouchMode">true</item>
     </style>
 
+    <!-- Compose Theme -->
+    <style name="Theme.Supernova.Compose" parent="Theme.Supernova">
+        <!-- Enable edge-to-edge for Compose -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
     <!-- Splash Theme -->
     <style name="Theme.Supernova.Splash" parent="Theme.Supernova">
-        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:windowBackground">@color/supernova_bg</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>

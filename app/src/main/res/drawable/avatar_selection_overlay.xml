@@ -6,7 +6,7 @@
 
     <stroke
         android:width="4dp"
-        android:color="@color/purple_500" />
+        android:color="@color/supernova_focus" />
 
     <corners android:radius="@dimen/card_corner_radius" />
 

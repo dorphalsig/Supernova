@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_900">
+    android:background="@color/supernova_bg">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -15,8 +15,8 @@
             android:id="@+id/titleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Create Profile"
-            android:textColor="@color/white"
+            android:text="@string/create_profile"
+            android:textColor="@color/supernova_on_surface"
             android:textSize="32sp"
             android:textStyle="bold"
             android:layout_marginBottom="@dimen/margin_xlarge"
@@ -30,7 +30,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_large"
-            app:cardBackgroundColor="@color/grey_700"
+            app:cardBackgroundColor="@color/supernova_surface"
             app:cardCornerRadius="@dimen/card_corner_radius"
             app:cardElevation="@dimen/card_elevation"
             app:layout_constraintEnd_toEndOf="parent"
@@ -49,11 +49,11 @@
                     android:id="@+id/profileNameInputLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Profile Name"
-                    android:textColorHint="@color/grey_400"
-                    app:boxBackgroundColor="@color/grey_800"
-                    app:boxStrokeColor="@color/purple_500"
-                    app:hintTextColor="@color/grey_400"
+                    android:hint="@string/profile_name"
+                    android:textColorHint="@color/supernova_on_surface_var"
+                    app:boxBackgroundColor="@color/supernova_surface_variant"
+                    app:boxStrokeColor="@color/supernova_primary"
+                    app:hintTextColor="@color/supernova_on_surface_var"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -61,7 +61,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textPersonName"
-                        android:textColor="@color/white"
+                        android:textColor="@color/supernova_on_surface"
                         android:textSize="@dimen/tv_text_size"
                         android:nextFocusDown="@id/avatarRecyclerView" />
 
@@ -74,8 +74,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margin_large"
                     android:layout_marginBottom="@dimen/margin_medium"
-                    android:text="Choose Avatar"
-                    android:textColor="@color/grey_300"
+                    android:text="@string/choose_avatar"
+                    android:textColor="@color/supernova_on_surface_var"
                     android:textSize="@dimen/tv_text_size" />
 
                 <!-- Avatar Grid -->
@@ -97,13 +97,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/margin_medium"
-                        android:text="Set PIN (4 digits)"
-                        android:textColor="@color/grey_300"
+                        android:text="@string/set_pin_4_digits"
+                        android:textColor="@color/supernova_on_surface_var"
                         android:textSize="@dimen/tv_text_size" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:baselineAligned="false"
                         android:orientation="horizontal"
                         android:layout_marginBottom="@dimen/margin_medium">
 
@@ -113,11 +114,11 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginEnd="@dimen/margin_medium"
-                            android:hint="PIN"
-                            android:textColorHint="@color/grey_400"
-                            app:boxBackgroundColor="@color/grey_800"
-                            app:boxStrokeColor="@color/purple_500"
-                            app:hintTextColor="@color/grey_400"
+                            android:hint="@string/pin"
+                            android:textColorHint="@color/supernova_on_surface_var"
+                            app:boxBackgroundColor="@color/supernova_surface_variant"
+                            app:boxStrokeColor="@color/supernova_primary"
+                            app:hintTextColor="@color/supernova_on_surface_var"
                             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                             <com.google.android.material.textfield.TextInputEditText
@@ -126,7 +127,7 @@
                                 android:layout_height="wrap_content"
                                 android:inputType="numberPassword"
                                 android:maxLength="4"
-                                android:textColor="@color/white"
+                                android:textColor="@color/supernova_on_surface"
                                 android:textSize="@dimen/tv_text_size" />
 
                         </com.google.android.material.textfield.TextInputLayout>
@@ -136,11 +137,11 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="Confirm PIN"
-                            android:textColorHint="@color/grey_400"
-                            app:boxBackgroundColor="@color/grey_800"
-                            app:boxStrokeColor="@color/purple_500"
-                            app:hintTextColor="@color/grey_400"
+                            android:hint="@string/confirm_pin"
+                            android:textColorHint="@color/supernova_on_surface_var"
+                            app:boxBackgroundColor="@color/supernova_surface_variant"
+                            app:boxStrokeColor="@color/supernova_primary"
+                            app:hintTextColor="@color/supernova_on_surface_var"
                             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                             <com.google.android.material.textfield.TextInputEditText
@@ -149,7 +150,7 @@
                                 android:layout_height="wrap_content"
                                 android:inputType="numberPassword"
                                 android:maxLength="4"
-                                android:textColor="@color/white"
+                                android:textColor="@color/supernova_on_surface"
                                 android:textSize="@dimen/tv_text_size" />
 
                         </com.google.android.material.textfield.TextInputLayout>
@@ -164,7 +165,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margin_medium"
-                    android:text="Save"
+                    android:text="@string/save"
                     android:textSize="@dimen/tv_text_size"
                     android:enabled="false"
                     style="@style/Widget.Supernova.Button" />
@@ -179,7 +180,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:indeterminateTint="@color/purple_500"
+            android:indeterminateTint="@color/supernova_primary"
             app:layout_constraintBottom_toBottomOf="@id/profileCreationCard"
             app:layout_constraintEnd_toEndOf="@id/profileCreationCard"
             app:layout_constraintStart_toStartOf="@id/profileCreationCard"
