@@ -47,6 +47,8 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.hilt.android)
+
 
     // UI & Material Design
     implementation(libs.androidx.appcompat)
@@ -81,4 +83,27 @@ dependencies {
 
     // Leanback for TV
     implementation(libs.androidx.leanback)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Security
+    implementation(libs.androidx.security.crypto)
+
+    // Leanback for TV
+    implementation(libs.androidx.leanback)
+
+    // WorkManager for background sync
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // Testing dependencies
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // Android testing
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

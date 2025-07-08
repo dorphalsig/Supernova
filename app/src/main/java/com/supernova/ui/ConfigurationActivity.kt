@@ -10,11 +10,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.supernova.databinding.ActivityConfigurationBinding
-import com.supernova.network.ApiService
 import com.supernova.network.models.ApiResult
 import com.supernova.utils.SecureStorage
 import com.supernova.utils.ValidationUtils
 import androidx.lifecycle.viewModelScope
+import com.supernova.network.ApiService
 import kotlinx.coroutines.launch
 
 class ConfigurationActivity : AppCompatActivity() {

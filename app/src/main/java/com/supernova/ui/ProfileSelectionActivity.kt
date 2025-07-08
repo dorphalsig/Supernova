@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
+import com.supernova.R
 import com.supernova.data.database.SupernovaDatabase
 import com.supernova.data.entities.ProfileEntity
 import com.supernova.databinding.ActivityProfileSelectionBinding
@@ -67,11 +68,18 @@ class ProfileSelectionActivity : AppCompatActivity() {
     private fun observeViewModel() {
         viewModel.profiles.observe(this, Observer { profiles ->
             if (profiles.isEmpty()) {
-                // No profiles exist, go to profile creation
                 navigateToProfileCreation()
             } else {
                 profileAdapter.updateProfiles(profiles)
-                binding.instructionText.text = "Use ◀ or ▶ to select"
+                binding.instructionText.setText(R.string.instruction_select_profile)
+
+                // Center single profile
+                if (profiles.size == 1) {
+                    binding.profilesRecyclerView.setPadding(0, binding.profilesRecyclerView.paddingTop, 0, binding.profilesRecyclerView.paddingBottom)
+                } else {
+                    val sidePadding = resources.getDimensionPixelSize(R.dimen.margin_xlarge)
+                    binding.profilesRecyclerView.setPadding(sidePadding, binding.profilesRecyclerView.paddingTop, sidePadding, binding.profilesRecyclerView.paddingBottom)
+                }
             }
         })
     }
