@@ -66,6 +66,7 @@ class ConfigurationActivity : AppCompatActivity() {
                         else -> "${getString(R.string.network_error_)}  ${result.message}"
                     }
                     showError(errorMsg)
+                    setLoadingState(false)
                 }
             }
         })
