@@ -1,5 +1,6 @@
 package com.supernova.network
 
+import androidx.annotation.VisibleForTesting
 import com.google.gson.Gson
 import com.supernova.data.database.SupernovaDatabase
 import com.supernova.data.entities.*
@@ -13,16 +14,12 @@ import com.supernova.utils.ApiUtils.parseTimestamp
 import com.supernova.utils.ApiUtils.normalizeUrl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class DataSyncService @Inject constructor(
+class DataSyncService(
     private val database: SupernovaDatabase,
     private val secureStorage: SecureStorage,
     private val gson: Gson = Gson()
 ) {
-
     companion object {
         private const val UNCATEGORIZED_ID = 999999
         private const val UNCATEGORIZED_NAME = "Uncategorized"
@@ -124,7 +121,7 @@ class DataSyncService @Inject constructor(
         }
     }
 
-    private suspend fun ensureDefaultCategory(type: String) {
+    internal suspend fun ensureDefaultCategory(type: String) {
         try {
             val existingCategory = database.categoryDao().getCategoryById(type, UNCATEGORIZED_ID)
             if (existingCategory == null) {
