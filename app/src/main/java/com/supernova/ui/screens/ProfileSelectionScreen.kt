@@ -2,7 +2,6 @@ package com.supernova.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -11,9 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,7 +23,6 @@ import com.supernova.ui.components.ProfileCard
 import com.supernova.ui.model.CarouselState
 import com.supernova.ui.model.ProfileDisplayItem
 import com.supernova.ui.model.toCarouselItems
-import com.supernova.utils.AvatarPreloader
 
 @Composable
 fun ProfileSelectionScreen(
@@ -34,9 +30,6 @@ fun ProfileSelectionScreen(
     onAddProfile: () -> Unit,
     viewModel: ProfileSelectionViewModel = viewModel()
 ) {
-    val context = LocalContext.current
-    val avatarPreloader = remember { AvatarPreloader(context) }
-
     val profiles by viewModel.profiles.collectAsState()
     val carouselState by remember(profiles) {
         derivedStateOf {
@@ -55,7 +48,6 @@ fun ProfileSelectionScreen(
     // Load profiles when screen starts
     LaunchedEffect(Unit) {
         viewModel.loadProfiles()
-        // Request focus on the screen for TV remote navigation
         focusRequester.requestFocus()
     }
 
@@ -70,20 +62,12 @@ fun ProfileSelectionScreen(
                         Key.DirectionLeft, Key.A -> {
                             if (currentCarouselState.canMoveLeft()) {
                                 currentCarouselState = currentCarouselState.moveLeft()
-                                avatarPreloader.preloadAdjacentAvatars(
-                                    currentCarouselState,
-                                    AvatarPreloader.Direction.LEFT
-                                )
                                 true
                             } else false
                         }
                         Key.DirectionRight, Key.D -> {
                             if (currentCarouselState.canMoveRight()) {
                                 currentCarouselState = currentCarouselState.moveRight()
-                                avatarPreloader.preloadAdjacentAvatars(
-                                    currentCarouselState,
-                                    AvatarPreloader.Direction.RIGHT
-                                )
                                 true
                             } else false
                         }
@@ -184,7 +168,7 @@ private fun ProfileCarousel(
                 onClick = onProfileClick,
                 modifier = Modifier
                     .offset(x = (-200).dp)
-                    .width(200.dp) // Partially visible
+                    .width(200.dp)
             )
         }
 
@@ -206,7 +190,7 @@ private fun ProfileCarousel(
                 onClick = onProfileClick,
                 modifier = Modifier
                     .offset(x = 200.dp)
-                    .width(200.dp) // Partially visible
+                    .width(200.dp)
             )
         }
     }

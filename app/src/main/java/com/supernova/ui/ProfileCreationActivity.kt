@@ -12,7 +12,6 @@ import com.supernova.data.database.SupernovaDatabase
 import com.supernova.data.entities.ProfileEntity
 import com.supernova.databinding.ActivityProfileCreationBinding
 import com.supernova.network.AvatarService
-import com.supernova.utils.AvatarPreloader
 import com.supernova.utils.SecureStorage
 import com.supernova.utils.ValidationUtils
 import kotlinx.coroutines.launch
@@ -22,7 +21,6 @@ class ProfileCreationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProfileCreationBinding
     private lateinit var secureStorage: SecureStorage
     private lateinit var avatarAdapter: AvatarAdapter
-    private lateinit var avatarPreloader: AvatarPreloader
     private val viewModel: ProfileCreationViewModel by viewModels {
         ProfileCreationViewModelFactory(SupernovaDatabase.getDatabase(this))
     }
@@ -35,7 +33,6 @@ class ProfileCreationActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         secureStorage = SecureStorage(this)
-        avatarPreloader = AvatarPreloader(this)
 
         setupViews()
         setupAvatarGrid()
@@ -71,8 +68,6 @@ class ProfileCreationActivity : AppCompatActivity() {
     private fun observeViewModel() {
         viewModel.avatarUrls.observe(this, Observer { urls ->
             avatarAdapter.updateAvatars(urls)
-            // Preload avatars in background after they're generated
-            avatarPreloader.preloadRandomAvatars(urls.size)
         })
 
         viewModel.profileCreation.observe(this, Observer { result ->
@@ -140,7 +135,7 @@ class ProfileCreationActivity : AppCompatActivity() {
         val profile = ProfileEntity(
             name = validName,
             pin = pin,
-            avatar = selectedAvatarUrl!! // Store URL instead of bytes
+            avatar = selectedAvatarUrl!!
         )
 
         viewModel.createProfile(profile)
@@ -174,7 +169,7 @@ class ProfileCreationViewModel(private val database: SupernovaDatabase) : ViewMo
     val profileCreation: LiveData<ProfileCreationResult> = _profileCreation
 
     fun generateAvatars() {
-        val urls = AvatarService.generateRandomAvatarUrls(6) // 6 avatars as shown in mockup
+        val urls = AvatarService.generateRandomAvatarUrls(6)
         _avatarUrls.value = urls
     }
 

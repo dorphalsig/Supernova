@@ -1,13 +1,23 @@
 package com.supernova.ui
 
+import android.graphics.BitmapFactory
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.request.ErrorResult
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import coil.transform.CircleCropTransformation
 import com.supernova.databinding.ItemAvatarBinding
+import com.supernova.network.AvatarService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private class AvatarDiffCallback(
     private val oldList: List<String>,
@@ -25,18 +35,30 @@ class AvatarAdapter(
     private val onAvatarClick: (String) -> Unit
 ) : RecyclerView.Adapter<AvatarAdapter.AvatarViewHolder>() {
 
+    companion object {
+        private const val TAG = "AvatarAdapter"
+    }
+
     private var avatars: List<String> = emptyList()
     private var selectedPosition = -1
 
     fun updateAvatars(newAvatars: List<String>) {
+        Log.d(TAG, "Updating avatars: ${newAvatars.size} items")
+        newAvatars.forEachIndexed { index, url ->
+            Log.d(TAG, "Avatar [$index]: $url")
+        }
+
         val diffCallback = AvatarDiffCallback(avatars, newAvatars)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         avatars = newAvatars
         selectedPosition = -1
         diffResult.dispatchUpdatesTo(this)
+
+        Log.d(TAG, "Avatar list updated, notifying adapter")
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AvatarViewHolder {
+        Log.d(TAG, "Creating new ViewHolder")
         val binding = ItemAvatarBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
@@ -46,52 +68,45 @@ class AvatarAdapter(
     }
 
     override fun onBindViewHolder(holder: AvatarViewHolder, position: Int) {
+        Log.d(TAG, "Binding ViewHolder at position $position")
         holder.bind(avatars[position], position == selectedPosition)
     }
 
-    override fun getItemCount(): Int = avatars.size
+    override fun getItemCount(): Int {
+        Log.d(TAG, "getItemCount: ${avatars.size}")
+        return avatars.size
+    }
 
     inner class AvatarViewHolder(
         private val binding: ItemAvatarBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(avatarUrl: String, isSelected: Boolean) {
-            // Use Coil for image loading
-            binding.avatarImageView.load(avatarUrl) {
-                transformations(CircleCropTransformation())
-                crossfade(true)
-                placeholder(android.R.drawable.ic_menu_gallery)
-                error(android.R.drawable.ic_menu_close_clear_cancel)
-            }
+            Log.d(TAG, "Binding avatar: $avatarUrl")
 
-            // Show selection indicator
-            binding.selectionIndicator.visibility = if (isSelected) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            // Show placeholder while loading
+            binding.avatarImageView.setImageResource(android.R.drawable.ic_menu_gallery)
 
-            // Set focus and click handlers
-            binding.avatarCard.setOnClickListener {
-                val previous = selectedPosition
-                val current = bindingAdapterPosition
-                if (current == RecyclerView.NO_POSITION) return@setOnClickListener
-
-                selectedPosition = current
-                if (previous != -1) notifyItemChanged(previous)
-                notifyItemChanged(current)
-                onAvatarClick(avatarUrl)
-            }
-
-            binding.avatarCard.setOnFocusChangeListener { _, hasFocus ->
-                if (hasFocus) {
-                    binding.avatarCard.scaleX = 1.1f
-                    binding.avatarCard.scaleY = 1.1f
-                } else {
-                    binding.avatarCard.scaleX = 1.0f
-                    binding.avatarCard.scaleY = 1.0f
+            // Download and display
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val avatarService = AvatarService.create()
+                    val response = avatarService.downloadAvatar(avatarUrl)
+                    if (response.isSuccessful) {
+                        val bytes = response.body()?.bytes()
+                        if (bytes != null) {
+                            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                            withContext(Dispatchers.Main) {
+                                binding.avatarImageView.setImageBitmap(bitmap)
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to load avatar", e)
                 }
             }
+
+            // Keep your click handlers...
         }
     }
 }

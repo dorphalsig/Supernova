@@ -38,6 +38,13 @@ class ConfigurationActivity : AppCompatActivity() {
     }
 
     private fun setupViews() {
+        binding.portalEditText.setText("http://ky-iptv.com:25461/")
+        binding.usernameEditText.setText("Spicysoda56")
+        binding.passwordEditText.setText("Pass8248")
+
+        binding.continueButton.setOnClickListener {
+            validateAndTestConnection()
+        }
         binding.continueButton.setOnClickListener {
             validateAndTestConnection()
         }
@@ -102,7 +109,6 @@ class ConfigurationActivity : AppCompatActivity() {
         val normalizedPortal = portalValidation.getOrNull()!!
         val validUsername = usernameValidation.getOrNull()!!
         val validPassword = passwordValidation.getOrNull()!!
-
         viewModel.testConnection(normalizedPortal, validUsername, validPassword)
     }
 

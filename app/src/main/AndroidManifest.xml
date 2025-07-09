@@ -39,6 +39,12 @@
             android:exported="false"
             android:theme="@style/Theme.Supernova" />
 
+        <!-- Loading Activity -->
+        <activity
+            android:name=".ui.LoadingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Supernova" />
+
         <!-- Profile Creation Activity -->
         <activity
             android:name=".ui.ProfileCreationActivity"

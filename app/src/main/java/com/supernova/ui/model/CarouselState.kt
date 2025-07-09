@@ -9,7 +9,7 @@ sealed class ProfileDisplayItem {
 
 data class CarouselState(
     val items: List<ProfileDisplayItem>,
-    val centerIndex: Int = 0
+    val centerIndex: Int = 1 // Start at index 1 (middle) instead of 0
 ) {
     val centerItem: ProfileDisplayItem?
         get() = items.getOrNull(centerIndex)
