@@ -9,46 +9,34 @@ import kotlin.random.Random
 class SyncManager(private val context: Context) {
 
     companion object {
-        private const val DAILY_SYNC_WORK_NAME = "DailySyncWork"
-        private const val MIN_DELAY_HOURS = 20L  // Minimum 20 hours between syncs
-        private const val MAX_DELAY_HOURS = 28L  // Maximum 28 hours between syncs
+        private const val DAILY_SYNC_WORK_NAME = DataSyncWorker.WORK_NAME
     }
 
     /**
-     * Schedules daily background sync with random timing to distribute server load
+     * Schedules periodic sync every 24 hours and triggers an immediate run.
+     * Any existing schedule is cancelled and replaced.
      */
     fun scheduleDailySync() {
         val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.UNMETERED) // WiFi only
-            .setRequiresBatteryNotLow(true)
-            .setRequiresDeviceIdle(false) // Allow sync even when device is being used
+            .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        // Random delay between 20-28 hours to distribute load
-        val randomDelayHours = Random.nextLong(MIN_DELAY_HOURS, MAX_DELAY_HOURS + 1)
-
-        val dailySyncRequest = PeriodicWorkRequestBuilder<DataSyncWorker>(
-            repeatInterval = 1,
-            repeatIntervalTimeUnit = TimeUnit.DAYS,
-            flexTimeInterval = 4, // 4-hour flex window
-            flexTimeIntervalUnit = TimeUnit.HOURS
-        )
+        val periodicRequest = PeriodicWorkRequestBuilder<DataSyncWorker>(24, TimeUnit.HOURS)
             .setConstraints(constraints)
-            .setInitialDelay(randomDelayHours, TimeUnit.HOURS)
-            .setBackoffCriteria(
-                BackoffPolicy.EXPONENTIAL,
-                30, // Start with 30 minute delay
-                TimeUnit.MINUTES
-            )
-            .addTag("background_sync")
             .build()
 
         WorkManager.getInstance(context)
             .enqueueUniquePeriodicWork(
                 DAILY_SYNC_WORK_NAME,
-                ExistingPeriodicWorkPolicy.KEEP, // Keep existing if already scheduled
-                dailySyncRequest
+                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+                periodicRequest
             )
+
+        val immediateRequest = OneTimeWorkRequestBuilder<DataSyncWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(context).enqueue(immediateRequest)
     }
 
     /**

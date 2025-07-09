@@ -23,13 +23,12 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun navigateToNextScreen() {
-        val intent = if (secureStorage.isConfigured()) {
-            Intent(this, ProfileSelectionActivity::class.java)
-        } else {
+        val intent = if (!secureStorage.isConfigured() || !secureStorage.isLastSyncSuccessful()) {
             Intent(this, ConfigurationActivity::class.java)
+        } else {
+            Intent(this, ProfileSelectionActivity::class.java)
         }
 
         startActivity(intent)
         finish()
-    }
-}
+    }}

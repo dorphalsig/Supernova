@@ -4,15 +4,20 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import com.google.android.material.snackbar.Snackbar
 import com.supernova.R
-import com.supernova.data.database.SupernovaDatabase
 import com.supernova.databinding.ActivityLoadingBinding
-import com.supernova.network.DataSyncService
 import com.supernova.utils.SecureStorage
-import kotlinx.coroutines.flow.last
+import com.supernova.work.DataSyncWorker
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.random.Random
 
 class LoadingActivity : AppCompatActivity() {
@@ -21,13 +26,14 @@ class LoadingActivity : AppCompatActivity() {
     private lateinit var secureStorage: SecureStorage
     private val handler = Handler(Looper.getMainLooper())
     private var phraseRotationRunnable: Runnable? = null
-    private var minimumDisplayTime = 30000L // 30 seconds minimum
+    private val minimumDisplayTime = 10000L // 10 seconds
+    private val timeoutMillis = 20 * 60 * 1000L
     private var startTime = 0L
-    
+
     private val loadingPhrases by lazy {
         (1..200).map { index ->
-            val resourceId = resources.getIdentifier("random_loading_phrase_$index", "string", packageName)
-            if (resourceId != 0) getString(resourceId) else "Initializing systems..."
+            val id = resources.getIdentifier("random_loading_phrase_$index", "string", packageName)
+            if (id != 0) getString(id) else "Loading..."
         }
     }
 
@@ -39,19 +45,8 @@ class LoadingActivity : AppCompatActivity() {
         secureStorage = SecureStorage(this)
         startTime = System.currentTimeMillis()
 
-        val isCompletingSync = intent.getBooleanExtra(EXTRA_COMPLETING_SYNC, false)
-        
-        // Update title based on mode
-        if (isCompletingSync) {
-            binding.setupTitleTextView.text = getString(R.string.completing_data_sync)
-        }
-
         startPhraseRotation()
-        if (isCompletingSync) {
-            waitForSyncCompletion()
-        } else {
-            startInitialSetup()
-        }
+        waitForSyncCompletion()
     }
 
     private fun startPhraseRotation() {
@@ -60,79 +55,79 @@ class LoadingActivity : AppCompatActivity() {
 
     private fun scheduleNextPhrase() {
         phraseRotationRunnable = Runnable {
-            // Pick random phrase
             val randomPhrase = loadingPhrases.random()
             binding.loadingPhraseTextView.text = randomPhrase
-
-            // Schedule next phrase in 3-5 seconds
             val nextDelay = Random.nextLong(3000, 5001)
             handler.postDelayed(phraseRotationRunnable!!, nextDelay)
         }
-        
-        // Initial delay before first phrase change
         val initialDelay = Random.nextLong(3000, 5001)
         handler.postDelayed(phraseRotationRunnable!!, initialDelay)
     }
 
-    private fun startInitialSetup() {
-        lifecycleScope.launch {
-            try {
-                // Get credentials from intent
-                val portal = intent.getStringExtra(EXTRA_PORTAL) ?: ""
-                val username = intent.getStringExtra(EXTRA_USERNAME) ?: ""
-                val password = intent.getStringExtra(EXTRA_PASSWORD) ?: ""
-
-                secureStorage.saveCredentials(portal, username, password)
-                val database = SupernovaDatabase.getDatabase(this@LoadingActivity)
-                val syncService = DataSyncService(database, secureStorage)
-                
-                val syncResult = syncService.syncAll().last()
-                
-                // Add delay to ensure user sees the loading screen
-                kotlinx.coroutines.delay(2000)
-                navigateToProfileCreation()
-                
-            } catch (e: Exception) {
-                navigateToProfileCreation()
-            }
-        }
-    }
-
     private fun waitForSyncCompletion() {
+        val wasSyncedBefore = secureStorage.isLastSyncSuccessful()
         lifecycleScope.launch {
-            try {
-                // Check if sync is still running by trying to get sync status
-                val database = SupernovaDatabase.getDatabase(this@LoadingActivity)
-                val syncService = DataSyncService(database, secureStorage)
-                
-                // Continue any pending sync
-                val syncResult = syncService.syncAll().last()
-                
-                // Ensure minimum display time
-                val elapsedTime = System.currentTimeMillis() - startTime
-                val remainingTime = minimumDisplayTime - elapsedTime
-                if (remainingTime > 0) {
-                    kotlinx.coroutines.delay(remainingTime)
+            val workInfo = withTimeoutOrNull(timeoutMillis) {
+                while (true) {
+                    val infos = WorkManager.getInstance(this@LoadingActivity)
+                        .getWorkInfosForUniqueWork(DataSyncWorker.WORK_NAME)
+                        .await()
+                    val info = infos.firstOrNull()
+                    if (info?.state?.isFinished == true) {
+                        break info
+                    }
+                    delay(1000)
                 }
-                
-                navigateToProfileSelection()
-                
-            } catch (e: Exception) {
-                // Even if sync fails, continue after minimum time
-                val elapsedTime = System.currentTimeMillis() - startTime
-                val remainingTime = minimumDisplayTime - elapsedTime
-                if (remainingTime > 0) {
-                    kotlinx.coroutines.delay(remainingTime)
+            }
+
+            val elapsed = System.currentTimeMillis() - startTime
+            val remaining = minimumDisplayTime - elapsed
+            if (remaining > 0) delay(remaining)
+
+            when {
+                workInfo == null -> showTimeoutDialog()
+                workInfo.state == WorkInfo.State.SUCCEEDED -> navigateToProfileSelection()
+                workInfo.state == WorkInfo.State.FAILED -> {
+                    val errorMsg = workInfo.outputData.getString(DataSyncWorker.KEY_ERROR_MESSAGE)
+                        ?: "Sync failed"
+                    handleSyncFailure(errorMsg, wasSyncedBefore)
                 }
-                navigateToProfileSelection()
+                else -> navigateToProfileSelection()
             }
         }
     }
 
-    private fun navigateToProfileCreation() {
-        val intent = Intent(this, ProfileCreationActivity::class.java)
-        startActivity(intent)
-        finish()
+    private fun showTimeoutDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Sync Timeout")
+            .setMessage("Data sync is taking too long. Cancel?")
+            .setCancelable(false)
+            .setPositiveButton("Cancel") { _, _ ->
+                startActivity(Intent(this, ConfigurationActivity::class.java))
+                finish()
+            }
+            .setNegativeButton("Wait") { _, _ ->
+                startTime = System.currentTimeMillis()
+                waitForSyncCompletion()
+            }
+            .show()
+    }
+
+    private fun handleSyncFailure(message: String, wasSyncedBefore: Boolean) {
+        if (!wasSyncedBefore) {
+            AlertDialog.Builder(this)
+                .setTitle("Sync Failed")
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton("OK") { _, _ ->
+                    startActivity(Intent(this, ConfigurationActivity::class.java))
+                    finish()
+                }
+                .show()
+        } else {
+            Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
+            navigateToProfileSelection()
+        }
     }
 
     private fun navigateToProfileSelection() {
@@ -147,9 +142,6 @@ class LoadingActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val EXTRA_PORTAL = "extra_portal"
-        const val EXTRA_USERNAME = "extra_username"
-        const val EXTRA_PASSWORD = "extra_password"
         const val EXTRA_COMPLETING_SYNC = "extra_completing_sync"
     }
 }

@@ -5,6 +5,7 @@ import com.supernova.network.models.CategoryResponse
 import com.supernova.network.models.VodResponse
 import com.supernova.network.models.SeriesResponse
 import com.supernova.network.models.LiveTvResponse
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -72,6 +73,13 @@ interface ApiService {
         @Query("password") password: String,
         @Query("action") action: String = "get_series"
     ): Response<List<SeriesResponse>>
+
+    @GET
+    suspend fun downloadEpg(
+        @Url url: String,
+        @Query("username") username: String,
+        @Query("password") password: String,
+    ): Response<ResponseBody>
 
     companion object {
         fun create(baseUrl: String): ApiService {

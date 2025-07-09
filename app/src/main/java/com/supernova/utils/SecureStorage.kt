@@ -24,6 +24,8 @@ class SecureStorage(context: Context) {
         private const val KEY_PASSWORD = "password"
         private const val KEY_IS_CONFIGURED = "is_configured"
         private const val KEY_PARENTAL_LOCK = "parental_lock"
+        private const val KEY_LAST_SYNC_SUCCESS = "last_sync_success"
+        private const val KEY_LAST_SYNC_TIME = "last_sync_time"
     }
 
     fun saveCredentials(portal: String, username: String, password: String) {
@@ -66,7 +68,23 @@ class SecureStorage(context: Context) {
             remove(KEY_USERNAME)
             remove(KEY_PASSWORD)
             remove(KEY_IS_CONFIGURED)
+            remove(KEY_LAST_SYNC_SUCCESS)
+            remove(KEY_LAST_SYNC_TIME)
             apply()
         }
     }
-}
+
+    fun setLastSyncResult(success: Boolean) {
+        sharedPreferences.edit()
+            .putBoolean(KEY_LAST_SYNC_SUCCESS, success)
+            .putLong(KEY_LAST_SYNC_TIME, System.currentTimeMillis())
+            .apply()
+    }
+
+    fun isLastSyncSuccessful(): Boolean {
+        return sharedPreferences.getBoolean(KEY_LAST_SYNC_SUCCESS, false)
+    }
+
+    fun getLastSyncTime(): Long {
+        return sharedPreferences.getLong(KEY_LAST_SYNC_TIME, 0L)
+    }}

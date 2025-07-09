@@ -37,11 +37,13 @@ class DataSyncWorker(
             when (finalResult) {
                 is SyncResult.Success -> {
                     Log.d(TAG, "Sync completed successfully")
+                    secureStorage.setLastSyncResult(true)
                     val outputData = workDataOf(KEY_SYNC_RESULT to "success")
                     Result.success(outputData)
                 }
                 is SyncResult.Error -> {
                     Log.e(TAG, "Sync failed: ${finalResult.message}")
+                    secureStorage.setLastSyncResult(false)
                     val outputData = workDataOf(
                         KEY_SYNC_RESULT to "error",
                         KEY_ERROR_MESSAGE to finalResult.message
@@ -55,11 +57,11 @@ class DataSyncWorker(
             }
         } catch (e: Exception) {
             Log.e(TAG, "DataSyncWorker failed with exception", e)
+            secureStorage.setLastSyncResult(false)
             val outputData = workDataOf(
                 KEY_SYNC_RESULT to "error",
                 KEY_ERROR_MESSAGE to (e.message ?: "Unknown error")
             )
             Result.failure(outputData)
         }
-    }
-}
+    }}

@@ -12,6 +12,7 @@ import com.supernova.data.database.SupernovaDatabase
 import com.supernova.data.entities.ProfileEntity
 import com.supernova.databinding.ActivityProfileCreationBinding
 import com.supernova.network.AvatarService
+import com.supernova.ui.LoadingActivity
 import com.supernova.utils.SecureStorage
 import com.supernova.utils.ValidationUtils
 import kotlinx.coroutines.launch
@@ -73,7 +74,13 @@ class ProfileCreationActivity : AppCompatActivity() {
         viewModel.profileCreation.observe(this, Observer { result ->
             when (result) {
                 is ProfileCreationResult.Success -> {
-                    navigateToProfileSelection()
+                    if (secureStorage.isLastSyncSuccessful()) {
+                        navigateToProfileSelection()
+                    } else {
+                        val intent = Intent(this@ProfileCreationActivity, LoadingActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
                 }
                 is ProfileCreationResult.Error -> {
                     showError(result.message)

@@ -30,4 +30,6 @@ interface ProfileDao {
 
     @Query("SELECT COUNT(*) FROM profiles")
     suspend fun getProfileCount(): Int
-}
+
+    @Query("SELECT COUNT(*) FROM profiles WHERE pin IS NOT NULL")
+    suspend fun getLockedProfileCount(): Int}

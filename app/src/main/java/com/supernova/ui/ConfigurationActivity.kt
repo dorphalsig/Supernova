@@ -17,6 +17,9 @@ import androidx.lifecycle.viewModelScope
 import com.supernova.R
 import com.supernova.network.ApiService
 import kotlinx.coroutines.launch
+import androidx.lifecycle.lifecycleScope
+import com.supernova.data.database.SupernovaDatabase
+import com.supernova.work.SyncManager
 
 class ConfigurationActivity : AppCompatActivity() {
 
@@ -117,13 +120,23 @@ class ConfigurationActivity : AppCompatActivity() {
         val username = binding.usernameEditText.text.toString().trim()
         val password = binding.passwordEditText.text.toString().trim()
 
-        // Save credentials
         secureStorage.saveCredentials(portal, username, password)
+        SyncManager(this).scheduleDailySync()
 
-        // Navigate to profile creation
-        val intent = Intent(this, ProfileCreationActivity::class.java)
-        startActivity(intent)
-        finish()
+        lifecycleScope.launch {
+            val db = SupernovaDatabase.getDatabase(this@ConfigurationActivity)
+            val profileCount = db.profileDao().getProfileCount()
+            val lockedCount = db.profileDao().getLockedProfileCount()
+
+            val next = if (profileCount == 0 || (secureStorage.isParentalLockEnabled() && lockedCount == 0)) {
+                Intent(this@ConfigurationActivity, ProfileCreationActivity::class.java)
+            } else {
+                Intent(this@ConfigurationActivity, LoadingActivity::class.java)
+            }
+
+            startActivity(next)
+            finish()
+        }
     }
 
     private fun setLoadingState(isLoading: Boolean) {
