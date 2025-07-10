@@ -31,7 +31,7 @@ class SecureDataStore(context: Context) {
 
     private val aead: Aead
 
-    private val dataStore: DataStore<SecurePrefs>
+    private val dataStore: DataStore<MutableMap<String, String>>
 
     init {
         AeadConfig.register()
@@ -51,81 +51,86 @@ class SecureDataStore(context: Context) {
 
         dataStore = DataStoreFactory.create(
             serializer = serializer,
-            produceFile = { java.io.File(context.filesDir, "secure_prefs.pb") },
+            produceFile = { File(context.filesDir, "secure_prefs.pb") },
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         )
     }
 
-    suspend fun saveCredentials(portal: String, username: String, password: String) {
-        dataStore.updateData {
-            it.copy(
-                portal = portal,
-                username = username,
-                password = password,
-                isConfigured = true
-            )
+    suspend fun putString(key: String, value: String) {
+        dataStore.updateData { prefs ->
+            prefs.toMutableMap().apply { this[key] = value }
         }
     }
 
-    suspend fun getPortal(): String? = dataStore.data.first().portal.ifEmpty { null }
-    suspend fun getUsername(): String? = dataStore.data.first().username.ifEmpty { null }
-    suspend fun getPassword(): String? = dataStore.data.first().password.ifEmpty { null }
-    suspend fun isConfigured(): Boolean = dataStore.data.first().isConfigured
+    suspend fun getString(key: String): String? = dataStore.data.first()[key]
 
-    suspend fun setParentalLock(enabled: Boolean) {
-        dataStore.updateData { it.copy(parentalLock = enabled) }
+    suspend fun putBoolean(key: String, value: Boolean) = putString(key, value.toString())
+
+    suspend fun getBoolean(key: String): Boolean = getString(key)?.toBoolean() ?: false
+
+    suspend fun putLong(key: String, value: Long) = putString(key, value.toString())
+
+    suspend fun getLong(key: String): Long = getString(key)?.toLongOrNull() ?: 0L
+
+    suspend fun saveCredentials(portal: String, username: String, password: String) {
+        dataStore.updateData { prefs ->
+            prefs.toMutableMap().apply {
+                this[SecureStorageKeys.PORTAL] = portal
+                this[SecureStorageKeys.USERNAME] = username
+                this[SecureStorageKeys.PASSWORD] = password
+                this[SecureStorageKeys.IS_CONFIGURED] = true.toString()
+            }
+        }
     }
 
-    suspend fun isParentalLockEnabled(): Boolean = dataStore.data.first().parentalLock
+    suspend fun getPortal(): String? = getString(SecureStorageKeys.PORTAL)
+    suspend fun getUsername(): String? = getString(SecureStorageKeys.USERNAME)
+    suspend fun getPassword(): String? = getString(SecureStorageKeys.PASSWORD)
+    suspend fun isConfigured(): Boolean = getBoolean(SecureStorageKeys.IS_CONFIGURED)
+
+    suspend fun setParentalLock(enabled: Boolean) = putBoolean(SecureStorageKeys.PARENTAL_LOCK, enabled)
+
+    suspend fun isParentalLockEnabled(): Boolean = getBoolean(SecureStorageKeys.PARENTAL_LOCK)
 
     suspend fun clearCredentials() {
-        dataStore.updateData { SecurePrefs() }
+        dataStore.updateData { mutableMapOf() }
     }
 
     suspend fun setLastSyncResult(success: Boolean) {
-        dataStore.updateData {
-            it.copy(
-                lastSyncSuccess = success,
-                lastSyncTime = System.currentTimeMillis()
-            )
+        dataStore.updateData { prefs ->
+            prefs.toMutableMap().apply {
+                this[SecureStorageKeys.LAST_SYNC_SUCCESS] = success.toString()
+                this[SecureStorageKeys.LAST_SYNC_TIME] = System.currentTimeMillis().toString()
+            }
         }
     }
 
-    suspend fun isLastSyncSuccessful(): Boolean = dataStore.data.first().lastSyncSuccess
-    suspend fun getLastSyncTime(): Long = dataStore.data.first().lastSyncTime
+    suspend fun isLastSyncSuccessful(): Boolean = getBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS)
+    suspend fun getLastSyncTime(): Long = getLong(SecureStorageKeys.LAST_SYNC_TIME)
 }
-
-data class SecurePrefs(
-    val portal: String = "",
-    val username: String = "",
-    val password: String = "",
-    val isConfigured: Boolean = false,
-    val parentalLock: Boolean = false,
-    val lastSyncSuccess: Boolean = false,
-    val lastSyncTime: Long = 0L
-)
 
 private class SecurePrefsSerializer(
     private val aead: Aead,
     private val gson: Gson
-) : Serializer<SecurePrefs> {
-    override val defaultValue: SecurePrefs = SecurePrefs()
+) : Serializer<MutableMap<String, String>> {
+    override val defaultValue: MutableMap<String, String> = mutableMapOf()
 
-    override suspend fun readFrom(input: InputStream): SecurePrefs {
+    override suspend fun readFrom(input: InputStream): MutableMap<String, String> {
         return try {
             val bytes = input.readBytes()
             if (bytes.isEmpty()) {
-                defaultValue
+                mutableMapOf()
             } else {
                 val decrypted = aead.decrypt(bytes, null)
-                gson.fromJson(String(decrypted), SecurePrefs::class.java)
+                @Suppress("UNCHECKED_CAST")
+                gson.fromJson(String(decrypted), MutableMap::class.java) as MutableMap<String, String>
             }
         } catch (_: Exception) {
-            defaultValue
+            mutableMapOf()
         }
     }
 
-    override suspend fun writeTo(t: SecurePrefs, output: OutputStream) {
+    override suspend fun writeTo(t: MutableMap<String, String>, output: OutputStream) {
         val json = gson.toJson(t).toByteArray()
         val encrypted = aead.encrypt(json, null)
         output.write(encrypted)
