@@ -19,7 +19,9 @@ import com.supernova.network.ApiService
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
 import com.supernova.data.database.SupernovaDatabase
+import com.supernova.utils.SecureStorageKeys
 import com.supernova.work.SyncManager
+import kotlin.collections.set
 
 class ConfigurationActivity : AppCompatActivity() {
 
@@ -117,13 +119,20 @@ class ConfigurationActivity : AppCompatActivity() {
         viewModel.testConnection(normalizedPortal, validUsername, validPassword)
     }
 
+    suspend fun saveCredentials(portal: String, username: String, password: String) {
+        secureStorage.putString(SecureStorageKeys.PORTAL, portal)
+        secureStorage.putString(SecureStorageKeys.USERNAME, username)
+        secureStorage.putString(SecureStorageKeys.PASSWORD, password)
+    }
+
+
     private fun handleSuccessfulTest() {
         val portal = ValidationUtils.normalizePortalUrl(binding.portalEditText.text.toString())
         val username = binding.usernameEditText.text.toString().trim()
         val password = binding.passwordEditText.text.toString().trim()
 
         lifecycleScope.launch {
-            secureStorage.saveCredentials(portal, username, password)
+            saveCredentials(portal, username, password)
             SyncManager(this@ConfigurationActivity).scheduleDailySync()
 
             val db = SupernovaDatabase.getDatabase(this@ConfigurationActivity)

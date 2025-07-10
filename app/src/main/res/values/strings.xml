@@ -29,205 +29,207 @@
     <string name="loading_animation">loading animation</string>
     <string name="finishing_setup">Finishing Setup</string>
 
-    <string name="random_loading_phrase_1">Calibrating the flux capacitor…</string>
-    <string name="random_loading_phrase_2">Reversing polarity on deck 3…</string>
-    <string name="random_loading_phrase_3">Activating quantum stabilizers…</string>
-    <string name="random_loading_phrase_4">Realigning the plasma conduits…</string>
-    <string name="random_loading_phrase_5">Boosting power to the deflector array…</string>
-    <string name="random_loading_phrase_6">Initializing warp core sequence…</string>
-    <string name="random_loading_phrase_7">Modulating the tachyon beam…</string>
-    <string name="random_loading_phrase_8">Adjusting gravitational field generators…</string>
-    <string name="random_loading_phrase_9">Syncing the molecular transporters…</string>
-    <string name="random_loading_phrase_10">Recalibrating sensor array matrix…</string>
-    <string name="random_loading_phrase_11">Engaging hyperdrive cooling systems…</string>
-    <string name="random_loading_phrase_12">Locking onto subspace frequency…</string>
-    <string name="random_loading_phrase_13">Activating emergency containment field…</string>
-    <string name="random_loading_phrase_14">Rerouting power through auxiliary circuits…</string>
-    <string name="random_loading_phrase_15">Initializing temporal displacement chamber…</string>
-    <string name="random_loading_phrase_16">Aligning quantum resonance crystals…</string>
-    <string name="random_loading_phrase_17">Boosting signal to communications array…</string>
-    <string name="random_loading_phrase_18">Stabilizing antimatter containment pods…</string>
-    <string name="random_loading_phrase_19">Purging the recycling systems immediately…</string>
-    <string name="random_loading_phrase_20">Engaging full spectrum analyzers…</string>
-    <string name="random_loading_phrase_21">Activating biometric scanning protocol…</string>
-    <string name="random_loading_phrase_22">Resetting the neural interface matrix…</string>
-    <string name="random_loading_phrase_23">Compensating for solar wind interference…</string>
-    <string name="random_loading_phrase_24">Firing photon torpedo tubes…</string>
-    <string name="random_loading_phrase_25">Increasing shield harmonics frequency…</string>
-    <string name="random_loading_phrase_26">Diverting all power to forward batteries…</string>
-    <string name="random_loading_phrase_27">Scanning for ionic storm patterns…</string>
-    <string name="random_loading_phrase_28">Initiating emergency evacuation sequence…</string>
-    <string name="random_loading_phrase_29">Optimizing fusion reactor efficiency…</string>
-    <string name="random_loading_phrase_30">Cross-referencing stellar cartography data…</string>
-    <string name="random_loading_phrase_31">Deploying emergency beacon immediately…</string>
-    <string name="random_loading_phrase_32">Activating holographic backup systems…</string>
-    <string name="random_loading_phrase_33">Engaging cloaking device protocols…</string>
-    <string name="random_loading_phrase_34">Reconfiguring the inertial dampeners…</string>
-    <string name="random_loading_phrase_35">Monitoring cosmic radiation levels…</string>
-    <string name="random_loading_phrase_36">Synchronizing orbital mechanics computer…</string>
-    <string name="random_loading_phrase_37">Activating emergency life support…</string>
-    <string name="random_loading_phrase_38">Launching probe into anomaly field…</string>
-    <string name="random_loading_phrase_39">Triangulating position using pulsars…</string>
-    <string name="random_loading_phrase_40">Engaging artificial gravity generators…</string>
-    <string name="random_loading_phrase_41">Decrypting alien communication protocols…</string>
-    <string name="random_loading_phrase_42">Stabilizing the magnetic field coils…</string>
-    <string name="random_loading_phrase_43">Preparing for atmospheric entry burn…</string>
-    <string name="random_loading_phrase_44">Initializing backup navigation systems…</string>
-    <string name="random_loading_phrase_45">Boosting power to structural integrity…</string>
-    <string name="random_loading_phrase_46">Activating emergency medical protocols…</string>
-    <string name="random_loading_phrase_47">Scanning for temporal anomalies…</string>
-    <string name="random_loading_phrase_48">Engaging automated repair drones…</string>
-    <string name="random_loading_phrase_49">Rerouting coolant to engine core…</string>
-    <string name="random_loading_phrase_50">Initializing quantum entanglement array…</string>
-    <string name="random_loading_phrase_51">Deploying solar collection panels…</string>
-    <string name="random_loading_phrase_52">Activating particle beam weapons…</string>
-    <string name="random_loading_phrase_53">Calibrating dimensional phase shifters…</string>
-    <string name="random_loading_phrase_54">Engaging emergency thrust vectors…</string>
-    <string name="random_loading_phrase_55">Monitoring dark matter concentrations…</string>
-    <string name="random_loading_phrase_56">Initializing cryogenic sleep chambers…</string>
-    <string name="random_loading_phrase_57">Activating ion storm protection…</string>
-    <string name="random_loading_phrase_58">Boosting signal through subspace relay…</string>
-    <string name="random_loading_phrase_59">Engaging atmospheric processors…</string>
-    <string name="random_loading_phrase_60">Recalibrating orbital trajectory…</string>
-    <string name="random_loading_phrase_61">Initializing zero-point energy field…</string>
-    <string name="random_loading_phrase_62">Deploying emergency escape pods…</string>
-    <string name="random_loading_phrase_63">Activating magnetic plasma containment…</string>
-    <string name="random_loading_phrase_64">Syncing with galactic positioning system…</string>
-    <string name="random_loading_phrase_65">Engaging automated defense grid…</string>
-    <string name="random_loading_phrase_66">Monitoring neutrino emission levels…</string>
-    <string name="random_loading_phrase_67">Initializing terraforming protocols…</string>
-    <string name="random_loading_phrase_68">Activating emergency beacon array…</string>
-    <string name="random_loading_phrase_69">Calibrating quantum flux inhibitors…</string>
-    <string name="random_loading_phrase_70">Engaging hyperspatial jump drive…</string>
-    <string name="random_loading_phrase_71">Deploying reconnaissance satellites…</string>
-    <string name="random_loading_phrase_72">Initializing biomass conversion systems…</string>
-    <string name="random_loading_phrase_73">Activating stealth field generators…</string>
-    <string name="random_loading_phrase_74">Monitoring stellar wind patterns…</string>
-    <string name="random_loading_phrase_75">Engaging emergency quarantine protocol…</string>
-    <string name="random_loading_phrase_76">Calibrating asteroid deflection array…</string>
-    <string name="random_loading_phrase_77">Initializing molecular assembly units…</string>
-    <string name="random_loading_phrase_78">Activating emergency power cells…</string>
-    <string name="random_loading_phrase_79">Deploying mining extraction drones…</string>
-    <string name="random_loading_phrase_80">Engaging trans-dimensional gateway…</string>
-    <string name="random_loading_phrase_81">Monitoring quantum vacuum fluctuations…</string>
-    <string name="random_loading_phrase_82">Initializing habitat dome systems…</string>
-    <string name="random_loading_phrase_83">Activating emergency lockdown protocol…</string>
-    <string name="random_loading_phrase_84">Calibrating electromagnetic pulse cannons…</string>
-    <string name="random_loading_phrase_85">Engaging wormhole stabilization field…</string>
-    <string name="random_loading_phrase_86">Deploying atmospheric entry shields…</string>
-    <string name="random_loading_phrase_87">Initializing genetic sequencer array…</string>
-    <string name="random_loading_phrase_88">Activating cosmic ray deflectors…</string>
-    <string name="random_loading_phrase_89">Monitoring antimatter storage levels…</string>
-    <string name="random_loading_phrase_90">Engaging plasma conduit purge…</string>
-    <string name="random_loading_phrase_91">Initializing space-time anchor points…</string>
-    <string name="random_loading_phrase_92">Deploying deep space probe network…</string>
-    <string name="random_loading_phrase_93">Activating emergency stasis fields…</string>
-    <string name="random_loading_phrase_94">Calibrating photonic crystal matrix…</string>
-    <string name="random_loading_phrase_95">Engaging multidimensional scanners…</string>
-    <string name="random_loading_phrase_96">Monitoring gravitational wave detectors…</string>
-    <string name="random_loading_phrase_97">Initializing alien artifact analysis…</string>
-    <string name="random_loading_phrase_98">Activating planetary defense grid…</string>
-    <string name="random_loading_phrase_99">Deploying emergency supply pods…</string>
-    <string name="random_loading_phrase_100">Engaging quantum teleportation chamber…</string>
-    <string name="random_loading_phrase_101">Purging the hydroponics bay…</string>
-    <string name="random_loading_phrase_102">Activating neural network interface…</string>
-    <string name="random_loading_phrase_103">Monitoring exotic matter readings…</string>
-    <string name="random_loading_phrase_104">Initializing stellar cartography update…</string>
-    <string name="random_loading_phrase_105">Engaging emergency course correction…</string>
-    <string name="random_loading_phrase_106">Deploying atmospheric scrubbers…</string>
-    <string name="random_loading_phrase_107">Activating temporal shield matrix…</string>
-    <string name="random_loading_phrase_108">Calibrating psionic amplifiers…</string>
-    <string name="random_loading_phrase_109">Engaging robotic maintenance crew…</string>
-    <string name="random_loading_phrase_110">Monitoring subspace communication array…</string>
-    <string name="random_loading_phrase_111">Initializing xenobiology protocols…</string>
-    <string name="random_loading_phrase_112">Activating emergency heat sinks…</string>
-    <string name="random_loading_phrase_113">Deploying orbital bombardment platform…</string>
-    <string name="random_loading_phrase_114">Engaging quantum encryption matrix…</string>
-    <string name="random_loading_phrase_115">Monitoring radiation exposure levels…</string>
-    <string name="random_loading_phrase_116">Initializing emergency surgery bay…</string>
-    <string name="random_loading_phrase_117">Activating magnetic bottle fusion…</string>
-    <string name="random_loading_phrase_118">Deploying interstellar beacon array…</string>
-    <string name="random_loading_phrase_119">Engaging emergency thrust reversal…</string>
-    <string name="random_loading_phrase_120">Calibrating dimensional phase meters…</string>
-    <string name="random_loading_phrase_121">Monitoring black hole event horizon…</string>
-    <string name="random_loading_phrase_122">Initializing emergency hibernation…</string>
-    <string name="random_loading_phrase_123">Activating plasma stream generators…</string>
-    <string name="random_loading_phrase_124">Deploying emergency shelter domes…</string>
-    <string name="random_loading_phrase_125">Engaging hyperdimensional sensors…</string>
-    <string name="random_loading_phrase_126">Monitoring quantum coherence field…</string>
-    <string name="random_loading_phrase_127">Initializing emergency food stores…</string>
-    <string name="random_loading_phrase_128">Activating neutron star calibration…</string>
-    <string name="random_loading_phrase_129">Deploying gravimetric torpedoes…</string>
-    <string name="random_loading_phrase_130">Engaging emergency decontamination…</string>
-    <string name="random_loading_phrase_131">Calibrating exotic particle detectors…</string>
-    <string name="random_loading_phrase_132">Monitoring space-time distortions…</string>
-    <string name="random_loading_phrase_133">Initializing archaeological protocols…</string>
-    <string name="random_loading_phrase_134">Activating emergency force fields…</string>
-    <string name="random_loading_phrase_135">Deploying resource extraction units…</string>
-    <string name="random_loading_phrase_136">Engaging transwarp conduit matrix…</string>
-    <string name="random_loading_phrase_137">Monitoring psyonic energy patterns…</string>
-    <string name="random_loading_phrase_138">Initializing emergency water recycling…</string>
-    <string name="random_loading_phrase_139">Activating magnetic plasma confinement…</string>
-    <string name="random_loading_phrase_140">Deploying emergency communication buoys…</string>
-    <string name="random_loading_phrase_141">Engaging quantum vacuum chambers…</string>
-    <string name="random_loading_phrase_142">Calibrating cosmic microwave sensors…</string>
-    <string name="random_loading_phrase_143">Monitoring stellar nursery activity…</string>
-    <string name="random_loading_phrase_144">Initializing emergency oxygen generation…</string>
-    <string name="random_loading_phrase_145">Activating holographic crew simulation…</string>
-    <string name="random_loading_phrase_146">Deploying emergency radiation shielding…</string>
-    <string name="random_loading_phrase_147">Engaging multiphase energy matrix…</string>
-    <string name="random_loading_phrase_148">Monitoring dark energy fluctuations…</string>
-    <string name="random_loading_phrase_149">Initializing emergency crew revival…</string>
-    <string name="random_loading_phrase_150">Activating quantum probability engine…</string>
-    <string name="random_loading_phrase_151">Deploying emergency cargo jettison…</string>
-    <string name="random_loading_phrase_152">Engaging temporal causality loop…</string>
-    <string name="random_loading_phrase_153">Calibrating biorhythm synchronizers…</string>
-    <string name="random_loading_phrase_154">Monitoring galactic core emissions…</string>
-    <string name="random_loading_phrase_155">Initializing emergency protocol alpha…</string>
-    <string name="random_loading_phrase_156">Activating dimensional rift scanner…</string>
-    <string name="random_loading_phrase_157">Deploying emergency habitat modules…</string>
-    <string name="random_loading_phrase_158">Engaging quantum tunneling array…</string>
-    <string name="random_loading_phrase_159">Monitoring supernova shock waves…</string>
-    <string name="random_loading_phrase_160">Initializing emergency brain backup…</string>
-    <string name="random_loading_phrase_161">Activating plasma weapon systems…</string>
-    <string name="random_loading_phrase_162">Deploying emergency atmosphere tanks…</string>
-    <string name="random_loading_phrase_163">Engaging chrono-displacement field…</string>
-    <string name="random_loading_phrase_164">Calibrating tachyon detection grid…</string>
-    <string name="random_loading_phrase_165">Monitoring nebula composition changes…</string>
-    <string name="random_loading_phrase_166">Initializing emergency protocol omega…</string>
-    <string name="random_loading_phrase_167">Activating quantum singularity engine…</string>
-    <string name="random_loading_phrase_168">Deploying emergency thermal regulators…</string>
-    <string name="random_loading_phrase_169">Engaging hyperspace jump coordinates…</string>
-    <string name="random_loading_phrase_170">Monitoring interdimensional barriers…</string>
-    <string name="random_loading_phrase_171">Initializing emergency clone backup…</string>
-    <string name="random_loading_phrase_172">Activating exotic matter converter…</string>
-    <string name="random_loading_phrase_173">Deploying emergency mag-lev systems…</string>
-    <string name="random_loading_phrase_174">Engaging quantum field harmonics…</string>
-    <string name="random_loading_phrase_175">Calibrating alien technology interface…</string>
-    <string name="random_loading_phrase_176">Monitoring parallel universe leakage…</string>
-    <string name="random_loading_phrase_177">Initializing emergency memory core…</string>
-    <string name="random_loading_phrase_178">Activating emergency thrust dampeners…</string>
-    <string name="random_loading_phrase_179">Deploying emergency fabrication units…</string>
-    <string name="random_loading_phrase_180">Engaging space-time coordinate lock…</string>
-    <string name="random_loading_phrase_181">Monitoring quantum entanglement decay…</string>
-    <string name="random_loading_phrase_182">Initializing emergency AI protocol…</string>
-    <string name="random_loading_phrase_183">Activating dimensional anchor points…</string>
-    <string name="random_loading_phrase_184">Deploying emergency power coupling…</string>
-    <string name="random_loading_phrase_185">Engaging reality stabilization field…</string>
-    <string name="random_loading_phrase_186">Calibrating consciousness transfer pod…</string>
-    <string name="random_loading_phrase_187">Monitoring multiverse convergence point…</string>
-    <string name="random_loading_phrase_188">Initializing emergency soul backup…</string>
-    <string name="random_loading_phrase_189">Activating universal translator matrix…</string>
-    <string name="random_loading_phrase_190">Deploying emergency quantum computers…</string>
-    <string name="random_loading_phrase_191">Engaging probability manipulation field…</string>
-    <string name="random_loading_phrase_192">Monitoring entropy reversal systems…</string>
-    <string name="random_loading_phrase_193">Initializing emergency timeline split…</string>
-    <string name="random_loading_phrase_194">Activating cosmic string detector…</string>
-    <string name="random_loading_phrase_195">Deploying emergency reality anchors…</string>
-    <string name="random_loading_phrase_196">Engaging final emergency protocol…</string>
-    <string name="random_loading_phrase_197">Monitoring universe heat death timer…</string>
-    <string name="random_loading_phrase_198">Initializing emergency god mode…</string>
-    <string name="random_loading_phrase_199">Activating emergency cake dispenser…</string>
-    <string name="random_loading_phrase_200">Deploying emergency rubber chicken…</string>
+    <string-array name="random_loading_phrases">
+        <item>Calibrating the flux capacitor…</item>
+        <item>Reversing polarity on deck 3…</item>
+        <item>Activating quantum stabilizers…</item>
+        <item>Realigning the plasma conduits…</item>
+        <item>Boosting power to the deflector array…</item>
+        <item>Initializing warp core sequence…</item>
+        <item>Modulating the tachyon beam…</item>
+        <item>Adjusting gravitational field generators…</item>
+        <item>Syncing the molecular transporters…</item>
+        <item>Recalibrating sensor array matrix…</item>
+        <item>Engaging hyperdrive cooling systems…</item>
+        <item>Locking onto subspace frequency…</item>
+        <item>Activating emergency containment field…</item>
+        <item>Rerouting power through auxiliary circuits…</item>
+        <item>Initializing temporal displacement chamber…</item>
+        <item>Aligning quantum resonance crystals…</item>
+        <item>Boosting signal to communications array…</item>
+        <item>Stabilizing antimatter containment pods…</item>
+        <item>Purging the recycling systems immediately…</item>
+        <item>Engaging full spectrum analyzers…</item>
+        <item>Activating biometric scanning protocol…</item>
+        <item>Resetting the neural interface matrix…</item>
+        <item>Compensating for solar wind interference…</item>
+        <item>Firing photon torpedo tubes…</item>
+        <item>Increasing shield harmonics frequency…</item>
+        <item>Diverting all power to forward batteries…</item>
+        <item>Scanning for ionic storm patterns…</item>
+        <item>Initiating emergency evacuation sequence…</item>
+        <item>Optimizing fusion reactor efficiency…</item>
+        <item>Cross-referencing stellar cartography data…</item>
+        <item>Deploying emergency beacon immediately…</item>
+        <item>Activating holographic backup systems…</item>
+        <item>Engaging cloaking device protocols…</item>
+        <item>Reconfiguring the inertial dampeners…</item>
+        <item>Monitoring cosmic radiation levels…</item>
+        <item>Synchronizing orbital mechanics computer…</item>
+        <item>Activating emergency life support…</item>
+        <item>Launching probe into anomaly field…</item>
+        <item>Triangulating position using pulsars…</item>
+        <item>Engaging artificial gravity generators…</item>
+        <item>Decrypting alien communication protocols…</item>
+        <item>Stabilizing the magnetic field coils…</item>
+        <item>Preparing for atmospheric entry burn…</item>
+        <item>Initializing backup navigation systems…</item>
+        <item>Boosting power to structural integrity…</item>
+        <item>Activating emergency medical protocols…</item>
+        <item>Scanning for temporal anomalies…</item>
+        <item>Engaging automated repair drones…</item>
+        <item>Rerouting coolant to engine core…</item>
+        <item>Initializing quantum entanglement array…</item>
+        <item>Deploying solar collection panels…</item>
+        <item>Activating particle beam weapons…</item>
+        <item>Calibrating dimensional phase shifters…</item>
+        <item>Engaging emergency thrust vectors…</item>
+        <item>Monitoring dark matter concentrations…</item>
+        <item>Initializing cryogenic sleep chambers…</item>
+        <item>Activating ion storm protection…</item>
+        <item>Boosting signal through subspace relay…</item>
+        <item>Engaging atmospheric processors…</item>
+        <item>Recalibrating orbital trajectory…</item>
+        <item>Initializing zero-point energy field…</item>
+        <item>Deploying emergency escape pods…</item>
+        <item>Activating magnetic plasma containment…</item>
+        <item>Syncing with galactic positioning system…</item>
+        <item>Engaging automated defense grid…</item>
+        <item>Monitoring neutrino emission levels…</item>
+        <item>Initializing terraforming protocols…</item>
+        <item>Activating emergency beacon array…</item>
+        <item>Calibrating quantum flux inhibitors…</item>
+        <item>Engaging hyperspatial jump drive…</item>
+        <item>Deploying reconnaissance satellites…</item>
+        <item>Initializing biomass conversion systems…</item>
+        <item>Activating stealth field generators…</item>
+        <item>Monitoring stellar wind patterns…</item>
+        <item>Engaging emergency quarantine protocol…</item>
+        <item>Calibrating asteroid deflection array…</item>
+        <item>Initializing molecular assembly units…</item>
+        <item>Activating emergency power cells…</item>
+        <item>Deploying mining extraction drones…</item>
+        <item>Engaging trans-dimensional gateway…</item>
+        <item>Monitoring quantum vacuum fluctuations…</item>
+        <item>Initializing habitat dome systems…</item>
+        <item>Activating emergency lockdown protocol…</item>
+        <item>Calibrating electromagnetic pulse cannons…</item>
+        <item>Engaging wormhole stabilization field…</item>
+        <item>Deploying atmospheric entry shields…</item>
+        <item>Initializing genetic sequencer array…</item>
+        <item>Activating cosmic ray deflectors…</item>
+        <item>Monitoring antimatter storage levels…</item>
+        <item>Engaging plasma conduit purge…</item>
+        <item>Initializing space-time anchor points…</item>
+        <item>Deploying deep space probe network…</item>
+        <item>Activating emergency stasis fields…</item>
+        <item>Calibrating photonic crystal matrix…</item>
+        <item>Engaging multidimensional scanners…</item>
+        <item>Monitoring gravitational wave detectors…</item>
+        <item>Initializing alien artifact analysis…</item>
+        <item>Activating planetary defense grid…</item>
+        <item>Deploying emergency supply pods…</item>
+        <item>Engaging quantum teleportation chamber…</item>
+        <item>Purging the hydroponics bay…</item>
+        <item>Activating neural network interface…</item>
+        <item>Monitoring exotic matter readings…</item>
+        <item>Initializing stellar cartography update…</item>
+        <item>Engaging emergency course correction…</item>
+        <item>Deploying atmospheric scrubbers…</item>
+        <item>Activating temporal shield matrix…</item>
+        <item>Calibrating psionic amplifiers…</item>
+        <item>Engaging robotic maintenance crew…</item>
+        <item>Monitoring subspace communication array…</item>
+        <item>Initializing xenobiology protocols…</item>
+        <item>Activating emergency heat sinks…</item>
+        <item>Deploying orbital bombardment platform…</item>
+        <item>Engaging quantum encryption matrix…</item>
+        <item>Monitoring radiation exposure levels…</item>
+        <item>Initializing emergency surgery bay…</item>
+        <item>Activating magnetic bottle fusion…</item>
+        <item>Deploying interstellar beacon array…</item>
+        <item>Engaging emergency thrust reversal…</item>
+        <item>Calibrating dimensional phase meters…</item>
+        <item>Monitoring black hole event horizon…</item>
+        <item>Initializing emergency hibernation…</item>
+        <item>Activating plasma stream generators…</item>
+        <item>Deploying emergency shelter domes…</item>
+        <item>Engaging hyperdimensional sensors…</item>
+        <item>Monitoring quantum coherence field…</item>
+        <item>Initializing emergency food stores…</item>
+        <item>Activating neutron star calibration…</item>
+        <item>Deploying gravimetric torpedoes…</item>
+        <item>Engaging emergency decontamination…</item>
+        <item>Calibrating exotic particle detectors…</item>
+        <item>Monitoring space-time distortions…</item>
+        <item>Initializing archaeological protocols…</item>
+        <item>Activating emergency force fields…</item>
+        <item>Deploying resource extraction units…</item>
+        <item>Engaging transwarp conduit matrix…</item>
+        <item>Monitoring psyonic energy patterns…</item>
+        <item>Initializing emergency water recycling…</item>
+        <item>Activating magnetic plasma confinement…</item>
+        <item>Deploying emergency communication buoys…</item>
+        <item>Engaging quantum vacuum chambers…</item>
+        <item>Calibrating cosmic microwave sensors…</item>
+        <item>Monitoring stellar nursery activity…</item>
+        <item>Initializing emergency oxygen generation…</item>
+        <item>Activating holographic crew simulation…</item>
+        <item>Deploying emergency radiation shielding…</item>
+        <item>Engaging multiphase energy matrix…</item>
+        <item>Monitoring dark energy fluctuations…</item>
+        <item>Initializing emergency crew revival…</item>
+        <item>Activating quantum probability engine…</item>
+        <item>Deploying emergency cargo jettison…</item>
+        <item>Engaging temporal causality loop…</item>
+        <item>Calibrating biorhythm synchronizers…</item>
+        <item>Monitoring galactic core emissions…</item>
+        <item>Initializing emergency protocol alpha…</item>
+        <item>Activating dimensional rift scanner…</item>
+        <item>Deploying emergency habitat modules…</item>
+        <item>Engaging quantum tunneling array…</item>
+        <item>Monitoring supernova shock waves…</item>
+        <item>Initializing emergency brain backup…</item>
+        <item>Activating plasma weapon systems…</item>
+        <item>Deploying emergency atmosphere tanks…</item>
+        <item>Engaging chrono-displacement field…</item>
+        <item>Calibrating tachyon detection grid…</item>
+        <item>Monitoring nebula composition changes…</item>
+        <item>Initializing emergency protocol omega…</item>
+        <item>Activating quantum singularity engine…</item>
+        <item>Deploying emergency thermal regulators…</item>
+        <item>Engaging hyperspace jump coordinates…</item>
+        <item>Monitoring interdimensional barriers…</item>
+        <item>Initializing emergency clone backup…</item>
+        <item>Activating exotic matter converter…</item>
+        <item>Deploying emergency mag-lev systems…</item>
+        <item>Engaging quantum field harmonics…</item>
+        <item>Calibrating alien technology interface…</item>
+        <item>Monitoring parallel universe leakage…</item>
+        <item>Initializing emergency memory core…</item>
+        <item>Activating emergency thrust dampeners…</item>
+        <item>Deploying emergency fabrication units…</item>
+        <item>Engaging space-time coordinate lock…</item>
+        <item>Monitoring quantum entanglement decay…</item>
+        <item>Initializing emergency AI protocol…</item>
+        <item>Activating dimensional anchor points…</item>
+        <item>Deploying emergency power coupling…</item>
+        <item>Engaging reality stabilization field…</item>
+        <item>Calibrating consciousness transfer pod…</item>
+        <item>Monitoring multiverse convergence point…</item>
+        <item>Initializing emergency soul backup…</item>
+        <item>Activating universal translator matrix…</item>
+        <item>Deploying emergency quantum computers…</item>
+        <item>Engaging probability manipulation field…</item>
+        <item>Monitoring entropy reversal systems…</item>
+        <item>Initializing emergency timeline split…</item>
+        <item>Activating cosmic string detector…</item>
+        <item>Deploying emergency reality anchors…</item>
+        <item>Engaging final emergency protocol…</item>
+        <item>Monitoring universe heat death timer…</item>
+        <item>Initializing emergency god mode…</item>
+        <item>Activating emergency cake dispenser…</item>
+        <item>Deploying emergency rubber chicken…</item>
+    </string-array>
     <string name="completing_data_sync">Finishing Setup</string>
 </resources>

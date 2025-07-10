@@ -26,7 +26,7 @@ class SplashActivity : AppCompatActivity() {
 
     private suspend fun navigateToNextScreen() {
         val configured = secureStorage.isConfigured()
-        val lastSuccess = secureStorage.isLastSyncSuccessful()
+        val lastSuccess = getBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS)
         val intent = if (!configured || !lastSuccess) {
             Intent(this, ConfigurationActivity::class.java)
         } else {

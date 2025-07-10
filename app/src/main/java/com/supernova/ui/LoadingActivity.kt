@@ -13,6 +13,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.supernova.R
 import com.supernova.databinding.ActivityLoadingBinding
 import com.supernova.utils.SecureDataStore
+import com.supernova.utils.SecureStorageKeys
 import com.supernova.work.DataSyncWorker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -30,11 +31,8 @@ class LoadingActivity : AppCompatActivity() {
     private val timeoutMillis = 20 * 60 * 1000L
     private var startTime = 0L
 
-    private val loadingPhrases by lazy {
-        (1..200).map { index ->
-            val id = resources.getIdentifier("random_loading_phrase_$index", "string", packageName)
-            if (id != 0) getString(id) else "Loading..."
-        }
+    private val loadingPhrases: Array<String> by lazy {
+        resources.getStringArray(R.array.random_loading_phrases)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,7 +64,7 @@ class LoadingActivity : AppCompatActivity() {
 
     private fun waitForSyncCompletion() {
         lifecycleScope.launch {
-            val wasSyncedBefore = secureStorage.isLastSyncSuccessful()
+            val wasSyncedBefore =  secureStorage.getBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS)
             val workInfo = withTimeoutOrNull(timeoutMillis) {
                 var result: WorkInfo? = null
                 while (result == null) {
@@ -142,9 +140,5 @@ class LoadingActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         phraseRotationRunnable?.let { handler.removeCallbacks(it) }
-    }
-
-    companion object {
-        const val EXTRA_COMPLETING_SYNC = "extra_completing_sync"
     }
 }

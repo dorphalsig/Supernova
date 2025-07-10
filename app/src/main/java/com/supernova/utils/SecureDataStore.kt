@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
-import androidx.security.crypto.MasterKey
 import androidx.security.crypto.MasterKeys
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.aead.AeadConfig
@@ -15,54 +14,57 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
+import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
-import java.io.File
 
 /**
  * Replacement for the previous [SecureStorage] class using an encrypted Jetpack
  * DataStore backed by Tink. A hardware-backed key is used when available with
  * a software fallback.
  */
-class SecureDataStore(context: Context) {
+object SecureDataStore {
+    private lateinit var gson: Gson
+    private lateinit var aead: Aead
+    private lateinit var dataStore: DataStore<MutableMap<String, String>>
+    private var initialized = false
 
-    private val gson = Gson()
-
-    private val aead: Aead
-
-    private val dataStore: DataStore<MutableMap<String, String>>
-
-    init {
+    fun init(context: Context) {
+        if (initialized) return
+        gson = Gson()
         AeadConfig.register()
-
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-
         val keysetHandle = AndroidKeysetManager.Builder()
             .withSharedPref(context, "secure_prefs_keyset", "secure_prefs")
             .withKeyTemplate(AesGcmKeyManager.aes256GcmTemplate())
             .withMasterKeyUri("android-keystore://$masterKeyAlias")
             .build()
             .keysetHandle
-
         aead = keysetHandle.getPrimitive(Aead::class.java)
-
         val serializer = SecurePrefsSerializer(aead, gson)
-
         dataStore = DataStoreFactory.create(
             serializer = serializer,
             produceFile = { File(context.filesDir, "secure_prefs.pb") },
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         )
+        initialized = true
+    }
+
+    private fun checkInit() {
+        check(initialized) { "SecureDataStore must be initialized by calling init(context) before use." }
     }
 
     suspend fun putString(key: String, value: String) {
+        checkInit()
         dataStore.updateData { prefs ->
             prefs.toMutableMap().apply { this[key] = value }
         }
     }
 
-    suspend fun getString(key: String): String? = dataStore.data.first()[key]
+    suspend fun getString(key: String): String? {
+        checkInit()
+        return dataStore.data.first()[key]
+    }
 
     suspend fun putBoolean(key: String, value: Boolean) = putString(key, value.toString())
 
@@ -71,17 +73,6 @@ class SecureDataStore(context: Context) {
     suspend fun putLong(key: String, value: Long) = putString(key, value.toString())
 
     suspend fun getLong(key: String): Long = getString(key)?.toLongOrNull() ?: 0L
-
-    suspend fun saveCredentials(portal: String, username: String, password: String) {
-        dataStore.updateData { prefs ->
-            prefs.toMutableMap().apply {
-                this[SecureStorageKeys.PORTAL] = portal
-                this[SecureStorageKeys.USERNAME] = username
-                this[SecureStorageKeys.PASSWORD] = password
-                this[SecureStorageKeys.IS_CONFIGURED] = true.toString()
-            }
-        }
-    }
 
     suspend fun getPortal(): String? = getString(SecureStorageKeys.PORTAL)
     suspend fun getUsername(): String? = getString(SecureStorageKeys.USERNAME)
@@ -92,11 +83,8 @@ class SecureDataStore(context: Context) {
 
     suspend fun isParentalLockEnabled(): Boolean = getBoolean(SecureStorageKeys.PARENTAL_LOCK)
 
-    suspend fun clearCredentials() {
-        dataStore.updateData { mutableMapOf() }
-    }
-
     suspend fun setLastSyncResult(success: Boolean) {
+        checkInit()
         dataStore.updateData { prefs ->
             prefs.toMutableMap().apply {
                 this[SecureStorageKeys.LAST_SYNC_SUCCESS] = success.toString()
@@ -106,7 +94,6 @@ class SecureDataStore(context: Context) {
     }
 
     suspend fun isLastSyncSuccessful(): Boolean = getBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS)
-    suspend fun getLastSyncTime(): Long = getLong(SecureStorageKeys.LAST_SYNC_TIME)
 }
 
 private class SecurePrefsSerializer(
@@ -136,4 +123,3 @@ private class SecurePrefsSerializer(
         output.write(encrypted)
     }
 }
-

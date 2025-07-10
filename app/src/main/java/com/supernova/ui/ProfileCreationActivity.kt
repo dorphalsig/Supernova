@@ -78,7 +78,7 @@ class ProfileCreationActivity : AppCompatActivity() {
             when (result) {
                 is ProfileCreationResult.Success -> {
                     lifecycleScope.launch {
-                        if (secureStorage.isLastSyncSuccessful()) {
+                        if (getBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS)) {
                             navigateToProfileSelection()
                         } else {
                             val intent = Intent(this@ProfileCreationActivity, LoadingActivity::class.java)
