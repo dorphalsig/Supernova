@@ -26,9 +26,9 @@ class DataSyncWorker(
     override suspend fun doWork(): Result {
         Log.d(TAG, "DataSyncWorker started")
 
+        val secureStorage = SecureStorage(applicationContext)
         return try {
             val database = SupernovaDatabase.getDatabase(applicationContext)
-            val secureStorage = SecureStorage(applicationContext)
             val syncService = DataSyncService(database, secureStorage)
 
             Log.d(TAG, "Starting sync process...")

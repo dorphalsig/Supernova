@@ -99,6 +99,7 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.guava)
 
     // Security
     implementation(libs.androidx.security.crypto)

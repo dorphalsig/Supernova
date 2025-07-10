@@ -16,7 +16,7 @@ import com.supernova.utils.SecureStorage
 import com.supernova.work.DataSyncWorker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.random.Random
 
@@ -68,16 +68,19 @@ class LoadingActivity : AppCompatActivity() {
         val wasSyncedBefore = secureStorage.isLastSyncSuccessful()
         lifecycleScope.launch {
             val workInfo = withTimeoutOrNull(timeoutMillis) {
-                while (true) {
+                var result: WorkInfo? = null
+                while (result == null) {
                     val infos = WorkManager.getInstance(this@LoadingActivity)
                         .getWorkInfosForUniqueWork(DataSyncWorker.WORK_NAME)
                         .await()
                     val info = infos.firstOrNull()
                     if (info?.state?.isFinished == true) {
-                        break info
+                        result = info
+                    } else {
+                        delay(1000)
                     }
-                    delay(1000)
                 }
+                result
             }
 
             val elapsed = System.currentTimeMillis() - startTime
