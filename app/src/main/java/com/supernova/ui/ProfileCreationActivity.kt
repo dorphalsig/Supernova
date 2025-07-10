@@ -12,14 +12,16 @@ import com.supernova.data.database.SupernovaDatabase
 import com.supernova.data.entities.ProfileEntity
 import com.supernova.databinding.ActivityProfileCreationBinding
 import com.supernova.network.AvatarService
-import com.supernova.utils.SecureStorage
+import com.supernova.ui.LoadingActivity
+import com.supernova.utils.SecureDataStore
 import com.supernova.utils.ValidationUtils
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class ProfileCreationActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileCreationBinding
-    private lateinit var secureStorage: SecureStorage
+    private lateinit var secureStorage: SecureDataStore
     private lateinit var avatarAdapter: AvatarAdapter
     private val viewModel: ProfileCreationViewModel by viewModels {
         ProfileCreationViewModelFactory(SupernovaDatabase.getDatabase(this))
@@ -32,7 +34,7 @@ class ProfileCreationActivity : AppCompatActivity() {
         binding = ActivityProfileCreationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        secureStorage = SecureStorage(this)
+        secureStorage = SecureDataStore(this)
 
         setupViews()
         setupAvatarGrid()
@@ -46,10 +48,12 @@ class ProfileCreationActivity : AppCompatActivity() {
         }
 
         // Show/hide PIN section based on parental lock setting
-        if (secureStorage.isParentalLockEnabled()) {
-            binding.pinSection.visibility = View.VISIBLE
-        } else {
-            binding.pinSection.visibility = View.GONE
+        lifecycleScope.launch {
+            if (secureStorage.isParentalLockEnabled()) {
+                binding.pinSection.visibility = View.VISIBLE
+            } else {
+                binding.pinSection.visibility = View.GONE
+            }
         }
     }
 
@@ -73,7 +77,15 @@ class ProfileCreationActivity : AppCompatActivity() {
         viewModel.profileCreation.observe(this, Observer { result ->
             when (result) {
                 is ProfileCreationResult.Success -> {
-                    navigateToProfileSelection()
+                    lifecycleScope.launch {
+                        if (secureStorage.isLastSyncSuccessful()) {
+                            navigateToProfileSelection()
+                        } else {
+                            val intent = Intent(this@ProfileCreationActivity, LoadingActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
                 }
                 is ProfileCreationResult.Error -> {
                     showError(result.message)
@@ -112,7 +124,8 @@ class ProfileCreationActivity : AppCompatActivity() {
 
         // Handle PIN if parental lock is enabled
         var pin: Int? = null
-        if (secureStorage.isParentalLockEnabled()) {
+        val parentalEnabled = kotlinx.coroutines.runBlocking { secureStorage.isParentalLockEnabled() }
+        if (parentalEnabled) {
             val pinText = binding.pinEditText.text.toString()
             val confirmPinText = binding.confirmPinEditText.text.toString()
 

@@ -11,17 +11,20 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.supernova.databinding.ActivityConfigurationBinding
 import com.supernova.network.models.ApiResult
-import com.supernova.utils.SecureStorage
+import com.supernova.utils.SecureDataStore
 import com.supernova.utils.ValidationUtils
 import androidx.lifecycle.viewModelScope
 import com.supernova.R
 import com.supernova.network.ApiService
 import kotlinx.coroutines.launch
+import androidx.lifecycle.lifecycleScope
+import com.supernova.data.database.SupernovaDatabase
+import com.supernova.work.SyncManager
 
 class ConfigurationActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityConfigurationBinding
-    private lateinit var secureStorage: SecureStorage
+    private lateinit var secureStorage: SecureDataStore
     private val viewModel: ConfigurationViewModel by viewModels {
         ConfigurationViewModelFactory()
     }
@@ -31,7 +34,7 @@ class ConfigurationActivity : AppCompatActivity() {
         binding = ActivityConfigurationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        secureStorage = SecureStorage(this)
+        secureStorage = SecureDataStore(this)
 
         setupViews()
         observeViewModel()
@@ -50,11 +53,13 @@ class ConfigurationActivity : AppCompatActivity() {
         }
 
         binding.parentalLockCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            secureStorage.setParentalLock(isChecked)
+            lifecycleScope.launch { secureStorage.setParentalLock(isChecked) }
         }
 
         // Set initial parental lock state
-        binding.parentalLockCheckbox.isChecked = secureStorage.isParentalLockEnabled()
+        lifecycleScope.launch {
+            binding.parentalLockCheckbox.isChecked = secureStorage.isParentalLockEnabled()
+        }
     }
 
     private fun observeViewModel() {
@@ -117,13 +122,25 @@ class ConfigurationActivity : AppCompatActivity() {
         val username = binding.usernameEditText.text.toString().trim()
         val password = binding.passwordEditText.text.toString().trim()
 
-        // Save credentials
-        secureStorage.saveCredentials(portal, username, password)
+        lifecycleScope.launch {
+            secureStorage.saveCredentials(portal, username, password)
+            SyncManager(this@ConfigurationActivity).scheduleDailySync()
 
-        // Navigate to profile creation
-        val intent = Intent(this, ProfileCreationActivity::class.java)
-        startActivity(intent)
-        finish()
+            val db = SupernovaDatabase.getDatabase(this@ConfigurationActivity)
+            val profileCount = db.profileDao().getProfileCount()
+            val lockedCount = db.profileDao().getLockedProfileCount()
+
+            val parental = secureStorage.isParentalLockEnabled()
+
+            val next = if (profileCount == 0 || (parental && lockedCount == 0)) {
+                Intent(this@ConfigurationActivity, ProfileCreationActivity::class.java)
+            } else {
+                Intent(this@ConfigurationActivity, LoadingActivity::class.java)
+            }
+
+            startActivity(next)
+            finish()
+        }
     }
 
     private fun setLoadingState(isLoading: Boolean) {

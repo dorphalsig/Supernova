@@ -11,6 +11,7 @@ import com.supernova.data.dao.CategoryDao
 import com.supernova.data.dao.MovieDao
 import com.supernova.data.dao.LiveTvDao
 import com.supernova.data.dao.SeriesDao
+import com.supernova.data.dao.EpgDao
 import com.supernova.data.entities.ProfileEntity
 import com.supernova.data.entities.CategoryEntity
 import com.supernova.data.entities.MovieEntity
@@ -18,6 +19,7 @@ import com.supernova.data.entities.MovieCategoryEntity
 import com.supernova.data.entities.LiveTvEntity
 import com.supernova.data.entities.SeriesEntity
 import com.supernova.data.entities.SeriesCategoryEntity
+import com.supernova.data.entities.EpgEntity
 import com.supernova.network.AvatarService
 
 @Database(
@@ -28,9 +30,10 @@ import com.supernova.network.AvatarService
         MovieCategoryEntity::class,
         LiveTvEntity::class,
         SeriesEntity::class,
-        SeriesCategoryEntity::class
+        SeriesCategoryEntity::class,
+        EpgEntity::class
     ],
-    version = 3, // Incremented for avatar field change
+    version = 4,
     exportSchema = false
 )
 abstract class SupernovaDatabase : RoomDatabase() {
@@ -40,6 +43,7 @@ abstract class SupernovaDatabase : RoomDatabase() {
     abstract fun movieDao(): MovieDao
     abstract fun liveTvDao(): LiveTvDao
     abstract fun seriesDao(): SeriesDao
+    abstract fun epgDao(): EpgDao
 
     companion object {
         @Volatile
@@ -76,6 +80,30 @@ abstract class SupernovaDatabase : RoomDatabase() {
             }
         }
 
+        // Migration from version 3 to 4 - add EPG table
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS epg (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            channel_id INTEGER NOT NULL,
+                            channel_name TEXT,
+                            start INTEGER NOT NULL,
+                            end INTEGER NOT NULL,
+                            title TEXT,
+                            description TEXT,
+                            FOREIGN KEY(channel_id) REFERENCES live_tv(channel_id) ON DELETE CASCADE
+                        )
+                    """.trimIndent()
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_epg_start ON epg(start)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_epg_end ON epg(end)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_epg_channel_id ON epg(channel_id)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_epg_channel_name ON epg(channel_name)")
+            }
+        }
+
         fun getDatabase(context: Context): SupernovaDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -83,7 +111,7 @@ abstract class SupernovaDatabase : RoomDatabase() {
                     SupernovaDatabase::class.java,
                     "supernova"
                 )
-                    .addMigrations(MIGRATION_2_3)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                 INSTANCE = instance
                 instance

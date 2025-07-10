@@ -5,28 +5,32 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
-import com.supernova.utils.SecureStorage
+import androidx.lifecycle.lifecycleScope
+import com.supernova.utils.SecureDataStore
+import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
 
-    private lateinit var secureStorage: SecureStorage
+    private lateinit var secureStorage: SecureDataStore
     private val splashTimeOut = 3000L // 3 seconds
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        secureStorage = SecureStorage(this)
+        secureStorage = SecureDataStore(this)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            navigateToNextScreen()
+            lifecycleScope.launch { navigateToNextScreen() }
         }, splashTimeOut)
     }
 
-    private fun navigateToNextScreen() {
-        val intent = if (secureStorage.isConfigured()) {
-            Intent(this, ProfileSelectionActivity::class.java)
-        } else {
+    private suspend fun navigateToNextScreen() {
+        val configured = secureStorage.isConfigured()
+        val lastSuccess = secureStorage.isLastSyncSuccessful()
+        val intent = if (!configured || !lastSuccess) {
             Intent(this, ConfigurationActivity::class.java)
+        } else {
+            Intent(this, ProfileSelectionActivity::class.java)
         }
 
         startActivity(intent)

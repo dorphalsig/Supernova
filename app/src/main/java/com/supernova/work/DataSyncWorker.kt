@@ -8,7 +8,7 @@ import androidx.work.workDataOf
 import com.supernova.data.database.SupernovaDatabase
 import com.supernova.network.DataSyncService
 import com.supernova.network.models.SyncResult
-import com.supernova.utils.SecureStorage
+import com.supernova.utils.SecureDataStore
 import kotlinx.coroutines.flow.last
 
 class DataSyncWorker(
@@ -26,9 +26,9 @@ class DataSyncWorker(
     override suspend fun doWork(): Result {
         Log.d(TAG, "DataSyncWorker started")
 
+        val secureStorage = SecureDataStore(applicationContext)
         return try {
             val database = SupernovaDatabase.getDatabase(applicationContext)
-            val secureStorage = SecureStorage(applicationContext)
             val syncService = DataSyncService(database, secureStorage)
 
             Log.d(TAG, "Starting sync process...")
@@ -37,11 +37,13 @@ class DataSyncWorker(
             when (finalResult) {
                 is SyncResult.Success -> {
                     Log.d(TAG, "Sync completed successfully")
+                    secureStorage.setLastSyncResult(true)
                     val outputData = workDataOf(KEY_SYNC_RESULT to "success")
                     Result.success(outputData)
                 }
                 is SyncResult.Error -> {
                     Log.e(TAG, "Sync failed: ${finalResult.message}")
+                    secureStorage.setLastSyncResult(false)
                     val outputData = workDataOf(
                         KEY_SYNC_RESULT to "error",
                         KEY_ERROR_MESSAGE to finalResult.message
@@ -55,6 +57,7 @@ class DataSyncWorker(
             }
         } catch (e: Exception) {
             Log.e(TAG, "DataSyncWorker failed with exception", e)
+            secureStorage.setLastSyncResult(false)
             val outputData = workDataOf(
                 KEY_SYNC_RESULT to "error",
                 KEY_ERROR_MESSAGE to (e.message ?: "Unknown error")

@@ -4,25 +4,33 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.google.gson.Gson
 import com.supernova.data.database.SupernovaDatabase
+import androidx.room.withTransaction
 import com.supernova.data.entities.*
+import okhttp3.ResponseBody
 import com.supernova.network.models.*
 import com.supernova.utils.ApiUtils.normalizeUrl
 import com.supernova.utils.ApiUtils.parseTimestamp
 import com.supernova.utils.ApiUtils.takeIfNotBlank
 import com.supernova.utils.ApiUtils.toIntSafely
-import com.supernova.utils.SecureStorage
+import org.xmlpull.v1.XmlPullParser
+import android.util.Xml
+import java.io.StringReader
+import java.text.SimpleDateFormat
+import java.util.Locale
+import com.supernova.utils.SecureDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class DataSyncService(
     private val database: SupernovaDatabase,
-    private val secureStorage: SecureStorage,
+    private val secureStorage: SecureDataStore,
     private val gson: Gson = Gson()
 ) {
     companion object {
         private const val TAG = "DataSyncService"
         private const val UNCATEGORIZED_ID = 999999
         private const val UNCATEGORIZED_NAME = "Uncategorized"
+        private val epgDateFormat = SimpleDateFormat("yyyyMMddHHmmss Z", Locale.US)
     }
 
     suspend fun syncAll(): Flow<SyncResult> = flow {
@@ -45,129 +53,96 @@ class DataSyncService(
             val baseUrl = ApiService.buildLoginUrl(portal)
             Log.d(TAG, "Created API service with base URL: $baseUrl")
 
-            emit(SyncResult.Progress("Starting sync...", 0, 6))
+            emit(SyncResult.Progress("Starting sync...", 0, 7))
 
-            // Step 1: Sync Live TV Categories
-            emit(SyncResult.Progress("Syncing Live TV categories...", 1, 6))
+            // --- Live TV ---
+            emit(SyncResult.Progress("Syncing live TV...", 1, 7))
             try {
-                Log.d(TAG, "Fetching live TV categories...")
-                val liveCategories = apiService.getLiveCategories(baseUrl, username, password)
-                Log.d(TAG, "Live categories response - success: ${liveCategories.isSuccessful}, code: ${liveCategories.code()}")
+                val catResp = apiService.getLiveCategories(baseUrl, username, password)
+                if (!catResp.isSuccessful) throw Exception("Live category API ${catResp.code()}")
+                val categories = mapCategories(catResp.body() ?: emptyList(), "live_tv")
 
-                if (liveCategories.isSuccessful) {
-                    val categories = liveCategories.body() ?: emptyList()
-                    Log.d(TAG, "Retrieved ${categories.size} live TV categories")
-                    syncCategories(categories, "live_tv")
-                } else {
-                    Log.e(TAG, "Live categories API failed: ${liveCategories.errorBody()?.string()}")
-                }
-                ensureDefaultCategory("live_tv")
-            } catch (e: Exception) {
-                Log.e(TAG, "Live TV categories sync failed", e)
-                emit(SyncResult.Progress("Live TV categories failed, continuing...", 1, 6))
-                ensureDefaultCategory("live_tv")
-            }
+                val streamResp = apiService.getLiveStreams(baseUrl, username, password)
+                if (!streamResp.isSuccessful) throw Exception("Live stream API ${streamResp.code()}")
+                val streams = mapLiveStreams(streamResp.body() ?: emptyList())
 
-            // Step 2: Sync VOD Categories
-            emit(SyncResult.Progress("Syncing VOD categories...", 2, 6))
-            try {
-                Log.d(TAG, "Fetching VOD categories...")
-                val vodCategories = apiService.getVodCategories(baseUrl, username, password)
-                Log.d(TAG, "VOD categories response - success: ${vodCategories.isSuccessful}, code: ${vodCategories.code()}")
-
-                if (vodCategories.isSuccessful) {
-                    val categories = vodCategories.body() ?: emptyList()
-                    Log.d(TAG, "Retrieved ${categories.size} VOD categories")
-                    syncCategories(categories, "movie")
-                } else {
-                    Log.e(TAG, "VOD categories API failed: ${vodCategories.errorBody()?.string()}")
-                }
-                ensureDefaultCategory("movie")
-            } catch (e: Exception) {
-                Log.e(TAG, "VOD categories sync failed", e)
-                emit(SyncResult.Progress("VOD categories failed, continuing...", 2, 6))
-                ensureDefaultCategory("movie")
-            }
-
-            // Step 3: Sync Series Categories
-            emit(SyncResult.Progress("Syncing Series categories...", 3, 6))
-            try {
-                Log.d(TAG, "Fetching series categories...")
-                val seriesCategories = apiService.getSeriesCategories(baseUrl, username, password)
-                Log.d(TAG, "Series categories response - success: ${seriesCategories.isSuccessful}, code: ${seriesCategories.code()}")
-
-                if (seriesCategories.isSuccessful) {
-                    val categories = seriesCategories.body() ?: emptyList()
-                    Log.d(TAG, "Retrieved ${categories.size} series categories")
-                    syncCategories(categories, "series")
-                } else {
-                    Log.e(TAG, "Series categories API failed: ${seriesCategories.errorBody()?.string()}")
-                }
-                ensureDefaultCategory("series")
-            } catch (e: Exception) {
-                Log.e(TAG, "Series categories sync failed", e)
-                emit(SyncResult.Progress("Series categories failed, continuing...", 3, 6))
-                ensureDefaultCategory("series")
-            }
-
-            // Step 4: Sync Live TV Streams
-            emit(SyncResult.Progress("Syncing Live TV streams...", 4, 6))
-            try {
-                Log.d(TAG, "Fetching live TV streams...")
-                val liveStreams = apiService.getLiveStreams(baseUrl, username, password)
-                Log.d(TAG, "Live streams response - success: ${liveStreams.isSuccessful}, code: ${liveStreams.code()}")
-
-                if (liveStreams.isSuccessful) {
-                    val streams = liveStreams.body() ?: emptyList()
-                    Log.d(TAG, "Retrieved ${streams.size} live TV streams")
-                    syncLiveStreams(streams)
-                } else {
-                    Log.e(TAG, "Live streams API failed: ${liveStreams.errorBody()?.string()}")
+                database.withTransaction {
+                    database.categoryDao().deleteCategoriesByType("live_tv")
+                    database.categoryDao().insertCategories(categories)
+                    database.categoryDao().insertCategory(CategoryEntity("live_tv", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
+                    database.liveTvDao().deleteAllChannels()
+                    database.liveTvDao().insertChannels(streams)
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Live TV streams sync failed", e)
-                emit(SyncResult.Progress("Live TV streams failed, continuing...", 4, 6))
+                emit(SyncResult.Error("Live TV sync failed: ${e.message}"))
+                return@flow
             }
 
-            // Step 5: Sync VOD Streams
-            emit(SyncResult.Progress("Syncing VOD streams...", 5, 6))
+            // --- Movies ---
+            emit(SyncResult.Progress("Syncing movies...", 2, 7))
             try {
-                Log.d(TAG, "Fetching VOD streams...")
-                val vodStreams = apiService.getVodStreams(baseUrl, username, password)
-                Log.d(TAG, "VOD streams response - success: ${vodStreams.isSuccessful}, code: ${vodStreams.code()}")
+                val catResp = apiService.getVodCategories(baseUrl, username, password)
+                if (!catResp.isSuccessful) throw Exception("VOD category API ${catResp.code()}")
+                val categories = mapCategories(catResp.body() ?: emptyList(), "movie")
 
-                if (vodStreams.isSuccessful) {
-                    val streams = vodStreams.body() ?: emptyList()
-                    Log.d(TAG, "Retrieved ${streams.size} VOD streams")
-                    syncVodStreams(streams)
-                } else {
-                    Log.e(TAG, "VOD streams API failed: ${vodStreams.errorBody()?.string()}")
+                val streamResp = apiService.getVodStreams(baseUrl, username, password)
+                if (!streamResp.isSuccessful) throw Exception("VOD stream API ${streamResp.code()}")
+                val (movies, movieCats) = mapVodStreams(streamResp.body() ?: emptyList())
+
+                database.withTransaction {
+                    database.categoryDao().deleteCategoriesByType("movie")
+                    database.categoryDao().insertCategories(categories)
+                    database.categoryDao().insertCategory(CategoryEntity("movie", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
+                    database.movieDao().deleteAllMovies()
+                    database.movieDao().insertMovies(movies)
+                    if (movieCats.isNotEmpty()) database.movieDao().insertMovieCategories(movieCats)
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "VOD streams sync failed", e)
-                emit(SyncResult.Progress("VOD streams failed, continuing...", 5, 6))
+                emit(SyncResult.Error("VOD sync failed: ${e.message}"))
+                return@flow
             }
 
-            // Step 6: Sync Series Streams
-            emit(SyncResult.Progress("Syncing Series streams...", 6, 6))
+            // --- Series ---
+            emit(SyncResult.Progress("Syncing series...", 3, 7))
             try {
-                Log.d(TAG, "Fetching series streams...")
-                val seriesStreams = apiService.getSeriesStreams(baseUrl, username, password)
-                Log.d(TAG, "Series streams response - success: ${seriesStreams.isSuccessful}, code: ${seriesStreams.code()}")
+                val catResp = apiService.getSeriesCategories(baseUrl, username, password)
+                if (!catResp.isSuccessful) throw Exception("Series category API ${catResp.code()}")
+                val categories = mapCategories(catResp.body() ?: emptyList(), "series")
 
-                if (seriesStreams.isSuccessful) {
-                    val streams = seriesStreams.body() ?: emptyList()
-                    Log.d(TAG, "Retrieved ${streams.size} series streams")
-                    syncSeriesStreams(streams)
-                } else {
-                    Log.e(TAG, "Series streams API failed: ${seriesStreams.errorBody()?.string()}")
+                val streamResp = apiService.getSeriesStreams(baseUrl, username, password)
+                if (!streamResp.isSuccessful) throw Exception("Series stream API ${streamResp.code()}")
+                val (series, seriesCats) = mapSeriesStreams(streamResp.body() ?: emptyList())
+
+                database.withTransaction {
+                    database.categoryDao().deleteCategoriesByType("series")
+                    database.categoryDao().insertCategories(categories)
+                    database.categoryDao().insertCategory(CategoryEntity("series", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
+                    database.seriesDao().deleteAllSeries()
+                    database.seriesDao().insertSeriesList(series)
+                    if (seriesCats.isNotEmpty()) database.seriesDao().insertSeriesCategories(seriesCats)
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Series streams sync failed", e)
-                emit(SyncResult.Progress("Series streams failed, continuing...", 6, 6))
+                emit(SyncResult.Error("Series sync failed: ${e.message}"))
+                return@flow
             }
 
-            Log.d(TAG, "Sync completed successfully")
+            // --- EPG ---
+            emit(SyncResult.Progress("Syncing EPG...", 4, 7))
+            try {
+                val epgUrl = "$portal/xmltv.php"
+                val resp = apiService.downloadEpg(epgUrl, username, password)
+                if (!resp.isSuccessful) throw Exception("EPG download failed ${resp.code()}")
+                val xml = resp.body()?.string() ?: ""
+                val programs = parseEpg(xml)
+                database.withTransaction {
+                    database.epgDao().deleteAllPrograms()
+                    if (programs.isNotEmpty()) database.epgDao().insertPrograms(programs)
+                }
+            } catch (e: Exception) {
+                emit(SyncResult.Error("EPG sync failed: ${e.message}"))
+                return@flow
+            }
+
             emit(SyncResult.Success)
 
         } catch (e: Exception) {
@@ -198,8 +173,8 @@ class DataSyncService(
         }
     }
 
-    private suspend fun syncCategories(categories: List<CategoryResponse>, type: String) {
-        Log.d(TAG, "Syncing ${categories.size} categories for type: $type")
+    private fun mapCategories(categories: List<CategoryResponse>, type: String): List<CategoryEntity> {
+        Log.d(TAG, "Mapping ${categories.size} categories for type: $type")
 
         val entities = categories.mapNotNull { category ->
             try {
@@ -231,21 +206,11 @@ class DataSyncService(
         }
 
         Log.d(TAG, "Parsed ${entities.size} valid categories for type: $type")
-
-        if (entities.isNotEmpty()) {
-            try {
-                for (entity in entities) {
-                    database.categoryDao().insertCategory(entity)
-                }
-                Log.d(TAG, "Successfully inserted ${entities.size} categories for type: $type")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to insert categories for type: $type", e)
-            }
-        }
+        return entities
     }
 
-    private suspend fun syncLiveStreams(streams: List<LiveTvResponse>) {
-        Log.d(TAG, "Syncing ${streams.size} live TV streams")
+    private fun mapLiveStreams(streams: List<LiveTvResponse>): List<LiveTvEntity> {
+        Log.d(TAG, "Mapping ${streams.size} live TV streams")
 
         val entities = streams.mapNotNull { stream ->
             try {
@@ -286,20 +251,11 @@ class DataSyncService(
         }
 
         Log.d(TAG, "Parsed ${entities.size} valid live TV streams")
-
-        if (entities.isNotEmpty()) {
-            try {
-                database.liveTvDao().deleteAllChannels()
-                database.liveTvDao().insertChannels(entities)
-                Log.d(TAG, "Successfully synced ${entities.size} live TV streams")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to sync live TV streams to database", e)
-            }
-        }
+        return entities
     }
 
-    private suspend fun syncVodStreams(streams: List<VodResponse>) {
-        Log.d(TAG, "Syncing ${streams.size} VOD streams")
+    private fun mapVodStreams(streams: List<VodResponse>): Pair<List<MovieEntity>, List<MovieCategoryEntity>> {
+        Log.d(TAG, "Mapping ${streams.size} VOD streams")
 
         val validStreams = streams.filter { it.streamId > 0 }
         Log.d(TAG, "Found ${validStreams.size} valid VOD streams")
@@ -357,23 +313,11 @@ class DataSyncService(
         }
 
         Log.d(TAG, "Parsed ${movieEntities.size} movies and ${movieCategoryEntities.size} movie-category relations")
-
-        if (movieEntities.isNotEmpty()) {
-            try {
-                database.movieDao().deleteAllMovies()
-                database.movieDao().insertMovies(movieEntities)
-                if (movieCategoryEntities.isNotEmpty()) {
-                    database.movieDao().insertMovieCategories(movieCategoryEntities)
-                }
-                Log.d(TAG, "Successfully synced ${movieEntities.size} VOD streams")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to sync VOD streams to database", e)
-            }
-        }
+        return movieEntities to movieCategoryEntities
     }
 
-    private suspend fun syncSeriesStreams(streams: List<SeriesResponse>) {
-        Log.d(TAG, "Syncing ${streams.size} series streams")
+    private fun mapSeriesStreams(streams: List<SeriesResponse>): Pair<List<SeriesEntity>, List<SeriesCategoryEntity>> {
+        Log.d(TAG, "Mapping ${streams.size} series streams")
 
         val validStreams = streams.filter { it.seriesId > 0 }
         Log.d(TAG, "Found ${validStreams.size} valid series streams")
@@ -439,18 +383,56 @@ class DataSyncService(
         }
 
         Log.d(TAG, "Parsed ${seriesEntities.size} series and ${seriesCategoryEntities.size} series-category relations")
+        return seriesEntities to seriesCategoryEntities
+    }
 
-        if (seriesEntities.isNotEmpty()) {
-            try {
-                database.seriesDao().deleteAllSeries()
-                database.seriesDao().insertSeriesList(seriesEntities)
-                if (seriesCategoryEntities.isNotEmpty()) {
-                    database.seriesDao().insertSeriesCategories(seriesCategoryEntities)
+    private fun parseEpg(xml: String): List<EpgEntity> {
+        val programs = mutableListOf<EpgEntity>()
+        try {
+            val parser = Xml.newPullParser()
+            parser.setInput(StringReader(xml))
+            var event = parser.eventType
+            var current: EpgEntity? = null
+            while (event != XmlPullParser.END_DOCUMENT) {
+                when (event) {
+                    XmlPullParser.START_TAG -> {
+                        when (parser.name) {
+                            "programme" -> {
+                                val start = parseXmlTvTime(parser.getAttributeValue(null, "start"))
+                                val end = parseXmlTvTime(parser.getAttributeValue(null, "stop"))
+                                val channel = parser.getAttributeValue(null, "channel")
+                                current = if (start != null && end != null) {
+                                    EpgEntity(
+                                        channel_id = channel?.toIntOrNull() ?: 0,
+                                        channel_name = channel,
+                                        start = start,
+                                        end = end,
+                                        title = null,
+                                        description = null
+                                    )
+                                } else null
+                            }
+                            "title" -> current = current?.copy(title = parser.nextText())
+                            "desc" -> current = current?.copy(description = parser.nextText())
+                        }
+                    }
+                    XmlPullParser.END_TAG -> if (parser.name == "programme") {
+                        current?.let { programs.add(it) }
+                    }
                 }
-                Log.d(TAG, "Successfully synced ${seriesEntities.size} series streams")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to sync series streams to database", e)
+                event = parser.next()
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse EPG", e)
+        }
+        return programs
+    }
+
+    private fun parseXmlTvTime(value: String?): Long? {
+        return try {
+            value?.let { epgDateFormat.parse(it)?.time }
+        } catch (e: Exception) {
+            null
         }
     }
 }
