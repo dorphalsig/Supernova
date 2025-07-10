@@ -17,13 +17,13 @@ import android.util.Xml
 import java.io.StringReader
 import java.text.SimpleDateFormat
 import java.util.Locale
-import com.supernova.utils.SecureStorage
+import com.supernova.utils.SecureDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class DataSyncService(
     private val database: SupernovaDatabase,
-    private val secureStorage: SecureStorage,
+    private val secureStorage: SecureDataStore,
     private val gson: Gson = Gson()
 ) {
     companion object {
@@ -434,4 +434,5 @@ class DataSyncService(
         } catch (e: Exception) {
             null
         }
-    }}
+    }
+}

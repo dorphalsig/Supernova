@@ -103,6 +103,8 @@ dependencies {
 
     // Security
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.datastore)
+    implementation(libs.tink.android)
 
     // Leanback for TV
     implementation(libs.androidx.leanback)

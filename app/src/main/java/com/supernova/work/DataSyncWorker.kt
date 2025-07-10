@@ -8,7 +8,7 @@ import androidx.work.workDataOf
 import com.supernova.data.database.SupernovaDatabase
 import com.supernova.network.DataSyncService
 import com.supernova.network.models.SyncResult
-import com.supernova.utils.SecureStorage
+import com.supernova.utils.SecureDataStore
 import kotlinx.coroutines.flow.last
 
 class DataSyncWorker(
@@ -26,7 +26,7 @@ class DataSyncWorker(
     override suspend fun doWork(): Result {
         Log.d(TAG, "DataSyncWorker started")
 
-        val secureStorage = SecureStorage(applicationContext)
+        val secureStorage = SecureDataStore(applicationContext)
         return try {
             val database = SupernovaDatabase.getDatabase(applicationContext)
             val syncService = DataSyncService(database, secureStorage)
@@ -64,4 +64,5 @@ class DataSyncWorker(
             )
             Result.failure(outputData)
         }
-    }}
+    }
+}
