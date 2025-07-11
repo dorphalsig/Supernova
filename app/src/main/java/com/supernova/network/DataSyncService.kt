@@ -16,7 +16,6 @@ import org.xmlpull.v1.XmlPullParser
 import android.util.Xml
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
-import java.io.StringReader
 import java.text.SimpleDateFormat
 import java.util.Locale
 import com.supernova.utils.SecureDataStore
@@ -106,58 +105,73 @@ class DataSyncService(
     }
 // In DataSyncService.kt
 
-    private suspend fun streamXmltvBatched(
+    private suspend fun batchXmlStream(
         responseBody: ResponseBody,
         batchSize: Int = DEFAULT_BATCH_SIZE,
-        insertBatch: suspend (List<EpgEntity>) -> Unit
-    ): Int {
+        insertChannels: suspend (List<ChannelEntity>) -> Unit,
+        insertPrograms: suspend (List<EpgEntity>) -> Unit
+    ) {
         val parser = Xml.newPullParser().apply {
             setInput(responseBody.byteStream(), null)
         }
 
         var event = parser.eventType
-        var current: EpgEntity? = null
-        val batch = mutableListOf<EpgEntity>()
-        var total = 0
+        var currentProgram: EpgEntity? = null
+        var currentChannelId: String? = null
+        var currentChannelName: String? = null
+        val programBatch = mutableListOf<EpgEntity>()
+        val channelBatch = mutableListOf<ChannelEntity>()
 
         while (event != XmlPullParser.END_DOCUMENT) {
             when (event) {
-                XmlPullParser.START_TAG -> {
-                    when (parser.name) {
-                        "programme" -> {
-                            // start a new programme
-                            val channelId =
-                                parser.getAttributeValue(null, "channel")?.toIntOrNull() ?: 0
-                            val start = parseXmlTvTime(parser.getAttributeValue(null, "start"))
-                            val end = parseXmlTvTime(parser.getAttributeValue(null, "stop"))
-                            current = if (start != null && end != null) {
-                                EpgEntity(
-                                    channel_id = channelId, channel_name = null,
-                                    start = start, end = end,
-                                    title = null, description = null
-                                )
-                            } else null
-                        }
-
-                        "title" -> {
-                            current = current?.copy(title = parser.nextText())
-                        }
-
-                        "desc" -> {
-                            current = current?.copy(description = parser.nextText())
-                        }
+                XmlPullParser.START_TAG -> when (parser.name) {
+                    "channel" -> {
+                        currentChannelId = parser.getAttributeValue(null, "id")
+                        currentChannelName = null
                     }
+                    "display-name" -> if (currentChannelId != null) {
+                        currentChannelName = parser.nextText()
+                    }
+                    "programme" -> {
+                        val ch = parser.getAttributeValue(null, "channel") ?: ""
+                        val start = parseXmlTvTime(parser.getAttributeValue(null, "start"))
+                        val end = parseXmlTvTime(parser.getAttributeValue(null, "stop"))
+                        currentProgram = if (start != null && end != null) {
+                            EpgEntity(
+                                channel_id = ch,
+                                start = start,
+                                end = end,
+                                title = null,
+                                description = null
+                            )
+                        } else null
+                    }
+                    "title" -> currentProgram = currentProgram?.copy(title = parser.nextText())
+                    "desc" -> currentProgram = currentProgram?.copy(description = parser.nextText())
                 }
 
-                XmlPullParser.END_TAG -> {
-                    if (parser.name == "programme" && current != null) {
-                        batch += current
-                        total++
-                        current = null
+                XmlPullParser.END_TAG -> when (parser.name) {
+                    "channel" -> {
+                        currentChannelId?.let { id ->
+                            channelBatch += ChannelEntity(id, currentChannelName)
+                            currentChannelId = null
+                            currentChannelName = null
 
-                        if (batch.size >= batchSize) {
-                            insertBatch(batch.toList())
-                            batch.clear()
+                            if (channelBatch.size >= batchSize) {
+                                insertChannels(channelBatch.toList())
+                                channelBatch.clear()
+                            }
+                        }
+                    }
+                    "programme" -> {
+                        currentProgram?.let { prog ->
+                            programBatch += prog
+                            currentProgram = null
+
+                            if (programBatch.size >= batchSize) {
+                                insertPrograms(programBatch.toList())
+                                programBatch.clear()
+                            }
                         }
                     }
                 }
@@ -165,12 +179,8 @@ class DataSyncService(
             event = parser.next()
         }
 
-        // flush remainder
-        if (batch.isNotEmpty()) {
-            insertBatch(batch)
-        }
-
-        return total
+        if (channelBatch.isNotEmpty()) insertChannels(channelBatch)
+        if (programBatch.isNotEmpty()) insertPrograms(programBatch)
     }
 
 
@@ -265,11 +275,11 @@ class DataSyncService(
         val epgUrl = "$portal/xmltv.php"
         val resp = apiService.downloadEpg(epgUrl, username, password)
         if (!resp.isSuccessful) throw Exception("EPG download failed ${resp.code()}")
-        val xml = resp.body()?.string() ?: ""
-        val programs = parseEpg(xml)
+        val body = resp.body() ?: throw Exception("Empty EPG body")
         database.withTransaction {
             database.epgDao().deleteAllPrograms()
-            if (programs.isNotEmpty()) database.epgDao().insertPrograms(programs)
+            database.channelDao().deleteAllChannels()
+            batchXmlStream(body, insertChannels = { database.channelDao().insertChannels(it) }, insertPrograms = { database.epgDao().insertPrograms(it) })
         }
     }
 
@@ -328,7 +338,7 @@ class DataSyncService(
 
             emit(SyncResult.Progress("Syncing EPG...", 4, 7))
             try {
-
+                syncEPG(apiService, portal, username, password)
             } catch (e: Exception) {
                 emit(SyncResult.Error("EPG sync failed: ${e.message}"))
                 return@flow
@@ -602,49 +612,6 @@ class DataSyncService(
         return seriesEntities to seriesCategoryEntities
     }
 
-    private fun parseEpg(xml: String): List<EpgEntity> {
-        val programs = mutableListOf<EpgEntity>()
-        try {
-            val parser = Xml.newPullParser()
-            parser.setInput(StringReader(xml))
-            var event = parser.eventType
-            var current: EpgEntity? = null
-            while (event != XmlPullParser.END_DOCUMENT) {
-                when (event) {
-                    XmlPullParser.START_TAG -> {
-                        when (parser.name) {
-                            "programme" -> {
-                                val start = parseXmlTvTime(parser.getAttributeValue(null, "start"))
-                                val end = parseXmlTvTime(parser.getAttributeValue(null, "stop"))
-                                val channel = parser.getAttributeValue(null, "channel")
-                                current = if (start != null && end != null) {
-                                    EpgEntity(
-                                        channel_id = channel?.toIntOrNull() ?: 0,
-                                        channel_name = channel,
-                                        start = start,
-                                        end = end,
-                                        title = null,
-                                        description = null
-                                    )
-                                } else null
-                            }
-
-                            "title" -> current = current?.copy(title = parser.nextText())
-                            "desc" -> current = current?.copy(description = parser.nextText())
-                        }
-                    }
-
-                    XmlPullParser.END_TAG -> if (parser.name == "programme") {
-                        current?.let { programs.add(it) }
-                    }
-                }
-                event = parser.next()
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse EPG", e)
-        }
-        return programs
-    }
 
     private fun parseXmlTvTime(value: String?): Long? {
         return try {
