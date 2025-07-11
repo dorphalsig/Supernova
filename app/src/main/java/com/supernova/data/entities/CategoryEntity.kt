@@ -6,15 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "category",
-    primaryKeys = ["type", "id"],
-    foreignKeys = [
-        ForeignKey(
-            entity = CategoryEntity::class,
-            parentColumns = ["type", "id"],
-            childColumns = ["type", "parent_id"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
+    primaryKeys = ["type", "id"]
 )
 data class CategoryEntity(
     val type: String,           // e.g., 'movie', 'live_tv'

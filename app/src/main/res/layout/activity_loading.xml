@@ -50,7 +50,7 @@
             android:id="@+id/loadingPhraseTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/random_loading_phrase_1"
+            android:text=""
             android:textColor="@color/supernova_on_surface_var"
             android:textSize="@dimen/tv_text_size_large" />
 
