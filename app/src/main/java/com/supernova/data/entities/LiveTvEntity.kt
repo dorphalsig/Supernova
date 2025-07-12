@@ -1,22 +1,22 @@
 package com.supernova.data.entities
 
 import androidx.room.Entity
-import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "live_tv",
-    foreignKeys = [
-        ForeignKey(
-            entity = CategoryEntity::class,
-            parentColumns = ["type", "id"],
-            childColumns = ["category_type", "category_id"],
-            onDelete = ForeignKey.SET_NULL
-        )
+    indices = [
+        Index("channel_id"),
+        Index("is_live"),
+        Index("name"),
+        Index("category_id"),
+        Index(value = ["category_type", "category_id"]),
+        Index(value = ["channel_id", "is_live"], unique = true)
     ]
 )
 data class LiveTvEntity(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true) val uid: Long = 0,
     val channel_id: Int,            // Corresponds to stream_id
     val num: Int?,
     val name: String,
@@ -30,5 +30,6 @@ data class LiveTvEntity(
     val tv_archive_duration: Int?,
     val category_type: String?,
     val category_id: Int?,
-    val thumbnail: String?
+    val thumbnail: String?,
+    val is_live: Boolean = true
 )

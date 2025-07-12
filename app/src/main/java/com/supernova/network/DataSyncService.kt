@@ -16,6 +16,9 @@ import com.supernova.utils.SecureDataStore
 import com.supernova.utils.SecureStorageKeys
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.supervisorScope
 
 class DataSyncService(
     private val database: SupernovaDatabase,
@@ -31,88 +34,34 @@ class DataSyncService(
     // In DataSyncService.kt
 
 
-    suspend fun syncTV(
+    suspend fun syncTVWithVersioning(
         apiService: ApiService,
         baseUrl: String,
         username: String,
         password: String
     ) {
-        val catResp = apiService.getLiveCategories(baseUrl, username, password)
-        if (!catResp.isSuccessful) throw Exception("Live category API ${catResp.code()}")
-        val categories = mapCategories(catResp.body() ?: emptyList(), "live_tv")
-
-        val response = apiService.getLiveStreams(baseUrl, username, password)
-        if (!response.isSuccessful) throw Exception("Live stream API ${response.code()}")
-        val responseBody = response.body()!!
-
-        database.withTransaction {
-            database.categoryDao().deleteCategoriesByType("live_tv")
-            database.categoryDao().insertCategories(categories)
-            database.categoryDao()
-                .insertCategory(CategoryEntity("live_tv", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
-            database.liveTvDao().deleteAllChannels()
-            // Streaming: map and insert each batch
-            ApiUtils.batchJsonStream<LiveTvResponse>(this, responseBody) { batch ->
-                val entities = mapLiveStreams(batch)
-                database.liveTvDao().insertChannels(entities) // Insert this batch
-            }
-        }
+        val categories = downloadCategoriesForType(apiService, baseUrl, username, password, "get_live_categories", "live_tv")
+        processContentTypeWithWorkers(apiService, baseUrl, username, password, "live_tv", categories)
     }
 
-    suspend fun syncSeries(
+    suspend fun syncSeriesWithVersioning(
         apiService: ApiService,
         baseUrl: String,
         username: String,
         password: String
     ) {
-        val catResp = apiService.getSeriesCategories(baseUrl, username, password)
-        if (!catResp.isSuccessful) throw Exception("Series category API ${catResp.code()}")
-        val categories = mapCategories(catResp.body() ?: emptyList(), "series")
-
-        val streamResp = apiService.getSeriesStreams(baseUrl, username, password)
-        if (!streamResp.isSuccessful) throw Exception("Series stream API ${streamResp.code()}")
-        val responseBody = streamResp.body()!!
-
-        database.withTransaction {
-            database.categoryDao().deleteCategoriesByType("series")
-            database.categoryDao().insertCategories(categories)
-            database.categoryDao()
-                .insertCategory(CategoryEntity("series", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
-            database.seriesDao().deleteAllSeries()
-            ApiUtils.batchJsonStream<SeriesResponse>(this, responseBody) { batch ->
-                val (series, seriesCats) = mapSeriesStreams(batch)
-                database.seriesDao().insertSeriesList(series)
-                if (seriesCats.isNotEmpty()) database.seriesDao().insertSeriesCategories(seriesCats)
-            }
-        }
+        val categories = downloadCategoriesForType(apiService, baseUrl, username, password, "get_series_categories", "series")
+        processContentTypeWithWorkers(apiService, baseUrl, username, password, "series", categories)
     }
 
-    suspend fun syncMovies(
+    suspend fun syncMoviesWithVersioning(
         apiService: ApiService,
         baseUrl: String,
         username: String,
         password: String
     ) {
-        val catResp = apiService.getVodCategories(baseUrl, username, password)
-        if (!catResp.isSuccessful) throw Exception("VOD category API ${catResp.code()}")
-        val categories = mapCategories(catResp.body() ?: emptyList(), "movie")
-
-        val streamResp = apiService.getVodStreams(baseUrl, username, password)
-        if (!streamResp.isSuccessful) throw Exception("VOD stream API ${streamResp.code()}")
-        val responseBody = streamResp.body()!!
-
-        database.withTransaction {
-            database.categoryDao().deleteCategoriesByType("movie")
-            database.categoryDao().insertCategories(categories)
-            database.categoryDao()
-                .insertCategory(CategoryEntity("movie", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
-            database.movieDao().deleteAllMovies()
-            ApiUtils.batchJsonStream<SeriesResponse>(this, responseBody) { batch ->
-                val (movies, moviesCats) = mapSeriesStreams(batch)
-                database.seriesDao().insertSeriesList(movies)
-                if (moviesCats.isNotEmpty()) database.seriesDao().insertSeriesCategories(moviesCats)
-            }
-        }
+        val categories = downloadCategoriesForType(apiService, baseUrl, username, password, "get_vod_categories", "movie")
+        processContentTypeWithWorkers(apiService, baseUrl, username, password, "movie", categories)
     }
 
     suspend fun syncEPG(
@@ -138,6 +87,8 @@ class DataSyncService(
 
     fun syncAll(): Flow<SyncResult> = flow {
         Log.d(TAG, "Starting sync process")
+
+        startupCleanup()
 
         val portal = SecureDataStore.getString(SecureStorageKeys.PORTAL)
         val username = SecureDataStore.getString(SecureStorageKeys.USERNAME)
@@ -166,7 +117,7 @@ class DataSyncService(
 
             emit(SyncResult.Progress("Syncing live TV...", 1, 7))
             try {
-                syncTV(apiService, baseUrl, username, password)
+                syncTVWithVersioning(apiService, baseUrl, username, password)
             } catch (e: Exception) {
                 emit(SyncResult.Error("Live TV sync failed: ${e.message}"))
                 return@flow
@@ -174,7 +125,7 @@ class DataSyncService(
 
             emit(SyncResult.Progress("Syncing movies...", 2, 7))
             try {
-                syncMovies(apiService, baseUrl, username, password)
+                syncMoviesWithVersioning(apiService, baseUrl, username, password)
             } catch (e: Exception) {
                 emit(SyncResult.Error("VOD sync failed: ${e.message}"))
                 return@flow
@@ -182,7 +133,7 @@ class DataSyncService(
 
             emit(SyncResult.Progress("Syncing series...", 3, 7))
             try {
-                syncSeries(apiService, baseUrl, username, password)
+                syncSeriesWithVersioning(apiService, baseUrl, username, password)
             } catch (e: Exception) {
                 emit(SyncResult.Error("Series sync failed: ${e.message}"))
                 return@flow
@@ -196,11 +147,14 @@ class DataSyncService(
                 return@flow
             }
 
+            swapVersioningToLive()
             emit(SyncResult.Success)
 
         } catch (e: Exception) {
             Log.e(TAG, "Sync failed with exception", e)
             emit(SyncResult.Error("Sync failed: ${e.message}"))
+        } finally {
+            deleteAllStaging()
         }
     }
 
@@ -462,6 +416,121 @@ class DataSyncService(
             "Parsed ${seriesEntities.size} series and ${seriesCategoryEntities.size} series-category relations"
         )
         return seriesEntities to seriesCategoryEntities
+    }
+
+    private suspend fun startupCleanup() {
+        database.categoryDao().deleteStaging()
+        database.movieDao().deleteStaging()
+        database.liveTvDao().deleteStaging()
+        database.seriesDao().deleteStaging()
+    }
+
+    private suspend fun downloadCategoriesForType(
+        apiService: ApiService,
+        baseUrl: String,
+        username: String,
+        password: String,
+        action: String,
+        type: String
+    ): List<CategoryEntity> {
+        val resp = when (action) {
+            "get_live_categories" -> apiService.getLiveCategories(baseUrl, username, password, action)
+            "get_vod_categories" -> apiService.getVodCategories(baseUrl, username, password, action)
+            "get_series_categories" -> apiService.getSeriesCategories(baseUrl, username, password, action)
+            else -> apiService.getLiveCategories(baseUrl, username, password, action)
+        }
+        if (!resp.isSuccessful) throw Exception("Category API ${resp.code()}")
+        val cats = mapCategories(resp.body() ?: emptyList(), type)
+        database.categoryDao().insertCategoriesStaging(cats)
+        return cats
+    }
+
+    private suspend fun downloadStreamsForCategory(
+        apiService: ApiService,
+        baseUrl: String,
+        username: String,
+        password: String,
+        category: CategoryEntity
+    ) {
+        when (category.type) {
+            "live_tv" -> {
+                val resp = apiService.getLiveStreamsByCategory(baseUrl, username, password, category.id)
+                if (resp.isSuccessful) {
+                    ApiUtils.batchJsonStream<LiveTvResponse>(this, resp.body()!!) { batch ->
+                        val entities = mapLiveStreams(batch)
+                        database.liveTvDao().insertChannelsStaging(entities)
+                    }
+                } else throw Exception("Live streams API ${resp.code()}")
+            }
+            "movie" -> {
+                val resp = apiService.getVodStreamsByCategory(baseUrl, username, password, category.id)
+                if (resp.isSuccessful) {
+                    ApiUtils.batchJsonStream<VodResponse>(this, resp.body()!!) { batch ->
+                        val (movies, cats) = mapVodStreams(batch)
+                        database.movieDao().insertMoviesStaging(movies)
+                        database.movieDao().insertMovieCategoriesStaging(cats)
+                    }
+                } else throw Exception("VOD streams API ${resp.code()}")
+            }
+            "series" -> {
+                val resp = apiService.getSeriesStreamsByCategory(baseUrl, username, password, category.id)
+                if (resp.isSuccessful) {
+                    ApiUtils.batchJsonStream<SeriesResponse>(this, resp.body()!!) { batch ->
+                        val (series, cats) = mapSeriesStreams(batch)
+                        database.seriesDao().insertSeriesStaging(series)
+                        database.seriesDao().insertSeriesCategoriesStaging(cats)
+                    }
+                } else throw Exception("Series streams API ${resp.code()}")
+            }
+        }
+    }
+
+    private suspend fun processContentTypeWithWorkers(
+        apiService: ApiService,
+        baseUrl: String,
+        username: String,
+        password: String,
+        type: String,
+        categories: List<CategoryEntity>
+    ) {
+        val dispatcher = Dispatchers.IO.limitedParallelism(5)
+        supervisorScope {
+            categories.map { cat ->
+                async(dispatcher) {
+                    try {
+                        downloadStreamsForCategory(apiService, baseUrl, username, password, cat)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Category sync failed for ${cat.type} category ${cat.id}: ${e.message}")
+                        handleCategoryFailure(type, cat.id)
+                    }
+                }
+            }.awaitAll()
+        }
+    }
+
+    private suspend fun handleCategoryFailure(type: String, categoryId: Int) {
+        database.categoryDao().deleteStagingCategory(type, categoryId)
+        when (type) {
+            "live_tv" -> database.liveTvDao().deleteStagingByCategory(categoryId)
+            "movie" -> database.movieDao().deleteStagingByCategory(categoryId)
+            "series" -> database.seriesDao().deleteStagingByCategory(categoryId)
+        }
+    }
+
+    private suspend fun deleteAllStaging() {
+        database.categoryDao().deleteStaging()
+        database.movieDao().deleteStaging()
+        database.liveTvDao().deleteStaging()
+        database.seriesDao().deleteStaging()
+    }
+
+    private suspend fun swapVersioningToLive() {
+        database.withTransaction {
+            database.categoryDao().swapStagingToLive()
+            database.movieDao().swapStagingToLive()
+            database.liveTvDao().swapStagingToLive()
+            database.seriesDao().swapStagingToLive()
+        }
     }
 
 

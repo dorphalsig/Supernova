@@ -75,6 +75,36 @@ interface ApiService {
         @Query("action") action: String = "get_series"
     ): Response<ResponseBody>
 
+    @Streaming
+    @GET
+    suspend fun getLiveStreamsByCategory(
+        @Url url: String,
+        @Query("username") username: String,
+        @Query("password") password: String,
+        @Query("category_id") categoryId: Int,
+        @Query("action") action: String = "get_live_streams"
+    ): Response<ResponseBody>
+
+    @Streaming
+    @GET
+    suspend fun getVodStreamsByCategory(
+        @Url url: String,
+        @Query("username") username: String,
+        @Query("password") password: String,
+        @Query("category_id") categoryId: Int,
+        @Query("action") action: String = "get_vod_streams"
+    ): Response<ResponseBody>
+
+    @Streaming
+    @GET
+    suspend fun getSeriesStreamsByCategory(
+        @Url url: String,
+        @Query("username") username: String,
+        @Query("password") password: String,
+        @Query("category_id") categoryId: Int,
+        @Query("action") action: String = "get_series"
+    ): Response<ResponseBody>
+
     @GET
     suspend fun downloadEpg(
         @Url url: String,

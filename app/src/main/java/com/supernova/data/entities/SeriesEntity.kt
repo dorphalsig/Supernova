@@ -1,11 +1,22 @@
 package com.supernova.data.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "series")
+@Entity(
+    tableName = "series",
+    indices = [
+        Index("series_id"),
+        Index("is_live"),
+        Index("name"),
+        Index("year"),
+        Index("genre"),
+        Index(value = ["series_id", "is_live"], unique = true)
+    ]
+)
 data class SeriesEntity(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true) val uid: Long = 0,
     val series_id: Int,
     val num: Int?,
     val name: String,
@@ -24,5 +35,6 @@ data class SeriesEntity(
     val rating_5based: Float?,
     val backdrop_path: String?,        // JSON array as string
     val youtube_trailer: String?,
-    val episode_run_time: String?
+    val episode_run_time: String?,
+    val is_live: Boolean = true
 )
