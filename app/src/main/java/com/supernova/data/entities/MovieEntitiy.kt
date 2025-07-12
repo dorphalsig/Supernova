@@ -1,9 +1,19 @@
 package com.supernova.data.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "movie")
+@Entity(
+    tableName = "movie",
+    indices = [
+        Index("movie_id"),
+        Index("is_live"),
+        Index("name"),
+        Index("year"),
+        Index("added")
+    ]
+)
 data class MovieEntity(
     @PrimaryKey
     val movie_id: Int,              // Corresponds to stream_id
@@ -18,5 +28,6 @@ data class MovieEntity(
     val added: Long?,               // Unix timestamp
     val container_extension: String?,
     val custom_sid: String?,
-    val direct_source: String?
+    val direct_source: String?,
+    val is_live: Boolean = true
 )

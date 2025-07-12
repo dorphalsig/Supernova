@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CategoryDao {
 
-    @Query("SELECT * FROM category WHERE type = :type ORDER BY name ASC")
+    @Query("SELECT * FROM category WHERE type = :type AND is_live = 1 ORDER BY name ASC")
     fun getCategoriesByType(type: String): Flow<List<CategoryEntity>>
 
     @Query("SELECT * FROM category WHERE type = :type AND parent_id = :parentId ORDER BY name ASC")
@@ -39,4 +39,30 @@ interface CategoryDao {
 
     @Query("SELECT COUNT(*) FROM category WHERE type = :type")
     suspend fun getCategoryCount(type: String): Int
+
+    // --- DML versioning helpers ---
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCategoriesStaging(categories: List<CategoryEntity>)
+
+    @Query(
+        "INSERT INTO category(type, id, name, parent_id, is_live) " +
+            "SELECT type, id, name, parent_id, 0 FROM category " +
+            "WHERE type = :type AND (:categoryId IS NULL OR id = :categoryId) AND is_live = 1"
+    )
+    suspend fun copyFromLive(type: String, categoryId: Int?)
+
+    @Query("DELETE FROM category WHERE is_live = 0")
+    suspend fun deleteStaging()
+
+    @Query("DELETE FROM category WHERE is_live = 1")
+    suspend fun deleteLive()
+
+    @Query("UPDATE category SET is_live = 1 WHERE is_live = 0")
+    suspend fun promoteStaging()
+
+    @Transaction
+    suspend fun swapStagingToLive() {
+        deleteLive()
+        promoteStaging()
+    }
 }

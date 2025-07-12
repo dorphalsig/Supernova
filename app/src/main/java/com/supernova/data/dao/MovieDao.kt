@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MovieDao {
 
-    @Query("SELECT * FROM movie ORDER BY name ASC")
+    @Query("SELECT * FROM movie WHERE is_live = 1 ORDER BY name ASC")
     fun getAllMovies(): Flow<List<MovieEntity>>
 
     @Query("SELECT * FROM movie WHERE movie_id = :movieId")
@@ -18,18 +18,18 @@ interface MovieDao {
     @Query("""
         SELECT m.* FROM movie m
         INNER JOIN movie_category mc ON m.movie_id = mc.movie_id
-        WHERE mc.category_type = :categoryType AND mc.category_id = :categoryId
+        WHERE mc.category_type = :categoryType AND mc.category_id = :categoryId AND m.is_live = 1 AND mc.is_live = 1
         ORDER BY m.name ASC
     """)
     fun getMoviesByCategory(categoryType: String, categoryId: Int): Flow<List<MovieEntity>>
 
-    @Query("SELECT * FROM movie WHERE name LIKE '%' || :searchQuery || '%' ORDER BY name ASC")
+    @Query("SELECT * FROM movie WHERE is_live = 1 AND name LIKE '%' || :searchQuery || '%' ORDER BY name ASC")
     fun searchMovies(searchQuery: String): Flow<List<MovieEntity>>
 
-    @Query("SELECT * FROM movie WHERE year = :year ORDER BY name ASC")
+    @Query("SELECT * FROM movie WHERE is_live = 1 AND year = :year ORDER BY name ASC")
     fun getMoviesByYear(year: Int): Flow<List<MovieEntity>>
 
-    @Query("SELECT * FROM movie ORDER BY added DESC LIMIT :limit")
+    @Query("SELECT * FROM movie WHERE is_live = 1 ORDER BY added DESC LIMIT :limit")
     fun getRecentlyAddedMovies(limit: Int): Flow<List<MovieEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -70,6 +70,59 @@ interface MovieDao {
 
     @Query("SELECT COUNT(*) FROM movie")
     suspend fun getMovieCount(): Int
+
+    // --- DML versioning helpers ---
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMoviesStaging(movies: List<MovieEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMovieCategoriesStaging(categories: List<MovieCategoryEntity>)
+
+    @Query(
+        "INSERT INTO movie(movie_id, num, name, title, year, stream_type, stream_icon, rating, rating_5based, added, container_extension, custom_sid, direct_source, is_live) " +
+            "SELECT movie_id, num, name, title, year, stream_type, stream_icon, rating, rating_5based, added, container_extension, custom_sid, direct_source, 0 FROM movie " +
+            "WHERE is_live = 1 AND (:categoryId IS NULL OR movie_id IN (SELECT movie_id FROM movie_category WHERE category_id = :categoryId AND category_type = 'movie' AND is_live = 1))"
+    )
+    suspend fun copyFromLive(categoryId: Int?)
+
+    @Query(
+        "INSERT INTO movie_category(movie_id, category_type, category_id, is_live) " +
+            "SELECT movie_id, category_type, category_id, 0 FROM movie_category " +
+            "WHERE is_live = 1 AND (:categoryId IS NULL OR category_id = :categoryId)"
+    )
+    suspend fun copyCategoriesFromLive(categoryId: Int?)
+
+    @Query("DELETE FROM movie WHERE is_live = 0")
+    suspend fun deleteStagingMovies()
+
+    @Query("DELETE FROM movie_category WHERE is_live = 0")
+    suspend fun deleteStagingCategories()
+
+    @Query("DELETE FROM movie WHERE is_live = 1")
+    suspend fun deleteLiveMovies()
+
+    @Query("DELETE FROM movie_category WHERE is_live = 1")
+    suspend fun deleteLiveMovieCategories()
+
+    @Query("UPDATE movie SET is_live = 1 WHERE is_live = 0")
+    suspend fun promoteStagingMovies()
+
+    @Query("UPDATE movie_category SET is_live = 1 WHERE is_live = 0")
+    suspend fun promoteStagingCategories()
+
+    @Transaction
+    suspend fun deleteStaging() {
+        deleteStagingMovies()
+        deleteStagingCategories()
+    }
+
+    @Transaction
+    suspend fun swapStagingToLive() {
+        deleteLiveMovies()
+        deleteLiveMovieCategories()
+        promoteStagingMovies()
+        promoteStagingCategories()
+    }
 
     @Transaction
     suspend fun insertMovieWithCategories(movie: MovieEntity, categories: List<MovieCategoryEntity>) {

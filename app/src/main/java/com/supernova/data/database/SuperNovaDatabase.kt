@@ -36,7 +36,7 @@ import com.supernova.network.AvatarService
         ChannelEntity::class,
         EpgEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class SupernovaDatabase : RoomDatabase() {
@@ -60,9 +60,21 @@ abstract class SupernovaDatabase : RoomDatabase() {
                     SupernovaDatabase::class.java,
                     "supernova"
                 )
+                    .addMigrations(MIGRATION_5_6)
                     .build()
                 INSTANCE = instance
                 instance
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE category ADD COLUMN is_live INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE movie ADD COLUMN is_live INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE live_tv ADD COLUMN is_live INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE series ADD COLUMN is_live INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE movie_category ADD COLUMN is_live INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE series_category ADD COLUMN is_live INTEGER NOT NULL DEFAULT 1")
             }
         }
     }}
