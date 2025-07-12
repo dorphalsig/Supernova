@@ -13,6 +13,7 @@
     <color name="supernova_border">#829afe99</color>
     <color name="supernova_lock_bg">#232344</color>
     <color name="supernova_shadow">#0b0b1a66</color>
+    <color name="avatar_highlight">#33ffffff</color>
 
     <!-- Legacy Colors (kept for backwards compatibility) -->
     <color name="purple_200">#FFBB86FC</color>
