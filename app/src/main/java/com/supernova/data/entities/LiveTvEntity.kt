@@ -11,11 +11,12 @@ import androidx.room.PrimaryKey
         Index("is_live"),
         Index("name"),
         Index("category_id"),
-        Index(value = ["category_type", "category_id"])
+        Index(value = ["category_type", "category_id"]),
+        Index(value = ["channel_id", "is_live"], unique = true)
     ]
 )
 data class LiveTvEntity(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true) val uid: Long = 0,
     val channel_id: Int,            // Corresponds to stream_id
     val num: Int?,
     val name: String,

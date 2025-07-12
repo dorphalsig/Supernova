@@ -70,6 +70,9 @@ interface LiveTvDao {
     )
     suspend fun copyFromLive(categoryId: Int?)
 
+    @Query("DELETE FROM live_tv WHERE category_id = :categoryId AND is_live = 0")
+    suspend fun deleteStagingByCategory(categoryId: Int)
+
     @Query("DELETE FROM live_tv WHERE is_live = 0")
     suspend fun deleteStaging()
 

@@ -509,16 +509,11 @@ class DataSyncService(
     }
 
     private suspend fun handleCategoryFailure(type: String, categoryId: Int) {
+        database.categoryDao().deleteStagingCategory(type, categoryId)
         when (type) {
-            "live_tv" -> database.liveTvDao().copyFromLive(categoryId)
-            "movie" -> {
-                database.movieDao().copyFromLive(categoryId)
-                database.movieDao().copyCategoriesFromLive(categoryId)
-            }
-            "series" -> {
-                database.seriesDao().copyFromLive(categoryId)
-                database.seriesDao().copyCategoriesFromLive(categoryId)
-            }
+            "live_tv" -> database.liveTvDao().deleteStagingByCategory(categoryId)
+            "movie" -> database.movieDao().deleteStagingByCategory(categoryId)
+            "series" -> database.seriesDao().deleteStagingByCategory(categoryId)
         }
     }
 

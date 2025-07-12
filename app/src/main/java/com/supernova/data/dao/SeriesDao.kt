@@ -83,6 +83,18 @@ interface SeriesDao {
     )
     suspend fun copyCategoriesFromLive(categoryId: Int?)
 
+    @Query("DELETE FROM series WHERE is_live = 0 AND series_id IN (SELECT series_id FROM series_category WHERE category_id = :categoryId AND is_live = 0)")
+    suspend fun deleteStagingSeriesByCategory(categoryId: Int)
+
+    @Query("DELETE FROM series_category WHERE category_id = :categoryId AND is_live = 0")
+    suspend fun deleteStagingCategoriesByCategory(categoryId: Int)
+
+    @Transaction
+    suspend fun deleteStagingByCategory(categoryId: Int) {
+        deleteStagingSeriesByCategory(categoryId)
+        deleteStagingCategoriesByCategory(categoryId)
+    }
+
     @Query("DELETE FROM series WHERE is_live = 0")
     suspend fun deleteStagingSeries()
 

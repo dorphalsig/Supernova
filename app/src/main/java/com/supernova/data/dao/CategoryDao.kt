@@ -51,6 +51,9 @@ interface CategoryDao {
     )
     suspend fun copyFromLive(type: String, categoryId: Int?)
 
+    @Query("DELETE FROM category WHERE type = :type AND id = :categoryId AND is_live = 0")
+    suspend fun deleteStagingCategory(type: String, categoryId: Int)
+
     @Query("DELETE FROM category WHERE is_live = 0")
     suspend fun deleteStaging()
 

@@ -92,6 +92,18 @@ interface MovieDao {
     )
     suspend fun copyCategoriesFromLive(categoryId: Int?)
 
+    @Query("DELETE FROM movie WHERE is_live = 0 AND movie_id IN (SELECT movie_id FROM movie_category WHERE category_id = :categoryId AND is_live = 0)")
+    suspend fun deleteStagingMoviesByCategory(categoryId: Int)
+
+    @Query("DELETE FROM movie_category WHERE category_id = :categoryId AND is_live = 0")
+    suspend fun deleteStagingCategoriesByCategory(categoryId: Int)
+
+    @Transaction
+    suspend fun deleteStagingByCategory(categoryId: Int) {
+        deleteStagingMoviesByCategory(categoryId)
+        deleteStagingCategoriesByCategory(categoryId)
+    }
+
     @Query("DELETE FROM movie WHERE is_live = 0")
     suspend fun deleteStagingMovies()
 

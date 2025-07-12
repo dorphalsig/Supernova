@@ -11,11 +11,12 @@ import androidx.room.PrimaryKey
         Index("is_live"),
         Index("name"),
         Index("year"),
-        Index("genre")
+        Index("genre"),
+        Index(value = ["series_id", "is_live"], unique = true)
     ]
 )
 data class SeriesEntity(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true) val uid: Long = 0,
     val series_id: Int,
     val num: Int?,
     val name: String,
