@@ -12,6 +12,8 @@
     <string name="set_pin_4_digits">Set PIN (4 digits)</string>
     <string name="pin">PIN</string>
     <string name="confirm_pin">Confirm PIN</string>
+    <string name="enter_pin">Enter PIN</string>
+    <string name="ok">OK</string>
     <string name="save">Save</string>
     <string name="continue_">Continue</string>
     <string name="initial_configuration">Initial Configuration</string>
