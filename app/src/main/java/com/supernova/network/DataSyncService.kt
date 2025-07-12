@@ -6,182 +6,29 @@ import com.google.gson.Gson
 import com.supernova.data.database.SupernovaDatabase
 import androidx.room.withTransaction
 import com.supernova.data.entities.*
-import okhttp3.ResponseBody
 import com.supernova.network.models.*
+import com.supernova.utils.ApiUtils
 import com.supernova.utils.ApiUtils.normalizeUrl
 import com.supernova.utils.ApiUtils.parseTimestamp
 import com.supernova.utils.ApiUtils.takeIfNotBlank
 import com.supernova.utils.ApiUtils.toIntSafely
-import org.xmlpull.v1.XmlPullParser
-import android.util.Xml
-import com.google.gson.stream.JsonReader
-import com.google.gson.stream.JsonToken
-import java.text.SimpleDateFormat
-import java.util.Locale
 import com.supernova.utils.SecureDataStore
+import com.supernova.utils.SecureStorageKeys
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import java.io.InputStreamReader
 
 class DataSyncService(
     private val database: SupernovaDatabase,
-    private val secureStorage: SecureDataStore,
     private val gson: Gson = Gson()
 ) {
     companion object {
         private const val TAG = "DataSyncService"
         private const val UNCATEGORIZED_ID = 999999
         private const val UNCATEGORIZED_NAME = "Uncategorized"
-        private val epgDateFormat = SimpleDateFormat("yyyyMMddHHmmss Z", Locale.US)
-        private const val DEFAULT_BATCH_SIZE = 100
 
     }
 
-    /**
-     * Stream parse JSON array from response body in batches.
-     * Balances memory efficiency with database performance.
-     *
-     * @param responseBody The response body containing JSON array
-     * @param batchSize Number of items to accumulate before processing (default 100)
-     * @param onBatch Callback to process each batch of items
-     * @return Total number of items processed
-     */
-    private suspend inline fun <reified T> batchJsonStream(
-        responseBody: ResponseBody,
-        batchSize: Int = DEFAULT_BATCH_SIZE,
-        onBatch: suspend (List<T>) -> Unit
-    ): Int {
-        var totalProcessed = 0
-        var currentBatch = mutableListOf<T>()
-
-        responseBody.use { body ->
-            JsonReader(InputStreamReader(body.byteStream())).use { reader ->
-                reader.beginArray()
-
-                while (reader.hasNext()) {
-                    try {
-                        when (reader.peek()) {
-                            JsonToken.BEGIN_OBJECT -> {
-                                val item = gson.fromJson<T>(reader, T::class.java)
-                                currentBatch.add(item)
-
-                                // Process batch when it reaches the specified size
-                                if (currentBatch.size >= batchSize) {
-                                    onBatch(currentBatch)
-                                    totalProcessed += currentBatch.size
-                                    currentBatch = mutableListOf()
-                                }
-                            }
-
-                            JsonToken.NULL -> reader.skipValue()
-                            else -> reader.skipValue()
-                        }
-                    } catch (e: Exception) {
-                        Log.e(
-                            TAG,
-                            "Error parsing item at position ${totalProcessed + currentBatch.size}, skipping",
-                            e
-                        )
-                        try {
-                            reader.skipValue()
-                        } catch (skipError: Exception) {
-                            Log.e(TAG, "Error skipping malformed item", skipError)
-                        }
-                    }
-                }
-
-                reader.endArray()
-
-                // Process any remaining items in the last batch
-                if (currentBatch.isNotEmpty()) {
-                    onBatch(currentBatch)
-                    totalProcessed += currentBatch.size
-                }
-            }
-        }
-
-        Log.d(TAG, "Finished parsing. Total items processed: $totalProcessed")
-        return totalProcessed
-    }
-// In DataSyncService.kt
-
-    private suspend fun batchXmlStream(
-        responseBody: ResponseBody,
-        batchSize: Int = DEFAULT_BATCH_SIZE,
-        insertChannels: suspend (List<ChannelEntity>) -> Unit,
-        insertPrograms: suspend (List<EpgEntity>) -> Unit
-    ) {
-        val parser = Xml.newPullParser().apply {
-            setInput(responseBody.byteStream(), null)
-        }
-
-        var event = parser.eventType
-        var currentProgram: EpgEntity? = null
-        var currentChannelId: String? = null
-        var currentChannelName: String? = null
-        val programBatch = mutableListOf<EpgEntity>()
-        val channelBatch = mutableListOf<ChannelEntity>()
-
-        while (event != XmlPullParser.END_DOCUMENT) {
-            when (event) {
-                XmlPullParser.START_TAG -> when (parser.name) {
-                    "channel" -> {
-                        currentChannelId = parser.getAttributeValue(null, "id")
-                        currentChannelName = null
-                    }
-                    "display-name" -> if (currentChannelId != null) {
-                        currentChannelName = parser.nextText()
-                    }
-                    "programme" -> {
-                        val ch = parser.getAttributeValue(null, "channel") ?: ""
-                        val start = parseXmlTvTime(parser.getAttributeValue(null, "start"))
-                        val end = parseXmlTvTime(parser.getAttributeValue(null, "stop"))
-                        currentProgram = if (start != null && end != null) {
-                            EpgEntity(
-                                channel_id = ch,
-                                start = start,
-                                end = end,
-                                title = null,
-                                description = null
-                            )
-                        } else null
-                    }
-                    "title" -> currentProgram = currentProgram?.copy(title = parser.nextText())
-                    "desc" -> currentProgram = currentProgram?.copy(description = parser.nextText())
-                }
-
-                XmlPullParser.END_TAG -> when (parser.name) {
-                    "channel" -> {
-                        currentChannelId?.let { id ->
-                            channelBatch += ChannelEntity(id, currentChannelName)
-                            currentChannelId = null
-                            currentChannelName = null
-
-                            if (channelBatch.size >= batchSize) {
-                                insertChannels(channelBatch.toList())
-                                channelBatch.clear()
-                            }
-                        }
-                    }
-                    "programme" -> {
-                        currentProgram?.let { prog ->
-                            programBatch += prog
-                            currentProgram = null
-
-                            if (programBatch.size >= batchSize) {
-                                insertPrograms(programBatch.toList())
-                                programBatch.clear()
-                            }
-                        }
-                    }
-                }
-            }
-            event = parser.next()
-        }
-
-        if (channelBatch.isNotEmpty()) insertChannels(channelBatch)
-        if (programBatch.isNotEmpty()) insertPrograms(programBatch)
-    }
+    // In DataSyncService.kt
 
 
     suspend fun syncTV(
@@ -205,7 +52,7 @@ class DataSyncService(
                 .insertCategory(CategoryEntity("live_tv", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
             database.liveTvDao().deleteAllChannels()
             // Streaming: map and insert each batch
-            batchJsonStream<LiveTvResponse>(responseBody) { batch ->
+            ApiUtils.batchJsonStream<LiveTvResponse>(this, responseBody) { batch ->
                 val entities = mapLiveStreams(batch)
                 database.liveTvDao().insertChannels(entities) // Insert this batch
             }
@@ -232,7 +79,7 @@ class DataSyncService(
             database.categoryDao()
                 .insertCategory(CategoryEntity("series", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
             database.seriesDao().deleteAllSeries()
-            batchJsonStream<SeriesResponse>(responseBody) { batch ->
+            ApiUtils.batchJsonStream<SeriesResponse>(this, responseBody) { batch ->
                 val (series, seriesCats) = mapSeriesStreams(batch)
                 database.seriesDao().insertSeriesList(series)
                 if (seriesCats.isNotEmpty()) database.seriesDao().insertSeriesCategories(seriesCats)
@@ -252,7 +99,7 @@ class DataSyncService(
 
         val streamResp = apiService.getVodStreams(baseUrl, username, password)
         if (!streamResp.isSuccessful) throw Exception("VOD stream API ${streamResp.code()}")
-        val (movies, movieCats) = mapVodStreams(streamResp.body() ?: emptyList())
+        val responseBody = streamResp.body()!!
 
         database.withTransaction {
             database.categoryDao().deleteCategoriesByType("movie")
@@ -260,12 +107,14 @@ class DataSyncService(
             database.categoryDao()
                 .insertCategory(CategoryEntity("movie", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
             database.movieDao().deleteAllMovies()
-            database.movieDao().insertMovies(movies)
-            if (movieCats.isNotEmpty()) database.movieDao().insertMovieCategories(movieCats)
+            ApiUtils.batchJsonStream<SeriesResponse>(this, responseBody) { batch ->
+                val (movies, moviesCats) = mapSeriesStreams(batch)
+                database.seriesDao().insertSeriesList(movies)
+                if (moviesCats.isNotEmpty()) database.seriesDao().insertSeriesCategories(moviesCats)
+            }
         }
     }
 
-    //@todo this needs to be streamed
     suspend fun syncEPG(
         apiService: ApiService,
         portal: String,
@@ -279,7 +128,10 @@ class DataSyncService(
         database.withTransaction {
             database.epgDao().deleteAllPrograms()
             database.channelDao().deleteAllChannels()
-            batchXmlStream(body, insertChannels = { database.channelDao().insertChannels(it) }, insertPrograms = { database.epgDao().insertPrograms(it) })
+            ApiUtils.batchXmlStream(
+                this, body,
+                insertChannels = { database.channelDao().insertChannels(it) },
+                insertPrograms = { database.epgDao().insertPrograms(it) })
         }
     }
 
@@ -287,9 +139,9 @@ class DataSyncService(
     fun syncAll(): Flow<SyncResult> = flow {
         Log.d(TAG, "Starting sync process")
 
-        val portal = secureStorage.getPortal()
-        val username = secureStorage.getUsername()
-        val password = secureStorage.getPassword()
+        val portal = SecureDataStore.getString(SecureStorageKeys.PORTAL)
+        val username = SecureDataStore.getString(SecureStorageKeys.USERNAME)
+        val password = SecureDataStore.getString(SecureStorageKeys.PASSWORD)
 
         if (portal == null || username == null || password == null) {
             Log.e(
@@ -613,11 +465,4 @@ class DataSyncService(
     }
 
 
-    private fun parseXmlTvTime(value: String?): Long? {
-        return try {
-            value?.let { epgDateFormat.parse(it)?.time }
-        } catch (e: Exception) {
-            null
-        }
-    }
 }

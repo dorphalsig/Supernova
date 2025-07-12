@@ -11,7 +11,6 @@ import com.supernova.network.models.SyncResult
 import com.supernova.utils.SecureDataStore
 import com.supernova.utils.SecureStorageKeys
 import kotlinx.coroutines.flow.last
-import kotlin.collections.set
 
 class DataSyncWorker(
     context: Context,
@@ -29,10 +28,9 @@ class DataSyncWorker(
 
     override suspend fun doWork(): Result {
         Log.d(TAG, "DataSyncWorker started")
-        val secureStorage = SecureDataStore(applicationContext)
         return try {
             val database = SupernovaDatabase.getDatabase(applicationContext)
-            val syncService = DataSyncService(database, secureStorage)
+            val syncService = DataSyncService(database)
 
             Log.d(TAG, "Starting sync process...")
             val finalResult = syncService.syncAll().last()
@@ -40,15 +38,15 @@ class DataSyncWorker(
             when (finalResult) {
                 is SyncResult.Success -> {
                     Log.d(TAG, "Sync completed successfully")
-                    secureStorage.putString(SecureStorageKeys.LAST_SYNC_SUCCESS, true.toString())
-                    secureStorage.putString(SecureStorageKeys.LAST_SYNC_TIME, System.currentTimeMillis().toString())
+                    SecureDataStore.putString(SecureStorageKeys.LAST_SYNC_SUCCESS, true.toString())
+                    SecureDataStore.putString(SecureStorageKeys.LAST_SYNC_TIME, System.currentTimeMillis().toString())
 
                     val outputData = workDataOf(KEY_SYNC_RESULT to "success")
                     Result.success(outputData)
                 }
                 is SyncResult.Error -> {
                     Log.e(TAG, "Sync failed: ${finalResult.message}")
-                    secureStorage.putString(SecureStorageKeys.LAST_SYNC_SUCCESS, false.toString())
+                    SecureDataStore.putString(SecureStorageKeys.LAST_SYNC_SUCCESS, false.toString())
                     val outputData = workDataOf(
                         KEY_SYNC_RESULT to "error",
                         KEY_ERROR_MESSAGE to finalResult.message
@@ -62,7 +60,7 @@ class DataSyncWorker(
             }
         } catch (e: Exception) {
             Log.e(TAG, "DataSyncWorker failed with exception", e)
-            secureStorage.putString(SecureStorageKeys.LAST_SYNC_SUCCESS, false.toString())
+            SecureDataStore.putString(SecureStorageKeys.LAST_SYNC_SUCCESS, false.toString())
             val outputData = workDataOf(
                 KEY_SYNC_RESULT to "error",
                 KEY_ERROR_MESSAGE to (e.message ?: "Unknown error")

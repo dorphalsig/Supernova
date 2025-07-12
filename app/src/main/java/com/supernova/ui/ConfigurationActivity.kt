@@ -26,7 +26,6 @@ import kotlin.collections.set
 class ConfigurationActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityConfigurationBinding
-    private lateinit var secureStorage: SecureDataStore
     private val viewModel: ConfigurationViewModel by viewModels {
         ConfigurationViewModelFactory()
     }
@@ -35,9 +34,6 @@ class ConfigurationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityConfigurationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        secureStorage = SecureDataStore(this)
-
         setupViews()
         observeViewModel()
     }
@@ -55,12 +51,12 @@ class ConfigurationActivity : AppCompatActivity() {
         }
 
         binding.parentalLockCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            lifecycleScope.launch { secureStorage.setParentalLock(isChecked) }
+            lifecycleScope.launch { SecureDataStore.putBoolean(SecureStorageKeys.PARENTAL_LOCK, isChecked) }
         }
 
         // Set initial parental lock state
         lifecycleScope.launch {
-            binding.parentalLockCheckbox.isChecked = secureStorage.isParentalLockEnabled()
+            binding.parentalLockCheckbox.isChecked = SecureDataStore.getBoolean(SecureStorageKeys.PARENTAL_LOCK)
         }
     }
 
@@ -70,9 +66,11 @@ class ConfigurationActivity : AppCompatActivity() {
                 is ApiResult.Loading -> {
                     setLoadingState(result.isLoading)
                 }
+
                 is ApiResult.Success -> {
                     handleSuccessfulTest()
                 }
+
                 is ApiResult.Error -> {
                     val errorMsg = when (result.message) {
                         "AUTHENTICATION_FAILED" -> getString(R.string.authentication_failed_please_check_your_credentials)
@@ -98,7 +96,8 @@ class ConfigurationActivity : AppCompatActivity() {
 
         val usernameValidation = ValidationUtils.validateUsername(username)
         if (usernameValidation.isFailure) {
-            val errorMessage = usernameValidation.exceptionOrNull()?.message ?: getString(R.string.invalid_user)
+            val errorMessage =
+                usernameValidation.exceptionOrNull()?.message ?: getString(R.string.invalid_user)
             binding.usernameInputLayout.error = errorMessage
             return
         }
@@ -106,7 +105,8 @@ class ConfigurationActivity : AppCompatActivity() {
 
         val passwordValidation = ValidationUtils.validatePassword(password)
         if (passwordValidation.isFailure) {
-            val errorMessage = passwordValidation.exceptionOrNull()?.message ?: getString(R.string.invalid_password)
+            val errorMessage = passwordValidation.exceptionOrNull()?.message
+                ?: getString(R.string.invalid_password)
             binding.passwordInputLayout.error = errorMessage
             return
         }
@@ -120,9 +120,9 @@ class ConfigurationActivity : AppCompatActivity() {
     }
 
     suspend fun saveCredentials(portal: String, username: String, password: String) {
-        secureStorage.putString(SecureStorageKeys.PORTAL, portal)
-        secureStorage.putString(SecureStorageKeys.USERNAME, username)
-        secureStorage.putString(SecureStorageKeys.PASSWORD, password)
+        SecureDataStore.putString(SecureStorageKeys.PORTAL, portal)
+        SecureDataStore.putString(SecureStorageKeys.USERNAME, username)
+        SecureDataStore.putString(SecureStorageKeys.PASSWORD, password)
     }
 
 
@@ -139,7 +139,7 @@ class ConfigurationActivity : AppCompatActivity() {
             val profileCount = db.profileDao().getProfileCount()
             val lockedCount = db.profileDao().getLockedProfileCount()
 
-            val parental = secureStorage.isParentalLockEnabled()
+            val parental = SecureDataStore.getBoolean(SecureStorageKeys.PARENTAL_LOCK)
 
             val next = if (profileCount == 0 || (parental && lockedCount == 0)) {
                 Intent(this@ConfigurationActivity, ProfileCreationActivity::class.java)

@@ -18,11 +18,6 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 
-/**
- * Replacement for the previous [SecureStorage] class using an encrypted Jetpack
- * DataStore backed by Tink. A hardware-backed key is used when available with
- * a software fallback.
- */
 object SecureDataStore {
     private lateinit var gson: Gson
     private lateinit var aead: Aead
@@ -74,26 +69,6 @@ object SecureDataStore {
 
     suspend fun getLong(key: String): Long = getString(key)?.toLongOrNull() ?: 0L
 
-    suspend fun getPortal(): String? = getString(SecureStorageKeys.PORTAL)
-    suspend fun getUsername(): String? = getString(SecureStorageKeys.USERNAME)
-    suspend fun getPassword(): String? = getString(SecureStorageKeys.PASSWORD)
-    suspend fun isConfigured(): Boolean = getBoolean(SecureStorageKeys.IS_CONFIGURED)
-
-    suspend fun setParentalLock(enabled: Boolean) = putBoolean(SecureStorageKeys.PARENTAL_LOCK, enabled)
-
-    suspend fun isParentalLockEnabled(): Boolean = getBoolean(SecureStorageKeys.PARENTAL_LOCK)
-
-    suspend fun setLastSyncResult(success: Boolean) {
-        checkInit()
-        dataStore.updateData { prefs ->
-            prefs.toMutableMap().apply {
-                this[SecureStorageKeys.LAST_SYNC_SUCCESS] = success.toString()
-                this[SecureStorageKeys.LAST_SYNC_TIME] = System.currentTimeMillis().toString()
-            }
-        }
-    }
-
-    suspend fun isLastSyncSuccessful(): Boolean = getBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS)
 }
 
 private class SecurePrefsSerializer(

@@ -7,17 +7,16 @@ import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.supernova.utils.SecureDataStore
+import com.supernova.utils.SecureDataStore.getBoolean
+import com.supernova.utils.SecureStorageKeys
 import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
 
-    private lateinit var secureStorage: SecureDataStore
     private val splashTimeOut = 3000L // 3 seconds
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        secureStorage = SecureDataStore(this)
 
         Handler(Looper.getMainLooper()).postDelayed({
             lifecycleScope.launch { navigateToNextScreen() }
@@ -25,7 +24,7 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private suspend fun navigateToNextScreen() {
-        val configured = secureStorage.isConfigured()
+        val configured = getBoolean(SecureStorageKeys.IS_CONFIGURED)
         val lastSuccess = getBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS)
         val intent = if (!configured || !lastSuccess) {
             Intent(this, ConfigurationActivity::class.java)

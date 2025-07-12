@@ -1,6 +1,5 @@
 package com.supernova.ui
 
-import android.graphics.BitmapFactory
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -8,16 +7,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import coil.request.ErrorResult
-import coil.request.ImageRequest
-import coil.request.SuccessResult
 import coil.transform.CircleCropTransformation
 import com.supernova.databinding.ItemAvatarBinding
-import com.supernova.network.AvatarService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 private class AvatarDiffCallback(
     private val oldList: List<String>,
@@ -81,32 +72,36 @@ class AvatarAdapter(
         private val binding: ItemAvatarBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(avatarUrl: String, isSelected: Boolean) {
-            Log.d(TAG, "Binding avatar: $avatarUrl")
-
-            // Show placeholder while loading
-            binding.avatarImageView.setImageResource(android.R.drawable.ic_menu_gallery)
-
-            // Download and display
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    val avatarService = AvatarService.create()
-                    val response = avatarService.downloadAvatar(avatarUrl)
-                    if (response.isSuccessful) {
-                        val bytes = response.body()?.bytes()
-                        if (bytes != null) {
-                            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                            withContext(Dispatchers.Main) {
-                                binding.avatarImageView.setImageBitmap(bitmap)
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to load avatar", e)
+        init {
+            binding.avatarCard.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val previousPosition = selectedPosition
+                    selectedPosition = position
+                    notifyItemChanged(previousPosition)
+                    notifyItemChanged(position)
+                    onAvatarClick(avatars[position])
                 }
             }
+        }
 
-            // Keep your click handlers...
+        fun bind(avatarUrl: String, isSelected: Boolean) {
+            Log.d(TAG, "Binding avatar: $avatarUrl, selected: $isSelected")
+
+            // Load image using Coil
+            binding.avatarImageView.load(avatarUrl) {
+                placeholder(android.R.drawable.ic_menu_gallery)
+                error(android.R.drawable.ic_menu_close_clear_cancel)
+                crossfade(true)
+                // Apply circle crop transformation to match the avatar style
+                transformations(CircleCropTransformation())
+            }
+
+            // Update selection state
+            binding.selectionIndicator.visibility = if (isSelected) View.VISIBLE else View.GONE
+
+            // Update card state for TV focus
+            binding.avatarCard.isSelected = isSelected
         }
     }
 }

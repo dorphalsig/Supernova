@@ -24,7 +24,6 @@ import kotlin.random.Random
 class LoadingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoadingBinding
-    private lateinit var secureStorage: SecureDataStore
     private val handler = Handler(Looper.getMainLooper())
     private var phraseRotationRunnable: Runnable? = null
     private val minimumDisplayTime = 10000L // 10 seconds
@@ -39,8 +38,6 @@ class LoadingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoadingBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        secureStorage = SecureDataStore(this)
         startTime = System.currentTimeMillis()
 
         startPhraseRotation()
@@ -64,7 +61,7 @@ class LoadingActivity : AppCompatActivity() {
 
     private fun waitForSyncCompletion() {
         lifecycleScope.launch {
-            val wasSyncedBefore =  secureStorage.getBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS)
+            val wasSyncedBefore = SecureDataStore.getBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS)
             val workInfo = withTimeoutOrNull(timeoutMillis) {
                 var result: WorkInfo? = null
                 while (result == null) {

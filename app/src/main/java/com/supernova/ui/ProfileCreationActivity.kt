@@ -12,16 +12,15 @@ import com.supernova.data.database.SupernovaDatabase
 import com.supernova.data.entities.ProfileEntity
 import com.supernova.databinding.ActivityProfileCreationBinding
 import com.supernova.network.AvatarService
-import com.supernova.ui.LoadingActivity
 import com.supernova.utils.SecureDataStore
+import com.supernova.utils.SecureDataStore.getBoolean
+import com.supernova.utils.SecureStorageKeys
 import com.supernova.utils.ValidationUtils
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class ProfileCreationActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileCreationBinding
-    private lateinit var secureStorage: SecureDataStore
     private lateinit var avatarAdapter: AvatarAdapter
     private val viewModel: ProfileCreationViewModel by viewModels {
         ProfileCreationViewModelFactory(SupernovaDatabase.getDatabase(this))
@@ -33,9 +32,6 @@ class ProfileCreationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileCreationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        secureStorage = SecureDataStore(this)
-
         setupViews()
         setupAvatarGrid()
         observeViewModel()
@@ -49,7 +45,7 @@ class ProfileCreationActivity : AppCompatActivity() {
 
         // Show/hide PIN section based on parental lock setting
         lifecycleScope.launch {
-            if (secureStorage.isParentalLockEnabled()) {
+            if (SecureDataStore.getBoolean(SecureStorageKeys.PARENTAL_LOCK)) {
                 binding.pinSection.visibility = View.VISIBLE
             } else {
                 binding.pinSection.visibility = View.GONE
@@ -81,16 +77,19 @@ class ProfileCreationActivity : AppCompatActivity() {
                         if (getBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS)) {
                             navigateToProfileSelection()
                         } else {
-                            val intent = Intent(this@ProfileCreationActivity, LoadingActivity::class.java)
+                            val intent =
+                                Intent(this@ProfileCreationActivity, LoadingActivity::class.java)
                             startActivity(intent)
                             finish()
                         }
                     }
                 }
+
                 is ProfileCreationResult.Error -> {
                     showError(result.message)
                     setLoadingState(false)
                 }
+
                 is ProfileCreationResult.Loading -> {
                     setLoadingState(true)
                 }
@@ -124,7 +123,9 @@ class ProfileCreationActivity : AppCompatActivity() {
 
         // Handle PIN if parental lock is enabled
         var pin: Int? = null
-        val parentalEnabled = kotlinx.coroutines.runBlocking { secureStorage.isParentalLockEnabled() }
+        val parentalEnabled = kotlinx.coroutines.runBlocking {
+            getBoolean(SecureStorageKeys.PARENTAL_LOCK)
+        }
         if (parentalEnabled) {
             val pinText = binding.pinEditText.text.toString()
             val confirmPinText = binding.confirmPinEditText.text.toString()
@@ -194,7 +195,8 @@ class ProfileCreationViewModel(private val database: SupernovaDatabase) : ViewMo
                 database.profileDao().insertProfile(profile)
                 _profileCreation.value = ProfileCreationResult.Success
             } catch (e: Exception) {
-                _profileCreation.value = ProfileCreationResult.Error(e.message ?: "Failed to create profile")
+                _profileCreation.value =
+                    ProfileCreationResult.Error(e.message ?: "Failed to create profile")
             }
         }
     }
