@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import coil.load
 import com.google.android.material.snackbar.Snackbar
 import com.supernova.R
 import com.supernova.databinding.ActivityLoadingBinding
@@ -39,6 +40,11 @@ class LoadingActivity : AppCompatActivity() {
         binding = ActivityLoadingBinding.inflate(layoutInflater)
         setContentView(binding.root)
         startTime = System.currentTimeMillis()
+
+        // Load GIF using Coil
+        binding.loadingAnimationImageView.load(R.drawable.loading_animation) {
+            crossfade(true)
+        }
 
         startPhraseRotation()
         waitForSyncCompletion()
