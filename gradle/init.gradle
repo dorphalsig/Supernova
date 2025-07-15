@@ -1,0 +1,36 @@
+// Gradle Init Script for Containerized Environment
+// Path: gradle/init.gradle
+
+// Configure build cache to store in git-tracked directory
+settingsEvaluated { settings ->
+    settings.buildCache {
+        local {
+            directory = new File(settings.rootDir, 'gradle-cache/build-cache')
+            removeUnusedEntriesAfterDays = 30
+        }
+    }
+}
+
+// Configure for containerized execution - disable build scan
+gradle.startParameter.with {
+    // Disable build scan (replaces --no-scan)
+    buildScan = false
+    noBuildScan = true
+}
+
+// Memory optimization for compilation tasks
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.fork = true
+        options.forkOptions.jvmArgs = ['-Xmx2g']
+    }
+
+    // Kotlin compilation optimized for in-process execution
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions {
+            freeCompilerArgs += ["-Xuse-k2"]
+        }
+        // Align with runtime flag: in-process compilation
+        compilerExecutionStrategy = org.jetbrains.kotlin.gradle.tasks.KotlinCompilerExecutionStrategy.IN_PROCESS
+    }
+}
