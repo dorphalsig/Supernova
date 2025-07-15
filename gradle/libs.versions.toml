@@ -33,6 +33,10 @@ kotlin-test = "1.9.20"
 kotlinx-coroutines-test = "1.10.2"
 androidx-junit = "1.2.1"
 androidx-espresso = "3.6.1"
+mockk = "1.14.4"
+coreTesting = "2.2.0"
+androidxTestCore = "1.6.1"
+robolectric = "4.15.1"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
@@ -69,6 +73,10 @@ kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.re
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-junit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+androidx-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "coreTesting" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

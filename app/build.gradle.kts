@@ -51,6 +51,10 @@ android {
         abortOnError = false
         warningsAsErrors = false
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -116,8 +120,15 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockk)
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.robolectric)
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.junit)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.robolectric)
 
     // Android testing
     androidTestImplementation(libs.androidx.junit)
