@@ -102,12 +102,9 @@ Verify:
 * Modules included in `settings.gradle`
 
 ## 10. Build & Test Automation Feedback
-- Error Log: `/tmp/build_error_context.md` is a  is a Markdown-formatted error report with 5 lines of context before and after each error.
-- Full Log: `/tmp/gradle_output.txt` is the complete stdout/stderr
-Tasks:
-1. **Lint First**: Run `./build.sh lint` make sure to address all issues before proceeding. Repeat until no lint issues remain.
-2. **Gradle Invocation**: run `./build.sh` with no redirects or pipes.
-5. **Solve issues**: Address all issues in the error log, ensuring no errors remain. and re-run the build. Repeat until no errors are present.
+1. **Full Build**: Run `./build.sh assembleDebug`  **WITH NO REDIRECTS OR PIPES**.
+2. **Error Analysis**: Review the `/tmp/build_error_context.md` report
+3. **Fix and Repeat**: Address all errors and re-run until successful
 
 ## 11. Worker Schedules & Success Criteria
 See Sync Architecture Updates.md for details depending on your task.
