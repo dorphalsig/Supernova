@@ -1,0 +1,1 @@
+- [2025-07-15T16:39:36+00:00] Added ProviderConfig entity and DAO with Room annotations. Updated SupernovaDatabase to include new entity and DAO, bumped version. Ensured gradle wrapper executable and baseline lint run.

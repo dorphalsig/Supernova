@@ -13,6 +13,7 @@ import com.supernova.data.dao.LiveTvDao
 import com.supernova.data.dao.SeriesDao
 import com.supernova.data.dao.EpgDao
 import com.supernova.data.dao.ChannelDao
+import com.supernova.data.dao.ProviderConfigDao
 import com.supernova.data.entities.ProfileEntity
 import com.supernova.data.entities.CategoryEntity
 import com.supernova.data.entities.MovieEntity
@@ -22,6 +23,7 @@ import com.supernova.data.entities.SeriesEntity
 import com.supernova.data.entities.SeriesCategoryEntity
 import com.supernova.data.entities.EpgEntity
 import com.supernova.data.entities.ChannelEntity
+import com.supernova.data.entities.ProviderConfigEntity
 import com.supernova.network.AvatarService
 
 @Database(
@@ -34,9 +36,10 @@ import com.supernova.network.AvatarService
         SeriesEntity::class,
         SeriesCategoryEntity::class,
         ChannelEntity::class,
-        EpgEntity::class
+        EpgEntity::class,
+        ProviderConfigEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class SupernovaDatabase : RoomDatabase() {
@@ -48,6 +51,7 @@ abstract class SupernovaDatabase : RoomDatabase() {
     abstract fun seriesDao(): SeriesDao
     abstract fun channelDao(): ChannelDao
     abstract fun epgDao(): EpgDao
+    abstract fun providerConfigDao(): ProviderConfigDao
 
     companion object {
         @Volatile

@@ -15,4 +15,12 @@
 .cxx
 local.properties
 /app/lint-baseline.xml
+android/
+native/
+notifications/
+wrapper/
+caches/
+daemon/
+kotlin-profile/
+.tmp/
 !gradle-cache/
