@@ -45,16 +45,6 @@
 * MVVM + Repository + Use-Case layering
 * Single source of truth: DB ← Worker ← ViewModel
 
-### 2.4 Sync and Atomic Swap Logic
-
-See Sync Architecture Updates.md for details depending on your task.
-- Section 3. Live Stream Sync Flow
-- Section 4. XMLTV EPG Sync Flow
-- Section 5. Error Handling & Reporting
-- Section 6. Account & Worker Lifecycle
-- Section 7. FTS Index Refresh
-- Section 8. TMDB Enrichment
-
 ## 3. Dead Code Policy
 
 Remove unused or deprecated code immediately. Regular lint and static analysis must identify and eliminate dead code.
@@ -67,17 +57,7 @@ Automate the following pre-merge checks:
 * Lint checks
 * Minimum code coverage of 70%
 
-## 5. Pull Request Guidelines
-
-Every PR must include:
-
-* Clear description
-* References (tickets/issues)
-* Screenshots for UI changes
-* Feedback log attachment
-* Minimal, focused scope
-
-## 6. Unit Tests
+## 5. Unit Tests
 
 Use MockK for ViewModel tests and an in-memory Room DB for repository tests. Target at least 70% coverage.
 
@@ -86,6 +66,7 @@ Use MockK for ViewModel tests and an in-memory Room DB for repository tests. Tar
 Ensure D-pad navigation across all screens; define `nextFocus*` attributes in XML or Compose.
 
 ## 8. Feedback Log Requirements
+Before committing, add all files under ./gradle-cache
 Commit titles should be: Task - Wave - Prompt #
 Each commit must include the following in the commit message:
 * A summary of changes, issues encountered, and resolutions.
