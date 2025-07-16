@@ -7,7 +7,7 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.supernova.data.database.SupernovaDatabase
 import com.supernova.network.DataSyncService
-import com.supernova.network.models.SyncResult
+import SyncResult
 import com.supernova.utils.SecureDataStore
 import com.supernova.utils.SecureStorageKeys
 import kotlinx.coroutines.flow.last
