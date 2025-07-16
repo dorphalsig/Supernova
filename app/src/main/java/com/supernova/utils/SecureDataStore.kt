@@ -22,7 +22,7 @@ object SecureDataStore {
     private lateinit var gson: Gson
     private lateinit var aead: Aead
     private lateinit var dataStore: DataStore<MutableMap<String, String>>
-    private var initialized = false
+    var initialized = false
 
     fun init(context: Context) {
         if (initialized) return

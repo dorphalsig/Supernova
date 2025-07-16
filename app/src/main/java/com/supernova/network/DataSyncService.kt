@@ -1,5 +1,6 @@
 package com.supernova.network
 
+import SyncResult
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.google.gson.Gson

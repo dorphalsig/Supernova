@@ -88,7 +88,7 @@ object ApiUtils {
             is Long -> this.toInt()
             is Float -> this.toInt()
             is Double -> this.toInt()
-            is String -> this.toIntSafely()
+            is String -> this.toIntOrNull()
             else -> null
         }
     }

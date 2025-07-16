@@ -88,7 +88,8 @@ Ensure D-pad navigation across all screens; define `nextFocus*` attributes in XM
 ## 8. Feedback Log Requirements
 
 Maintain `codex_build_log.md` with timestamped entries, actions, outcomes, and commit conventions.
-
+Format for entries:
+```# YYYY-MM-DD HH:MM — branch - message```
 additionally provide direct feedback on the task with the same information added to the md
 
 ## 9. Pre-Run Environment Checks
