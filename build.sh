@@ -63,6 +63,11 @@ awk -v pat="$ERROR_PATTERNS" '
   fi
 } > "$REPORT"
 
+if [ -d "gradle-cache" ]; then
+    git add gradle-cache/
+fi
+git commit "$@"
+
 # Feedback log (append result, if file is writable)
 if [[ -w codex_build_log.md ]]; then
   status="FAILURE"

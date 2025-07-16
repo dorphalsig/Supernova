@@ -23,4 +23,3 @@ caches/
 daemon/
 kotlin-profile/
 .tmp/
-!gradle-cache/

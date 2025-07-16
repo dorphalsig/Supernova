@@ -103,7 +103,7 @@ Verify:
 * Modules included in `settings.gradle`
 
 ## 10. Build & Test Automation Feedback
-1. **Full Build**: Run `./build.sh assembleDebug`  **WITH NO REDIRECTS OR PIPES**.
+1. **Full Build**: Run `./build.sh assembleDebug` $1 **WITH NO REDIRECTS OR PIPES**.
 2. **Error Analysis**: Review the `/tmp/build_error_context.md` report
 3. **Fix and Repeat**: Address all errors and re-run until successful
 

@@ -18,6 +18,12 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+// Build cache configuration
+buildCache {
+    local {
+        directory = File(rootDir, "gradle-cache")
+    }
+}
 
 rootProject.name = "Supernova"
 include(":app")
