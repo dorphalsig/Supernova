@@ -66,7 +66,9 @@ Use MockK for ViewModel tests and an in-memory Room DB for repository tests. Tar
 Ensure D-pad navigation across all screens; define `nextFocus*` attributes in XML or Compose.
 
 ## 8. Feedback Log Requirements
-Before committing, add all files under ./gradle-cache
+
+Before committing:
+  * run git add -A ./gradle-cache
 Commit titles should be: Task - Wave - Prompt #
 Each commit must include the following in the commit message:
 * A summary of changes, issues encountered, and resolutions.
