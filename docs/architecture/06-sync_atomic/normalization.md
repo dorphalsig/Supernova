@@ -1,0 +1,4 @@
+- Title/category normalization: strip punctuation, diacritics, collapse whitespace, lowercase, remove parenthetical years, drop prefixes ("Live", etc.)
+- Channel names fallback: use raw name if cleaned name empty
+- Category mapping: static provider->Category.type, else "uncategorized"
+- Matching: title+year exact, then fuzzy, then skip (mark tmdbSyncedAt)

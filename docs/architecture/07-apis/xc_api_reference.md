@@ -1,0 +1,4 @@
+- All endpoints: player_api.php (auth, live/vod/series categories, streams, EPG)
+- Auth required for all, JSON streaming responses
+- See full list of endpoints (auth, categories, content lists, content details, EPG, streams, M3U playlist)
+- Sample responses in original document (move JSON examples to /examples/ for minimal base)

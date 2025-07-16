@@ -1,0 +1,3 @@
+- Standard api.themoviedb.org/3 endpoints (trending, detail, search, keywords, recommendations, genres)
+- Auth: API key required (param or bearer header)
+- Key fields: id, title/name, release

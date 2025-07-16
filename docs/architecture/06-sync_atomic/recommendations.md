@@ -1,0 +1,4 @@
+- Weekly updates, local catalog only
+- "Favorites" = Reaction(reactionType=favorite)
+- "Continue Watching" = WatchHistory.progress >5%
+- Show as rails in home UI

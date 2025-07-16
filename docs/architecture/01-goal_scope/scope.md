@@ -1,0 +1,4 @@
+- XC API-compatible provider support.
+- All data lives in local Room DB.
+- Sync and FTS search are core features.
+- Minimal server infrastructure.

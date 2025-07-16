@@ -1,0 +1,2 @@
+- Live/Content sync: every 12h (WorkManager)
+- EPG: once per day

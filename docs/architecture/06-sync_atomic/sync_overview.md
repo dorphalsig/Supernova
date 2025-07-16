@@ -1,0 +1,6 @@
+- Parallel syncs (WorkManager)
+- XC API ingest: categories split in 5 buckets, parsed in parallel
+- EPG: 24h window atomic swap; internal/external
+- EPG Channel Map: automated match if confidence >=0.8; low confidence triggers admin flag (future)
+- Unmatched channels: label as "Unknown Channel"
+- TMDB: Enrich streams post-ingest, fill missing metadata

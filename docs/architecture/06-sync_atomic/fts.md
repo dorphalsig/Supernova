@@ -1,0 +1,5 @@
+- On-device Room FTS4: StreamFts, EpgProgrammeFts
+- Search normalization: same pipeline as content
+- Result sections: "On-Demand", "Live Channels", "Episodes"
+- Ranking: boost exact, fuzzy by edit distance, live content boost if airing soon
+- Voice: Android Speech API → normalization → DAO query

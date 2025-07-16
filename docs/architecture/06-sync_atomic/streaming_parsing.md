@@ -1,0 +1,2 @@
+- Streaming JSON parsing: Gson/Moshi + JsonReader
+- Encoding: UTF-8 preferred, fallback to HTTP charset

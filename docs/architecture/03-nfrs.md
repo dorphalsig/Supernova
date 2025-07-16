@@ -1,0 +1,7 @@
+- Responsive D-pad/focus navigation
+- Streaming JSON ingest (constant memory)
+- Robust to partial/malformed provider data
+- Minimal GDPR/consent (no crash on missing info)
+- Sync and DB encoding always UTF-8 (fallback: HTTP charset)
+- Room FTS4 only; never FTS5
+- No EPG grid in MVP

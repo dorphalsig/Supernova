@@ -1,0 +1,3 @@
+- Provider-agnostic IPTV client for Android TV (incl. Chromecast, Fire TV, etc).
+- Fast/resilient catalog/EPG ingest, on-device search, personalized recommendations.
+- All syncs, parsing, validation must be memory- and token-efficient.

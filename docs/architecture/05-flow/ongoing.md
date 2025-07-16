@@ -1,0 +1,2 @@
+- Time-based syncs with atomic table swap
+- Show stale data if sync/network fails (visual indicator for last sync)

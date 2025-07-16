@@ -1,0 +1,5 @@
+- Concurrency: Kotlin Coroutines, 5 parallel tasks for ingest
+- Error logging: Log.e per failed category
+- User notifications for failures
+- Retry strategy: WorkManager exponential backoff (1m–1h), keep last successful data, show stale
+- Fallback: keep last Room data, visual indicator, timestamp

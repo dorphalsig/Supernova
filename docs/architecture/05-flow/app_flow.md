@@ -1,0 +1,7 @@
+- Core States: Configuration, Synchronization, Validation, Profiles, Host Change
+- Navigation logic for Splash, Config, Profile Selection/Creation, Loading
+- Sync needed before profiles available
+- Avatar options preloaded for profile creation
+- Full-screen error + retry on network issues
+- Parental lock gate for profiles
+- All UI uses local Room DB
