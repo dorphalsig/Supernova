@@ -1,6 +1,6 @@
 package com.supernova.network
 
-import SyncResult
+import com.supernova.network.models.SyncResult
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.google.gson.Gson
@@ -8,6 +8,7 @@ import com.supernova.data.database.SupernovaDatabase
 import androidx.room.withTransaction
 import com.supernova.data.entities.*
 import com.supernova.network.models.*
+import com.google.gson.stream.MalformedJsonException
 import com.supernova.utils.ApiUtils
 import com.supernova.utils.ApiUtils.normalizeUrl
 import com.supernova.utils.ApiUtils.parseTimestamp
@@ -53,9 +54,13 @@ class DataSyncService(
                 .insertCategory(CategoryEntity("live_tv", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
             database.liveTvDao().deleteAllChannels()
             // Streaming: map and insert each batch
-            ApiUtils.batchJsonStream<LiveTvResponse>(this, responseBody) { batch ->
-                val entities = mapLiveStreams(batch)
-                database.liveTvDao().insertChannels(entities) // Insert this batch
+            try {
+                ApiUtils.batchJsonStream<LiveTvResponse>(this, responseBody) { batch ->
+                    val entities = mapLiveStreams(batch)
+                    database.liveTvDao().insertChannels(entities)
+                }
+            } catch (e: MalformedJsonException) {
+                throw Exception("Malformed live TV response")
             }
         }
     }
@@ -80,10 +85,14 @@ class DataSyncService(
             database.categoryDao()
                 .insertCategory(CategoryEntity("series", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
             database.seriesDao().deleteAllSeries()
-            ApiUtils.batchJsonStream<SeriesResponse>(this, responseBody) { batch ->
-                val (series, seriesCats) = mapSeriesStreams(batch)
-                database.seriesDao().insertSeriesList(series)
-                if (seriesCats.isNotEmpty()) database.seriesDao().insertSeriesCategories(seriesCats)
+            try {
+                ApiUtils.batchJsonStream<SeriesResponse>(this, responseBody) { batch ->
+                    val (series, seriesCats) = mapSeriesStreams(batch)
+                    database.seriesDao().insertSeriesList(series)
+                    if (seriesCats.isNotEmpty()) database.seriesDao().insertSeriesCategories(seriesCats)
+                }
+            } catch (e: MalformedJsonException) {
+                throw Exception("Malformed series response")
             }
         }
     }
@@ -108,10 +117,14 @@ class DataSyncService(
             database.categoryDao()
                 .insertCategory(CategoryEntity("movie", UNCATEGORIZED_ID, UNCATEGORIZED_NAME))
             database.movieDao().deleteAllMovies()
-            ApiUtils.batchJsonStream<SeriesResponse>(this, responseBody) { batch ->
-                val (movies, moviesCats) = mapSeriesStreams(batch)
-                database.seriesDao().insertSeriesList(movies)
-                if (moviesCats.isNotEmpty()) database.seriesDao().insertSeriesCategories(moviesCats)
+            try {
+                ApiUtils.batchJsonStream<VodResponse>(this, responseBody) { batch ->
+                    val (movies, movieCats) = mapVodStreams(batch)
+                    database.movieDao().insertMovies(movies)
+                    if (movieCats.isNotEmpty()) database.movieDao().insertMovieCategories(movieCats)
+                }
+            } catch (e: MalformedJsonException) {
+                throw Exception("Malformed movie response")
             }
         }
     }
