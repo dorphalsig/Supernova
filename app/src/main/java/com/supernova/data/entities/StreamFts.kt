@@ -3,10 +3,12 @@ package com.supernova.data.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Fts4
+import androidx.room.PrimaryKey
 
 @Fts4
 @Entity(tableName = "stream_fts")
 data class StreamFts(
+    @PrimaryKey
     @ColumnInfo(name = "rowid")
     val stream_id: Int,
     val title: String?,
