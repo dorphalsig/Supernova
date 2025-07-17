@@ -69,6 +69,11 @@ object SecureDataStore {
 
     suspend fun getLong(key: String): Long = getString(key)?.toLongOrNull() ?: 0L
 
+    suspend fun clear() {
+        checkInit()
+        dataStore.updateData { mutableMapOf() }
+    }
+
 }
 
 private class SecurePrefsSerializer(
