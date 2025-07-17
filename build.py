@@ -14,8 +14,6 @@ def keep_alive(proc):
         time.sleep(60)
 
 
-ka_thread = threading.Thread(target=keep_alive, args=(proc,), daemon=True)
-ka_thread.start()
 
 BUILD_CMD = ["./gradlew"] + sys.argv[1:]
 LOGFILE = Path("/tmp/gradle_output.txt")
@@ -32,6 +30,9 @@ with LOGFILE.open("w", encoding="utf-8", errors="replace") as log:
         bufsize=1,
         universal_newlines=True,
     )
+    ka_thread = threading.Thread(target=keep_alive, args=(proc,), daemon=True)
+    ka_thread.start()
+
     last_task = ""
     lines = []
     try:
