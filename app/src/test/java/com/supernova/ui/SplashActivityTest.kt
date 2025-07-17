@@ -91,7 +91,9 @@ class SplashActivityTest {
         SecureDataStore.putBoolean(SecureStorageKeys.IS_CONFIGURED, true)
         SecureDataStore.putBoolean(SecureStorageKeys.LAST_SYNC_SUCCESS, true)
         val db = SupernovaDatabase.getDatabase(context)
-        db.profileDao().insertProfile(ProfileEntity(name = "Test"))
+        db.profileDao().insertProfile(
+            ProfileEntity(name = "Test", avatar = "http://example.com/avatar.jpg")
+        )
         val controller = Robolectric.buildActivity(SplashActivity::class.java).setup()
         Shadows.shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(3))
         assertEquals(
