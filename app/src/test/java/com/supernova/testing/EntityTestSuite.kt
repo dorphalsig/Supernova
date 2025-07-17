@@ -2,7 +2,8 @@ package com.supernova.testing
 
 import android.content.Context
 import androidx.room.Room
-import androidx.test.core.app.ApplicationProvider
+import io.mockk.every
+import io.mockk.mockk
 import com.supernova.data.database.SupernovaDatabase
 import org.junit.After
 import org.junit.Before
@@ -20,7 +21,9 @@ abstract class EntityTestSuite {
     /** Create the in-memory database for tests. */
     @Before
     open fun setUp() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
+        // Mock a minimal Context for Room
+        val context = mockk<Context>(relaxed = true)
+        every { context.applicationContext } returns context
         db = Room.inMemoryDatabaseBuilder(context, SupernovaDatabase::class.java)
             .allowMainThreadQueries()
             .build()
