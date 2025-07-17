@@ -12,7 +12,7 @@ plugins {
 
 android {
     namespace = "com.supernova"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.supernova"

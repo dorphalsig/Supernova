@@ -1,11 +1,11 @@
 package com.supernova.data
 
-import org.robolectric.RobolectricTestRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.supernova.data.dao.ProviderConfigDao
-import com.supernova.testing.EntityTestSuite
 import com.supernova.testing.AssertionUtils.assertValid
 import com.supernova.testing.DbPerformanceUtils.explainQueryPlan
 import com.supernova.testing.factories.ProviderConfigFactory
+import com.supernova.testing.InstrumentedTestSuite
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
@@ -14,10 +14,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Tests for [ProviderConfigDao] CRUD operations and index usage.
+ * Instrumented tests for [ProviderConfigDao] CRUD operations and index usage.
  */
-@RunWith(RobolectricTestRunner::class)
-class ProviderConfigDaoTest : EntityTestSuite() {
+@RunWith(AndroidJUnit4::class)
+class ProviderConfigDaoInstrumentedTest : InstrumentedTestSuite() {
 
     private lateinit var dao: ProviderConfigDao
 
