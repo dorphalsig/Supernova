@@ -14,9 +14,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.supernova.home.HomeUiState
+import com.supernova.home.ContentRail
 import com.supernova.ui.components.FocusableButton
 import com.supernova.ui.components.LoadingSpinner
 import com.supernova.ui.components.MediaCard
+import com.supernova.data.entities.StreamEntity
 
 @Composable
 fun HomeScreen(
@@ -26,13 +29,10 @@ fun HomeScreen(
     onProfileClicked: () -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val uiState by viewModel.state.collectAsState()
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadHome()
-        focusRequester.requestFocus()
-    }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     Column(
         modifier = Modifier
@@ -55,39 +55,27 @@ fun HomeScreen(
             }
         }
 
-        if (state.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                LoadingSpinner()
+        when (val state = uiState) {
+            HomeUiState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LoadingSpinner()
+                }
+                return
             }
-            return
+            is HomeUiState.Error -> {
+                Text("Error: ${state.message}")
+            }
+            is HomeUiState.Success -> {
+                state.rails.forEach { rail ->
+                    ContentRail(
+                        title = rail.title,
+                        items = rail.items.map { it.toMediaItem() },
+                        onSeeAll = { onRailExpanded(rail.title) },
+                        card = { item -> TrendingMediaCard(item) { onContentSelected("stream", item.id) } }
+                    )
+                }
+            }
         }
-
-        ContentRail(
-            title = "Continue Watching",
-            items = state.continueWatching,
-            onSeeAll = { onRailExpanded("continue") },
-            card = { item ->
-                ContinueWatchingCard(item) { onContentSelected("stream", item.id) }
-            }
-        )
-        ContentRail(
-            title = "Trending Movies",
-            items = state.trendingMovies,
-            onSeeAll = { onRailExpanded("movies") },
-            card = { item -> TrendingMediaCard(item) { onContentSelected("movie", item.id) } }
-        )
-        ContentRail(
-            title = "Trending Series",
-            items = state.trendingSeries,
-            onSeeAll = { onRailExpanded("series") },
-            card = { item -> TrendingMediaCard(item) { onContentSelected("series", item.id) } }
-        )
-        ContentRail(
-            title = "For You",
-            items = state.forYou,
-            onSeeAll = { onRailExpanded("for_you") },
-            card = { item -> TrendingMediaCard(item) { onContentSelected("movie", item.id) } }
-        )
     }
 }
 
@@ -157,3 +145,9 @@ fun ContinueWatchingCard(item: MediaItem, onClick: () -> Unit) {
 fun TrendingMediaCard(item: MediaItem, onClick: () -> Unit) {
     MediaCard(title = item.title, imageUrl = item.posterUrl, onClick = onClick)
 }
+
+private fun StreamEntity.toMediaItem() = MediaItem(
+    id = stream_id,
+    title = title ?: "Unknown",
+    posterUrl = thumbnail_url
+)

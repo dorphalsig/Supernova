@@ -16,8 +16,10 @@ import com.supernova.data.dao.StreamDao
 import com.supernova.data.dao.SeriesDao
 import com.supernova.data.dao.EpgProgrammeDao
 import com.supernova.data.dao.WatchHistoryDao
+import com.supernova.data.dao.RecommendationDao
 import com.supernova.data.dao.ContentDetailDao
 import com.supernova.data.database.MIGRATION_7_8
+import com.supernova.data.database.MIGRATION_8_9
 import com.supernova.data.entities.CategoryEntity
 import com.supernova.data.entities.ChannelEntity
 import com.supernova.data.entities.EpgEntity
@@ -28,6 +30,7 @@ import com.supernova.data.entities.LiveTvEntity
 import com.supernova.data.entities.MovieCategoryEntity
 import com.supernova.data.entities.MovieEntity
 import com.supernova.data.entities.ContentDetailEntity
+import com.supernova.data.entities.RecommendationEntity
 import com.supernova.data.entities.ProfileEntity
 import com.supernova.data.entities.ProviderConfigEntity
 import com.supernova.data.entities.SeriesCategoryEntity
@@ -58,9 +61,10 @@ import com.supernova.data.entities.StreamEntity
         SearchQueryEntity::class,
         ProviderConfigEntity::class,
         UserProfileEntity::class,
-        ContentDetailEntity::class
+        ContentDetailEntity::class,
+        RecommendationEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 abstract class SupernovaDatabase : RoomDatabase() {
@@ -75,6 +79,7 @@ abstract class SupernovaDatabase : RoomDatabase() {
     abstract fun epgDao(): EpgDao
     abstract fun providerConfigDao(): ProviderConfigDao
     abstract fun watchHistoryDao(): WatchHistoryDao
+    abstract fun recommendationDao(): RecommendationDao
     abstract fun searchDao(): SearchDao
     abstract fun epgProgrammeDao(): EpgProgrammeDao
     abstract fun contentDetailDao(): ContentDetailDao
@@ -90,7 +95,7 @@ abstract class SupernovaDatabase : RoomDatabase() {
                     SupernovaDatabase::class.java,
                     "supernova"
                 )
-                    .addMigrations(MIGRATION_7_8)
+                    .addMigrations(MIGRATION_7_8, MIGRATION_8_9)
                     .build()
                 INSTANCE = instance
                 instance

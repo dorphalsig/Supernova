@@ -36,6 +36,12 @@ interface StreamDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStreamFtsList(ftsList: List<StreamFts>)
 
+    @Query("SELECT * FROM stream WHERE tmdb_id IN (:ids)")
+    suspend fun getByTmdbIds(ids: List<Int>): List<StreamEntity>
+
+    @Query("SELECT * FROM stream WHERE tmdb_id = :tmdbId LIMIT 1")
+    suspend fun getStreamByTmdb(tmdbId: Int): StreamEntity?
+
     @Query(
         """
         SELECT s.* FROM stream s

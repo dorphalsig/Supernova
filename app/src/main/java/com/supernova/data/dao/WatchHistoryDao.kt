@@ -31,4 +31,7 @@ interface WatchHistoryDao {
         "SELECT * FROM watch_history WHERE userId = :userId AND progress > 0.05 ORDER BY watchedAt DESC"
     )
     fun getContinueWatching(userId: Int): Flow<List<WatchHistoryEntity>>
+
+    @Query("SELECT * FROM watch_history WHERE userId = :userId ORDER BY watchedAt DESC LIMIT 10")
+    suspend fun getRecent(userId: Int): List<WatchHistoryEntity>
 }
