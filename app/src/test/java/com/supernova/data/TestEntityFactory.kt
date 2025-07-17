@@ -170,4 +170,19 @@ object TestEntityFactory {
         youtube_trailer = null,
         episode_run_time = null
     )
+
+    fun watchHistory(userId: Int = 1, streamId: Int = 1) = WatchHistoryEntity(
+        userId = userId,
+        streamId = streamId,
+        episodeId = null,
+        watchedAt = System.currentTimeMillis(),
+        durationSec = null,
+        progress = null
+    )
+
+    fun reaction(userId: Int = 1, streamId: Int = 1, type: String = "like") = ReactionEntity(
+        userId = userId,
+        streamId = streamId,
+        reactionType = type
+    )
 }

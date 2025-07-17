@@ -28,10 +28,19 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
 
 val MIGRATION_8_9 = object : Migration(8, 9) {
     override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS reaction (
+                reactionId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                userId INTEGER NOT NULL,
+                streamId INTEGER,
+                reactionType TEXT NOT NULL,
+                createdAt INTEGER NOT NULL
+            )
+        """)
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_reaction_userId ON reaction(userId)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_reaction_streamId ON reaction(streamId)")
         db.execSQL(
             "CREATE TABLE IF NOT EXISTS recommendation (recId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, userId INTEGER NOT NULL, streamId INTEGER NOT NULL, recoAt INTEGER NOT NULL, score REAL, source TEXT, moodId INTEGER)"
         )
-        db.execSQL("CREATE INDEX IF NOT EXISTS index_recommendation_userId ON recommendation(userId)")
-        db.execSQL("CREATE INDEX IF NOT EXISTS index_recommendation_streamId ON recommendation(streamId)")
     }
 }

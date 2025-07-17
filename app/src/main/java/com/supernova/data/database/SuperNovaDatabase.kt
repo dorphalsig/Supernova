@@ -16,6 +16,7 @@ import com.supernova.data.dao.StreamDao
 import com.supernova.data.dao.SeriesDao
 import com.supernova.data.dao.EpgProgrammeDao
 import com.supernova.data.dao.WatchHistoryDao
+import com.supernova.data.dao.ReactionDao
 import com.supernova.data.dao.RecommendationDao
 import com.supernova.data.dao.ContentDetailDao
 import com.supernova.data.database.MIGRATION_7_8
@@ -39,6 +40,7 @@ import com.supernova.data.entities.StreamEntity
 import com.supernova.data.entities.StreamFts
 import com.supernova.data.entities.UserProfileEntity
 import com.supernova.data.entities.WatchHistoryEntity
+import com.supernova.data.entities.ReactionEntity
 import com.supernova.data.entities.StreamFts
 import com.supernova.data.entities.StreamEntity
 
@@ -62,6 +64,7 @@ import com.supernova.data.entities.StreamEntity
         ProviderConfigEntity::class,
         UserProfileEntity::class,
         ContentDetailEntity::class,
+        ReactionEntity::class,
         RecommendationEntity::class
     ],
     version = 9,
@@ -83,6 +86,7 @@ abstract class SupernovaDatabase : RoomDatabase() {
     abstract fun searchDao(): SearchDao
     abstract fun epgProgrammeDao(): EpgProgrammeDao
     abstract fun contentDetailDao(): ContentDetailDao
+    abstract fun reactionDao(): ReactionDao
 
     companion object {
         @Volatile

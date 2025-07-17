@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.plugin)
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -62,6 +63,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 
     // UI & Material Design
     implementation(libs.androidx.appcompat)
