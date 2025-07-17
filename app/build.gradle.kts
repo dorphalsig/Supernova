@@ -98,6 +98,7 @@ dependencies {
     // Image Loading - Coil for Compose
     implementation(libs.coil.compose)
     implementation(libs.coil)
+    implementation(libs.navigation.compose)
 
     // Glide (for legacy views)
     implementation(libs.glide)

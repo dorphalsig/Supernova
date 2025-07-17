@@ -23,9 +23,8 @@
         android:theme="@style/Theme.Supernova"
         android:banner="@mipmap/ic_launcher">
 
-        <!-- Splash Activity - Entry Point -->
         <activity
-            android:name=".ui.SplashActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Supernova.Splash">
             <intent-filter>
