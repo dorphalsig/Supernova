@@ -68,30 +68,22 @@ Ensure D-pad navigation across all screens; define `nextFocus*` attributes in XM
 ## 8. Feedback Log Requirements
 Each commit must include the following in the commit message:
 * A summary of changes, issues encountered, and resolutions.
-* /rebase literal
 * For each error in each run of the build script, include:
   * Error message
   * Steps taken to resolve the error
   * Any errors present in the `/tmp/build_error_context.md` file at the moment of the commit
 
-## 9. Pre-Run Environment Checks
 
-Verify:
-* ANDROID_SDK_ROOT=/opt/sdk
-* ANDROID_HOME=/opt/sdk
-* Gradle wrapper permissions
-* Java/Gradle versions
-* Required environment variables
-* Modules included in `settings.gradle`
-
-## 10. Build & Test Automation Feedback
-1. **Full Build**: Run `./build.py build` $1 **WITH NO REDIRECTS OR PIPES**.
+## 9. Build & Test Automation Feedback
+1. $1 **BUILD COMMANDS SHOULD BE RUN WITHOUT REDIRECTS OR PIPES**
+2. bE PATIENT, AS THE BUILD MAY TAKE SEVERAL MINUTES, YOU WILL NOT SEE OUTPUT UNTIL 2 MINUTES AFTER THE COMMAND IS EXECUTED
+2. **Full Build**: Run `./build.py build`
 2. **Error Analysis**: Review the `/tmp/build_error_context.md` report
 3. **Fix and Repeat**: Address all errors and re-run until successful
 
-## 11. Definition of Done
+## 10. Definition of Done
 * All tests passing
 * Feedback log updated and committed
  
-## 12. Architecture Documentation
+## 11. Architecture Documentation
 The architecture documentation is stored in the `/docs` folder. Each chapter is a separate markdown file.
