@@ -13,6 +13,8 @@ import com.supernova.data.dao.ProfileDao
 import com.supernova.data.dao.ProviderConfigDao
 import com.supernova.data.dao.SeriesDao
 import com.supernova.data.dao.WatchHistoryDao
+import com.supernova.data.dao.ContentDetailDao
+import com.supernova.data.database.MIGRATION_7_8
 import com.supernova.data.entities.CategoryEntity
 import com.supernova.data.entities.ChannelEntity
 import com.supernova.data.entities.EpgEntity
@@ -21,6 +23,7 @@ import com.supernova.data.entities.EpgProgrammeFts
 import com.supernova.data.entities.LiveTvEntity
 import com.supernova.data.entities.MovieCategoryEntity
 import com.supernova.data.entities.MovieEntity
+import com.supernova.data.entities.ContentDetailEntity
 import com.supernova.data.entities.ProfileEntity
 import com.supernova.data.entities.ProviderConfigEntity
 import com.supernova.data.entities.SeriesCategoryEntity
@@ -43,9 +46,10 @@ import com.supernova.data.entities.WatchHistoryEntity
         EpgProgrammeEntity::class,
         EpgProgrammeFts::class,
         ProviderConfigEntity::class,
-        UserProfileEntity::class
+        UserProfileEntity::class,
+        ContentDetailEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class SupernovaDatabase : RoomDatabase() {
@@ -59,6 +63,7 @@ abstract class SupernovaDatabase : RoomDatabase() {
     abstract fun epgDao(): EpgDao
     abstract fun providerConfigDao(): ProviderConfigDao
     abstract fun watchHistoryDao(): WatchHistoryDao
+    abstract fun contentDetailDao(): ContentDetailDao
 
     companion object {
         @Volatile
@@ -71,6 +76,7 @@ abstract class SupernovaDatabase : RoomDatabase() {
                     SupernovaDatabase::class.java,
                     "supernova"
                 )
+                    .addMigrations(MIGRATION_7_8)
                     .build()
                 INSTANCE = instance
                 instance

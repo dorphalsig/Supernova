@@ -18,5 +18,12 @@ data class MovieEntity(
     val added: Long?,               // Unix timestamp
     val container_extension: String?,
     val custom_sid: String?,
-    val direct_source: String?
+    val direct_source: String?,
+    // TMDB metadata
+    val backdrop_path: String?,
+    val poster_path: String?,
+    val overview: String?,
+    val genres: String?,
+    val runtime: Int?,
+    val spoken_languages: String?
 )

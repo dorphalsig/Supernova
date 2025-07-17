@@ -4,6 +4,7 @@ import androidx.room.*
 import com.supernova.data.entities.SeriesEntity
 import com.supernova.data.entities.SeriesCategoryEntity
 import com.supernova.data.entities.CategoryEntity
+import com.supernova.data.entities.SeriesWithDetails
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -58,6 +59,13 @@ interface SeriesDao {
 
     @Query("SELECT COUNT(*) FROM series")
     suspend fun getSeriesCount(): Int
+
+    @Transaction
+    @Query("SELECT * FROM series WHERE series_id = :seriesId")
+    suspend fun getSeriesWithDetails(seriesId: Int): SeriesWithDetails?
+
+    @Query("SELECT * FROM series WHERE genres LIKE '%' || :genre || '%' ORDER BY name ASC")
+    fun getByGenre(genre: String): Flow<List<SeriesEntity>>
 
     @Query("SELECT COUNT(*) FROM series WHERE series_id IN (SELECT series_id FROM series_category WHERE category_type = :categoryType AND category_id = :categoryId)")
     suspend fun getSeriesCountByCategory(categoryType: String, categoryId: Int): Int

@@ -354,7 +354,13 @@ class DataSyncService(
                     added = stream.added.parseTimestamp(),
                     container_extension = stream.containerExtension.takeIfNotBlank(),
                     custom_sid = stream.customSid.takeIfNotBlank(),
-                    direct_source = stream.directSource.takeIfNotBlank()
+                    direct_source = stream.directSource.takeIfNotBlank(),
+                    backdrop_path = null,
+                    poster_path = null,
+                    overview = null,
+                    genres = null,
+                    runtime = null,
+                    spoken_languages = null
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to parse VOD stream: ${stream.streamId} - ${stream.name}", e)
@@ -435,7 +441,14 @@ class DataSyncService(
                         }
                     },
                     youtube_trailer = stream.youtubeTrailer.takeIfNotBlank(),
-                    episode_run_time = stream.episodeRunTime.takeIfNotBlank()
+                    episode_run_time = stream.episodeRunTime.takeIfNotBlank(),
+                    poster_path = null,
+                    overview = null,
+                    genres = null,
+                    first_air_date = null,
+                    last_air_date = null,
+                    number_of_seasons = null,
+                    number_of_episodes = null
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to parse series stream: ${stream.seriesId} - ${stream.name}", e)
