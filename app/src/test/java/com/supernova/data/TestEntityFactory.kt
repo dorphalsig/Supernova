@@ -97,4 +97,77 @@ object TestEntityFactory {
         category_id = null,
         thumbnail = null
     )
+
+    fun stream(id: Int = 1, title: String = "Stream$id") = StreamEntity(
+        stream_id = id,
+        title = title,
+        year = null,
+        stream_type = "movie",
+        thumbnail_url = null,
+        banner_url = null,
+        tmdb_id = null,
+        media_type = null,
+        tmdb_synced_at = null,
+        provider_id = null,
+        container_extension = null,
+        epg_channel_id = null,
+        tv_archive = null,
+        tv_archive_duration = null,
+        direct_source = null,
+        custom_sid = null,
+        rating = null,
+        rating_5based = null,
+        added = null,
+        plot = null,
+        cast = null,
+        director = null,
+        genre = null
+    )
+
+    fun streamFts(id: Int, title: String = "Stream$id") = StreamFts(
+        stream_id = id,
+        title = title,
+        plot = null,
+        director = null,
+        cast = null,
+        genre = null
+    )
+
+    fun programme(id: Int = 1, channelId: String = "ch$id", title: String = "Prog$id") =
+        EpgProgrammeEntity(
+            programmeId = id,
+            epgChannelId = channelId,
+            startAt = 0L,
+            endAt = 1L,
+            title = title
+        )
+
+    fun programmeFts(id: Int, title: String = "Prog$id") = EpgProgrammeFts(
+        title = title,
+        subTitle = null,
+        description = null,
+        rowid = id
+    )
+
+    fun series(id: Int = 1, name: String = "Series$id") = SeriesEntity(
+        series_id = id,
+        num = id,
+        name = name,
+        title = null,
+        year = null,
+        stream_type = "series",
+        cover = null,
+        plot = null,
+        cast = null,
+        director = null,
+        genre = null,
+        release_date = null,
+        releaseDate = null,
+        last_modified = null,
+        rating = null,
+        rating_5based = null,
+        backdrop_path = null,
+        youtube_trailer = null,
+        episode_run_time = null
+    )
 }

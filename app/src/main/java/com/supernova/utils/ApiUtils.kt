@@ -143,6 +143,16 @@ object ApiUtils {
     }
 
     /**
+     * Normalize search queries using simple lowercase + punctuation stripping.
+     */
+    fun normalizeSearchQuery(query: String): String {
+        return query.lowercase(Locale.getDefault())
+            .replace(Regex("[^a-z0-9 ]"), " ")
+            .replace("\\s+".toRegex(), " ")
+            .trim()
+    }
+
+    /**
      * Stream parse JSON array from response body in batches.
      * Balances memory efficiency with database performance.
      *
