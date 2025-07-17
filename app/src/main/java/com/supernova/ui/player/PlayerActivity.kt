@@ -1,6 +1,7 @@
 package com.supernova.ui.player
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +12,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.PlaybackException
+import com.supernova.ui.player.components.PlayerControlsOverlay
 import com.supernova.databinding.ActivityPlayerBinding
 import com.supernova.data.database.SupernovaDatabase
 import com.supernova.utils.SecureDataStore
@@ -36,7 +38,19 @@ class PlayerActivity : AppCompatActivity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.playerView.requestFocus()
+        binding.controlsOverlay.setContent {
+            PlayerControlsOverlay(viewModel)
+        }
+        observeVisibility()
         checkParentalControlsAndStart()
+    }
+
+    private fun observeVisibility() {
+        lifecycleScope.launch {
+            viewModel.controlsVisible.collect { visible ->
+                if (!visible) binding.playerView.requestFocus()
+            }
+        }
     }
 
     private fun checkParentalControlsAndStart() {
@@ -83,6 +97,30 @@ class PlayerActivity : AppCompatActivity() {
         val duration = exoPlayer?.duration ?: 0L
         val position = exoPlayer?.currentPosition ?: 0L
         viewModel.saveProgress(userId, streamId, episodeId, duration, position)
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_UP) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_DPAD_CENTER -> {
+                    viewModel.toggleControls()
+                    return true
+                }
+                KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    if (viewModel.controlsVisible.value) {
+                        viewModel.showSettings()
+                        return true
+                    }
+                }
+                KeyEvent.KEYCODE_BACK -> {
+                    if (viewModel.controlsVisible.value) {
+                        viewModel.hideControls()
+                        return true
+                    }
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onStop() {
