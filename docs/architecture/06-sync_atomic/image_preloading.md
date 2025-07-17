@@ -1,2 +1,4 @@
 - Smart preload: 2x visible rails, prioritize main/recent, discard out-of-scope when OOM
 - Use Glide/Coil, LRU memory+disk cache, background idle preloading
+- `ImagePreloader` service manages a priority queue for visible, next and background images
+- Network and memory conditions gate preloading

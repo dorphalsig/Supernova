@@ -22,12 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -38,11 +33,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.Coil
-import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.request.CachePolicy
-import coil.request.ImageRequest
+import com.supernova.ui.preload.ImagePreloader
 import com.supernova.ui.theme.SupernovaColors
 
 @Composable
@@ -54,19 +46,13 @@ fun ProfileCreationScreen(
     onSave: () -> Unit
 ) {
     val context = LocalContext.current
-    // Use Coil's default loader for preloading
-    val imageLoader: ImageLoader = Coil.imageLoader(context)
+    val preloader = remember { ImagePreloader(context) }
 
-    // Preload all avatar URLs into memory cache on first composition
     LaunchedEffect(avatars) {
-        avatars.forEach { avatarUrl ->
-            val request = ImageRequest.Builder(context)
-                .data(avatarUrl)
-                .memoryCachePolicy(CachePolicy.ENABLED)
-                .diskCachePolicy(CachePolicy.ENABLED)
-                .build()
-            imageLoader.enqueue(request)
-        }
+        preloader.preloadVisible(avatars)
+    }
+    DisposableEffect(Unit) {
+        onDispose { preloader.clear() }
     }
 
     val configuration = LocalConfiguration.current
