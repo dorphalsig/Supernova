@@ -76,10 +76,10 @@ Each commit must include the following in the commit message:
 
 ## 9. Build & Test Automation Feedback
 1. $1 **BUILD COMMANDS SHOULD BE RUN WITHOUT REDIRECTS OR PIPES**
-2. bE PATIENT, AS THE BUILD MAY TAKE SEVERAL MINUTES, YOU WILL NOT SEE OUTPUT UNTIL 2 MINUTES AFTER THE COMMAND IS EXECUTED
-2. **Full Build**: Run `./build.py build`
-2. **Error Analysis**: Review the `/tmp/build_error_context.md` report
-3. **Fix and Repeat**: Address all errors and re-run until successful
+2. BE PATIENT, AS THE BUILD MAY TAKE SEVERAL MINUTES, YOU WILL NOT SEE OUTPUT UNTIL 2 MINUTES AFTER THE COMMAND IS EXECUTED
+3. **Full Build**: Run `./build.py :app:assembleDebug :app:testDebugUnitTest`
+4. **Error Analysis**: Review the `/tmp/build_error_context.md` report
+5. **Fix and Repeat**: Address all errors and re-run until successful
 
 ## 10. Definition of Done
 * All tests passing
