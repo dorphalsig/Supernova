@@ -5,8 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.room.Room
 import com.supernova.data.database.SupernovaDatabase
 import com.supernova.data.dao.MovieDao
+import com.supernova.data.entities.ContentDetailEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.flow.first
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -56,5 +58,31 @@ class MovieDaoTest {
         dao.insertMovie(movie)
         val loaded = dao.getMovieById(2)
         assertNull(loaded?.stream_type)
+    }
+
+    @Test
+    fun getMovieWithDetails_returnsRelation() = runTest {
+        val movie = TestEntityFactory.movie(id = 3)
+        dao.insertMovie(movie)
+        db.contentDetailDao().insertDetail(
+            ContentDetailEntity(3, "movie", tagline = "tag", status = null, homepage = null, genres = null)
+        )
+        val loaded = dao.getMovieWithDetails(3)
+        assertEquals("tag", loaded?.details?.tagline)
+    }
+
+    @Test
+    fun searchByGenre_filtersCorrectly() = runTest {
+        val movie = TestEntityFactory.movie(id = 4).copy(
+            genres = "Action,Drama",
+            backdrop_path = null,
+            poster_path = null,
+            overview = null,
+            runtime = null,
+            spoken_languages = null
+        )
+        dao.insertMovie(movie)
+        val results = dao.searchByGenre("Action").first()
+        assertEquals(1, results.size)
     }
 }

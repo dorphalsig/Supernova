@@ -35,7 +35,45 @@ object TestEntityFactory {
         added = added,
         container_extension = null,
         custom_sid = null,
-        direct_source = null
+        direct_source = null,
+        backdrop_path = null,
+        poster_path = null,
+        overview = null,
+        genres = null,
+        runtime = null,
+        spoken_languages = null
+    )
+
+    fun series(
+        id: Int = 1,
+        name: String = "Series$id"
+    ) = SeriesEntity(
+        series_id = id,
+        num = id,
+        name = name,
+        title = null,
+        year = null,
+        stream_type = null,
+        cover = null,
+        plot = null,
+        cast = null,
+        director = null,
+        genre = null,
+        release_date = null,
+        releaseDate = null,
+        last_modified = null,
+        rating = null,
+        rating_5based = null,
+        backdrop_path = null,
+        youtube_trailer = null,
+        episode_run_time = null,
+        poster_path = null,
+        overview = null,
+        genres = null,
+        first_air_date = null,
+        last_air_date = null,
+        number_of_seasons = null,
+        number_of_episodes = null
     )
 
     fun liveTv(

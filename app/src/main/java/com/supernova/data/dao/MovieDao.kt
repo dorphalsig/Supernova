@@ -4,6 +4,7 @@ import androidx.room.*
 import com.supernova.data.entities.MovieEntity
 import com.supernova.data.entities.MovieCategoryEntity
 import com.supernova.data.entities.CategoryEntity
+import com.supernova.data.entities.MovieWithDetails
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -70,6 +71,13 @@ interface MovieDao {
 
     @Query("SELECT COUNT(*) FROM movie")
     suspend fun getMovieCount(): Int
+
+    @Transaction
+    @Query("SELECT * FROM movie WHERE movie_id = :movieId")
+    suspend fun getMovieWithDetails(movieId: Int): MovieWithDetails?
+
+    @Query("SELECT * FROM movie WHERE genres LIKE '%' || :genre || '%' ORDER BY name ASC")
+    fun searchByGenre(genre: String): Flow<List<MovieEntity>>
 
     @Transaction
     suspend fun insertMovieWithCategories(movie: MovieEntity, categories: List<MovieCategoryEntity>) {

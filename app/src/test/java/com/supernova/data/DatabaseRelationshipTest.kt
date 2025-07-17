@@ -65,7 +65,14 @@ class DatabaseRelationshipTest {
             rating_5based = null,
             backdrop_path = "[\"one.jpg\",\"two.jpg\"]",
             youtube_trailer = null,
-            episode_run_time = null
+            episode_run_time = null,
+            poster_path = null,
+            overview = null,
+            genres = null,
+            first_air_date = null,
+            last_air_date = null,
+            number_of_seasons = null,
+            number_of_episodes = null
         )
 
         seriesDao.insertSeries(series)
@@ -78,7 +85,27 @@ class DatabaseRelationshipTest {
     fun movieCategory_cascadeDeleteRemovesRelations() {
         runBlocking {
         val category = CategoryEntity("movie", 10, "Drama")
-        val movie = MovieEntity(1, null, "Movie", null, null, null, null, null, null, null, null, null, null)
+        val movie = MovieEntity(
+            movie_id = 1,
+            num = null,
+            name = "Movie",
+            title = null,
+            year = null,
+            stream_type = null,
+            stream_icon = null,
+            rating = null,
+            rating_5based = null,
+            added = null,
+            container_extension = null,
+            custom_sid = null,
+            direct_source = null,
+            backdrop_path = null,
+            poster_path = null,
+            overview = null,
+            genres = null,
+            runtime = null,
+            spoken_languages = null
+        )
         db.categoryDao().insertCategory(category)
         movieDao.insertMovie(movie)
         val relation = MovieCategoryEntity(1, "movie", 10)
@@ -123,7 +150,14 @@ class DatabaseRelationshipTest {
             rating_5based = null,
             backdrop_path = "[]",
             youtube_trailer = null,
-            episode_run_time = null
+            episode_run_time = null,
+            poster_path = null,
+            overview = null,
+            genres = null,
+            first_air_date = null,
+            last_air_date = null,
+            number_of_seasons = null,
+            number_of_episodes = null
         )
         db.categoryDao().insertCategory(category)
         seriesDao.insertSeries(series)

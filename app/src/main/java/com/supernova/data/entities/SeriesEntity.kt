@@ -24,5 +24,13 @@ data class SeriesEntity(
     val rating_5based: Float?,
     val backdrop_path: String?,        // JSON array as string
     val youtube_trailer: String?,
-    val episode_run_time: String?
+    val episode_run_time: String?,
+    // TMDB metadata
+    val poster_path: String?,
+    val overview: String?,
+    val genres: String?,
+    val first_air_date: String?,
+    val last_air_date: String?,
+    val number_of_seasons: Int?,
+    val number_of_episodes: Int?
 )
