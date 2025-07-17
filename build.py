@@ -58,23 +58,29 @@ error_patterns = re.compile(
 )
 
 matches = [(i, l.rstrip()) for i, l in enumerate(lines, 1) if error_patterns.search(l)]
+md_report = """"""
 
+md_report = "# Build Error Context\n\n"
+if not matches:
+    md_report += "_No errors found in build output_\n"
+    md_report += "BUILD_STATUS: SUCCESS\n"
+else:
+    for lineno, msg in matches:
+        md_report += "## Error\n"
+        md_report += f"**Line:** {lineno}\n"
+        md_report += f"**Message:** `{msg}`\n\n"
+        start = max(lineno-6, 0)
+        end = min(lineno+5, len(lines))
+        md_report += "**Context:**\n```text\n"
+        md_report += ''.join(lines[start:end])
+        md_report += "```\n\n"
+    md_report += "BUILD_STATUS: FAILURE\n"
+
+# Now you can write to file AND print:
 with MD_REPORT.open("w", encoding="utf-8") as f:
-    f.write("# Build Error Context\n\n")
-    if not matches:
-        f.write("_No errors found in build output_\n")
-        f.write("BUILD_STATUS: SUCCESS\n")
-    else:
-        for lineno, msg in matches:
-            f.write("## Error\n")
-            f.write(f"**Line:** {lineno}\n")
-            f.write(f"**Message:** `{msg}`\n\n")
-            start = max(lineno-6, 0)
-            end = min(lineno+5, len(lines))
-            f.write("**Context:**\n```text\n")
-            f.writelines(lines[start:end])
-            f.write("```\n\n")
-        f.write("BUILD_STATUS: FAILURE\n")
+    f.write(md_report)
+
+print(md_report)
 
 if exitcode == 0:
     print("[AGENT] BUILD_STATUS: SUCCESS")
@@ -82,5 +88,5 @@ if exitcode == 0:
     sys.exit(0)
 else:
     print("[AGENT] BUILD_STATUS: FAILURE")
-    print(f"[AGENT] See build errors in {MD_REPORT}")
+    print(f"[AGENT] Build errors follow:\n\n{md_report}")
     sys.exit(exitcode)
