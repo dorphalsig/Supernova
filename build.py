@@ -10,7 +10,7 @@ import datetime
 def keep_alive(proc):
     while proc.poll() is None:
         print(f"[AGENT] Still alive – please do not kill. {datetime.datetime.now().strftime('%H:%M:%S')}")
-        time.sleep(120)  # every 2 minutes
+        time.sleep(60)  # every 2 minutes
 
 
 
@@ -20,7 +20,7 @@ MD_REPORT = Path("/tmp/build_error_context.md")
 
 print(f"[AGENT] Build script started at {datetime.datetime.now().isoformat(' ', 'seconds')}")
 print(f"[AGENT] Running: {' '.join(BUILD_CMD)}")
-print(f"[AGENT] Gradle step updates will print only if changed.")
+print(f"[AGENT] Gradle step updates will print only if changed. **BE PATIENT**")
 
 with LOGFILE.open("w", encoding="utf-8", errors="replace") as log:
     proc = subprocess.Popen(

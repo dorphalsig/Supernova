@@ -3,7 +3,7 @@ name: Update Gist With File Structure
 on:
   push:
     branches:
-      - master   # or your default branch
+      - master   # Your default branch
 
 jobs:
   update-gist:
@@ -21,16 +21,19 @@ jobs:
           GIST_ID: 52c9f181e73a65e61a5770021c695e61
           GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
         run: |
+          # Create a proper JSON payload with escaped content
+          jq -n --rawfile content file_structure.txt '{
+            "files": {
+              "file_structure.txt": {
+                "content": $content
+              }
+            }
+          }' > payload.json
+          
+          # Send the update to GitHub
           curl -X PATCH \
             -H "Authorization: token $GIST_TOKEN" \
             -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
             https://api.github.com/gists/$GIST_ID \
-            -d @- <<EOF
-          {
-            "files": {
-              "file_structure.txt": {
-                "content": "$(cat file_structure.txt)"
-              }
-            }
-          }
-          EOF
+            -d @payload.json
