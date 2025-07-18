@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Close Linked Issue with Merge Comment
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           # Get merge commit title/body, or PR body if not available
           PR_NUMBER=${{ github.event.pull_request.number }}
