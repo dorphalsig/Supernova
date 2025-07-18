@@ -10,6 +10,12 @@ import androidx.compose.ui.test.performClick
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * UI tests for [HomeScreen].
+ *
+ * These tests validate that the screen renders expected headers when the
+ * [HomeViewModel] loads its mock content. No Robolectric components are used.
+ */
 class HomeScreenTest {
     @get:Rule
     val rule = createComposeRule()
