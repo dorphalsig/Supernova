@@ -56,37 +56,67 @@ object TestEntityFactory {
         spoken_languages = null
     )
 
-    /** Create a [SeriesEntity] with full metadata fields set to `null`. */
+    /**
+     * Create a [SeriesEntity].
+     *
+     * All parameters default to `null` except for [id], [num] and [name].
+     * This mirrors the latest schema so tests can override any field directly
+     * without additional copy calls.
+     */
     fun series(
         id: Int = 1,
-        name: String = "Series$id"
+        num: Int = id,
+        name: String = "Series$id",
+        title: String? = null,
+        year: String? = null,
+        streamType: String? = null,
+        cover: String? = null,
+        plot: String? = null,
+        cast: String? = null,
+        director: String? = null,
+        genre: String? = null,
+        release_date: String? = null,
+        releaseDate: String? = null,
+        last_modified: String? = null,
+        rating: String? = null,
+        rating_5based: Float? = null,
+        backdrop_path: String? = null,
+        youtube_trailer: String? = null,
+        episode_run_time: String? = null,
+        poster_path: String? = null,
+        overview: String? = null,
+        genres: String? = null,
+        first_air_date: String? = null,
+        last_air_date: String? = null,
+        number_of_seasons: Int? = null,
+        number_of_episodes: Int? = null
     ) = SeriesEntity(
         series_id = id,
-        num = id,
+        num = num,
         name = name,
-        title = null,
-        year = null,
-        stream_type = null,
-        cover = null,
-        plot = null,
-        cast = null,
-        director = null,
-        genre = null,
-        release_date = null,
-        releaseDate = null,
-        last_modified = null,
-        rating = null,
-        rating_5based = null,
-        backdrop_path = null,
-        youtube_trailer = null,
-        episode_run_time = null,
-        poster_path = null,
-        overview = null,
-        genres = null,
-        first_air_date = null,
-        last_air_date = null,
-        number_of_seasons = null,
-        number_of_episodes = null
+        title = title,
+        year = year,
+        stream_type = streamType,
+        cover = cover,
+        plot = plot,
+        cast = cast,
+        director = director,
+        genre = genre,
+        release_date = release_date,
+        releaseDate = releaseDate,
+        last_modified = last_modified,
+        rating = rating,
+        rating_5based = rating_5based,
+        backdrop_path = backdrop_path,
+        youtube_trailer = youtube_trailer,
+        episode_run_time = episode_run_time,
+        poster_path = poster_path,
+        overview = overview,
+        genres = genres,
+        first_air_date = first_air_date,
+        last_air_date = last_air_date,
+        number_of_seasons = number_of_seasons,
+        number_of_episodes = number_of_episodes
     )
 
     /** Create a [LiveTvEntity] representing a channel. */
