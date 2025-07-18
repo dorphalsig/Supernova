@@ -3,7 +3,11 @@ package com.supernova.search
 import com.supernova.testing.EntityTestSuite
 import com.supernova.data.TestEntityFactory
 import com.supernova.search.SearchIntegrationService.SearchState
-import com.supernova.data.dao.SearchDao
+import com.supernova.data.dao.StreamDao
+import com.supernova.data.dao.MovieDao
+import com.supernova.data.dao.SeriesDao
+import com.supernova.data.dao.LiveTvDao
+import com.supernova.data.dao.EpgProgrammeDao
 import com.supernova.data.entities.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,7 +32,14 @@ class SearchIntegrationServiceTest : EntityTestSuite() {
     @BeforeTest
     override fun setUp() {
         super.setUp()
-        service = SearchIntegrationService(db.searchDao(), StandardTestDispatcher())
+        service = SearchIntegrationService(
+            db.streamDao(),
+            db.movieDao(),
+            db.seriesDao(),
+            db.liveTvDao(),
+            db.epgProgrammeDao(),
+            StandardTestDispatcher()
+        )
     }
 
     @Test
@@ -61,14 +72,26 @@ class SearchIntegrationServiceTest : EntityTestSuite() {
 
     @Test
     fun daoErrorEmitsErrorState() = runTest {
-        val failingDao = mockk<SearchDao>()
-        every { failingDao.searchStreams(any()) } returns flow<List<StreamEntity>> { throw IllegalStateException("fail") }
-        every { failingDao.searchMovies(any()) } returns flow<List<MovieEntity>> { emit(emptyList()) }
-        every { failingDao.searchSeries(any()) } returns flow<List<SeriesEntity>> { emit(emptyList()) }
-        every { failingDao.searchChannels(any()) } returns flow<List<LiveTvEntity>> { emit(emptyList()) }
-        every { failingDao.searchProgrammes(any()) } returns flow<List<EpgProgrammeEntity>> { emit(emptyList()) }
+        val streamDao = mockk<StreamDao>()
+        val movieDao = mockk<MovieDao>()
+        val seriesDao = mockk<SeriesDao>()
+        val liveTvDao = mockk<LiveTvDao>()
+        val epgProgrammeDao = mockk<EpgProgrammeDao>()
 
-        val failingService = SearchIntegrationService(failingDao, StandardTestDispatcher())
+        every { streamDao.searchStreams(any()) } returns flow<List<StreamEntity>> { throw IllegalStateException("fail") }
+        every { movieDao.searchMovies(any()) } returns flow<List<MovieEntity>> { emit(emptyList()) }
+        every { seriesDao.searchSeries(any()) } returns flow<List<SeriesEntity>> { emit(emptyList()) }
+        every { liveTvDao.searchChannels(any()) } returns flow<List<LiveTvEntity>> { emit(emptyList()) }
+        every { epgProgrammeDao.searchProgrammes(any()) } returns flow<List<EpgProgrammeEntity>> { emit(emptyList()) }
+
+        val failingService = SearchIntegrationService(
+            streamDao,
+            movieDao,
+            seriesDao,
+            liveTvDao,
+            epgProgrammeDao,
+            StandardTestDispatcher()
+        )
         val state = failingService.search(flowOf("boom")).first { it is SearchState.Error }
         assertTrue(state is SearchState.Error)
     }
