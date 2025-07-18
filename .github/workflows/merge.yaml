@@ -1,0 +1,46 @@
+name: Close Issue on Merge
+on:
+  pull_request:
+    types: [closed]
+    branches: [ master ]
+
+jobs:
+  close_issue_on_merge:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close Linked Issue with Merge Comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get merge commit title/body, or PR body if not available
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO="${{ github.repository }}"
+          SHA="${{ github.event.pull_request.merge_commit_sha }}"
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          MERGE_MSG="${{ github.event.pull_request.merge_commit_message }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          # Use merge message first, fallback to PR body
+          COMMENT="${MERGE_MSG:-$PR_BODY}"
+
+          # Try to extract an issue reference (first #123 found)
+          ISSUE=$(echo "$COMMENT" | grep -oE "#[0-9]+" | head -1 | grep -oE "[0-9]+")
+          if [ -z "$ISSUE" ]; then
+            echo "No issue reference found in merge comment or PR body."
+            exit 0
+          fi
+
+          # Comment with the merge commit message/comment
+          curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"body\": \"🔀 **Merged branch \`$BRANCH\` into master**\n\n${COMMENT}\n\nCommit: \`$SHA\`\nPR: https://github.com/$REPO/pull/$PR_NUMBER\"}" \
+            "https://api.github.com/repos/$REPO/issues/$ISSUE/comments"
+
+          # Close the issue
+          curl -s -X PATCH \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d '{"state": "closed"}' \
+            "https://api.github.com/repos/$REPO/issues/$ISSUE"
