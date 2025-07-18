@@ -9,8 +9,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,7 +42,7 @@ fun SettingsScreen(
             SettingsHeader(onBack)
             Spacer(modifier = Modifier.height(16.dp))
             SettingsMenuItem(
-                icon = Icons.Default.Tune,
+                icon = Icons.Default.Settings,
                 title = "Provider Settings",
                 description = "Configure portal and credentials",
                 onClick = onProviderSettings,
@@ -56,7 +56,7 @@ fun SettingsScreen(
                 tag = "profiles"
             )
             SettingsMenuItem(
-                icon = Icons.Default.Sync,
+                icon = Icons.Default.Refresh,
                 title = "Sync Settings",
                 description = syncState?.name ?: lastSyncTime?.let { "Last sync: $it" } ?: "",
                 onClick = { viewModel.triggerManualSync() },

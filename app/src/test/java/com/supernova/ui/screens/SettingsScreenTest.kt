@@ -22,7 +22,7 @@ class SettingsScreenTest {
         composeRule.setContent {
             SupernovaTheme {
                 SettingsMenuItem(
-                    icon = androidx.compose.material.icons.Icons.Default.Tune,
+                    icon = androidx.compose.material.icons.Icons.Default.Settings,
                     title = "Provider Settings",
                     description = "",
                     onClick = { clicked = true },
