@@ -73,8 +73,9 @@ If any errors persist, detail all of them in the Work summary with filename and 
 1. Run chmod +x ./create_issue.py
 2. Run `./create_issue.py --pat "<GITHUB PAT FROM YOUR PROMPT>" --title "<GOALS SUMMARY>" --body "<COMPLETE PROMPT>"` to create a new issue for the task
    this will return the issue number.
-3. Include the latest output of  /tmp/build_error_context.md in the issue body.
-4. The last line of the commit mus **ALWAYS** be `#<issue number>` to tag the issue when merged.
+3. Include your initial prompt ih the issue body.  **NEVER INCLUDE THE PAT IN THE ISSUE**
+4. Include the latest output of  /tmp/build_error_context.md in the issue body.
+5. The last line of the issue body must **ALWAYS** be `#<issue number>` to tag the issue when merged.
 
 
 ---
