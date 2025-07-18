@@ -77,7 +77,7 @@ Each task must:
 ./build.py :app:assembleDebug :app:testDebugUnitTest
 ```
 After each run go through the `/tmp/build_error_context.md` file to check for any issues.
-
+If any errors persist, detail all of them in the Work summary with filename and line number.
 ---
 
 ## 5. Commit & Merge Rules
