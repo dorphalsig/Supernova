@@ -1,39 +1,43 @@
-name: Update Gist With File Structure
+name: Update File List Gist
 
 on:
   push:
-    branches:
-      - master   # Your default branch
+    branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   update-gist:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Create file list
+      run: |
+        find . -type f -not -path './.git/*' | sort > file_list.txt
 
-      - name: Generate file tree
-        run: |
-          tree -a -I '.git|build|.idea|node_modules' > file_structure.txt
-
-      - name: Update Gist
-        env:
-          GIST_ID: 52c9f181e73a65e61a5770021c695e61
-          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
-        run: |
-          # Create a proper JSON payload with escaped content
-          jq -n --rawfile content file_structure.txt '{
-            "files": {
-              "file_structure.txt": {
-                "content": $content
-              }
+    - name: Update Gist
+      env:
+        GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
+        GIST_ID: ${{ secrets.GIST_ID }}
+      run: |
+        FILE_LIST_CONTENT=$(cat file_list.txt)
+        
+        cat > gist_payload.json << EOF
+        {
+          "description": "File list for ${{ github.repository }}",
+          "files": {
+            "file_list.txt": {
+              "content": $(echo "$FILE_LIST_CONTENT" | jq -Rs .)
             }
-          }' > payload.json
-          
-          # Send the update to GitHub
-          curl -X PATCH \
-            -H "Authorization: token $GIST_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            -H "Content-Type: application/json" \
-            https://api.github.com/gists/$GIST_ID \
-            -d @payload.json
+          }
+        }
+        EOF
+        
+        curl -X PATCH \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Content-Type: application/json" \
+          -d @gist_payload.json \
+          "https://api.github.com/gists/$GIST_ID"
