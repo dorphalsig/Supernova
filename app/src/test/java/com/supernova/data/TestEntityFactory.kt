@@ -57,11 +57,10 @@ object TestEntityFactory {
     )
 
     /**
-     * Create a [SeriesEntity].
+     * Create a [SeriesEntity] with the provided id and name.
      *
-     * All parameters default to `null` except for [id], [num] and [name].
-     * This mirrors the latest schema so tests can override any field directly
-     * without additional copy calls.
+     * All optional TMDB metadata fields default to `null` so tests can
+     * override just the values they require.
      */
     fun series(
         id: Int = 1,
@@ -119,12 +118,19 @@ object TestEntityFactory {
         number_of_episodes = number_of_episodes
     )
 
-    /** Create a [LiveTvEntity] representing a channel. */
+    /**
+     * Create a [LiveTvEntity] representing a channel.
+     *
+     * @param id unique channel identifier
+     * @param name display name of the channel
+     * @param epgId optional EPG channel id
+     * @param archive whether recording is enabled
+     */
     fun liveTv(
         id: Int = 1,
         name: String = "Channel$id",
         epgId: String? = "epg$id",
-        archive: Int? = 0
+        archive: Int? = 0,
     ) = LiveTvEntity(
         channel_id = id,
         num = id,
@@ -198,18 +204,38 @@ object TestEntityFactory {
     )
 
 
-    /** Create a [WatchHistoryEntity] entry. */
-    fun watchHistory(userId: Int = 1, streamId: Int = 1) = WatchHistoryEntity(
+    /**
+     * Create a [WatchHistoryEntity] entry.
+     *
+     * @param userId id of the profile that watched the stream
+     * @param streamId associated stream id
+     * @param watchedAt Unix timestamp when the watch occurred
+     */
+    fun watchHistory(
+        userId: Int = 1,
+        streamId: Int = 1,
+        watchedAt: Long = System.currentTimeMillis(),
+    ) = WatchHistoryEntity(
         userId = userId,
         streamId = streamId,
         episodeId = null,
-        watchedAt = System.currentTimeMillis(),
+        watchedAt = watchedAt,
         durationSec = null,
         progress = null
     )
 
-    /** Create a [ReactionEntity] for simple like/dislike tests. */
-    fun reaction(userId: Int = 1, streamId: Int = 1, type: String = "like") = ReactionEntity(
+    /**
+     * Create a [ReactionEntity] for simple like/dislike tests.
+     *
+     * @param userId id of the reacting profile
+     * @param streamId id of the associated stream
+     * @param type reaction type, e.g. "like" or "dislike"
+     */
+    fun reaction(
+        userId: Int = 1,
+        streamId: Int = 1,
+        type: String = "like",
+    ) = ReactionEntity(
         userId = userId,
         streamId = streamId,
         reactionType = type
