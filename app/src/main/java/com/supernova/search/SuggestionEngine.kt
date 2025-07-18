@@ -20,7 +20,10 @@ class SuggestionEngine @Inject constructor(
     suspend fun suggestions(userId: Int): List<Int> = withContext(dispatcher) {
         val now = System.currentTimeMillis()
         if (now - lastUpdated < cacheDurationMs && cached.isNotEmpty()) {
-            return@withContext cached.toList().sortedByDescending { it.value }.map { it.first }
+            // Use Map.Entry to correctly access key/value in pair
+            return@withContext cached.entries
+                .sortedByDescending { it.value }
+                .map { it.key }
         }
         val history = historyDao.getByUser(userId).first()
         val reactions = reactionDao.getByUser(userId)
@@ -29,7 +32,10 @@ class SuggestionEngine @Inject constructor(
         reactions.forEach { it.streamId?.let { id -> counts[id] = counts.getOrDefault(id, 0) + 3 } }
         lastUpdated = now
         cached = counts
-        counts.toList().sortedByDescending { it.second }.map { it.first }
+        // Store in cache before returning sorted stream IDs
+        counts.entries
+            .sortedByDescending { it.value }
+            .map { it.key }
     }
 
     fun invalidate() { lastUpdated = 0L }
