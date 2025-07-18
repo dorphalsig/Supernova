@@ -2,19 +2,13 @@ package com.supernova.search
 
 import com.supernova.testing.EntityTestSuite
 import com.supernova.data.TestEntityFactory
-import com.supernova.data.entities.ReactionEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33])
 class SuggestionEngineTest : EntityTestSuite() {
     private lateinit var engine: SuggestionEngine
 
