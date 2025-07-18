@@ -7,6 +7,7 @@ import com.supernova.data.dao.WatchHistoryDao
 import com.supernova.network.tmdb.TmdbService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 
 class ContentRailGenerator @Inject constructor(
@@ -23,15 +24,33 @@ class ContentRailGenerator @Inject constructor(
 
         val cw = watchHistoryDao.getRecent(userId)
         if (cw.isNotEmpty()) {
-            rails += ContentRail("Continue Watching", cw.mapNotNull { it.streamId?.let(streamDao::getStreamById) })
+            val cwStreams = mutableListOf<com.supernova.data.entities.StreamEntity>()
+            for (entry in cw) {
+                val id = entry.streamId ?: continue
+                val stream = streamDao.getStreamById(id)
+                if (stream != null) cwStreams += stream
+            }
+            if (cwStreams.isNotEmpty()) {
+                rails += ContentRail("Continue Watching", cwStreams)
+            }
         }
 
-        val trendingMovies = tmdbService.trendingMovies(apiKey).results.mapNotNull { streamDao.getStreamByTmdb(it.id) }
+        val trendingMoviesApi = tmdbService.trendingMovies(apiKey).results
+        val trendingMovies = mutableListOf<com.supernova.data.entities.StreamEntity>()
+        for (item in trendingMoviesApi) {
+            val stream = streamDao.getStreamByTmdb(item.id)
+            if (stream != null) trendingMovies += stream
+        }
         if (trendingMovies.isNotEmpty()) {
             rails += ContentRail("Trending Movies", trendingMovies)
         }
 
-        val trendingSeries = tmdbService.trendingSeries(apiKey).results.mapNotNull { streamDao.getStreamByTmdb(it.id) }
+        val trendingSeriesApi = tmdbService.trendingSeries(apiKey).results
+        val trendingSeries = mutableListOf<com.supernova.data.entities.StreamEntity>()
+        for (item in trendingSeriesApi) {
+            val stream = streamDao.getStreamByTmdb(item.id)
+            if (stream != null) trendingSeries += stream
+        }
         if (trendingSeries.isNotEmpty()) {
             rails += ContentRail("Trending Series", trendingSeries)
         }
@@ -39,7 +58,14 @@ class ContentRailGenerator @Inject constructor(
         val recs = recommendationDao.getRecommendations(userId)
         val recEntities = recs.firstOrNull() ?: emptyList()
         if (recEntities.isNotEmpty()) {
-            rails += ContentRail("Recommended For You", recEntities.mapNotNull { streamDao.getStreamById(it.streamId) })
+            val recStreams = mutableListOf<com.supernova.data.entities.StreamEntity>()
+            for (rec in recEntities) {
+                val stream = streamDao.getStreamById(rec.streamId)
+                if (stream != null) recStreams += stream
+            }
+            if (recStreams.isNotEmpty()) {
+                rails += ContentRail("Recommended For You", recStreams)
+            }
         }
 
         rails
