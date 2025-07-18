@@ -2,6 +2,7 @@ package com.supernova.data.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 
 @Entity(
     tableName = "movie_category",
@@ -19,6 +20,9 @@ import androidx.room.ForeignKey
             childColumns = ["category_type", "category_id"],
             onDelete = ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        Index(value = ["category_type", "category_id"])
     ]
 )
 data class MovieCategoryEntity(
