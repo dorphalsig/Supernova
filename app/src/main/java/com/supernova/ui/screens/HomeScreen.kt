@@ -147,7 +147,7 @@ fun TrendingMediaCard(item: MediaItem, onClick: () -> Unit) {
 }
 
 private fun StreamEntity.toMediaItem() = MediaItem(
-    id = stream_id,
+    id = streamId,
     title = title ?: "Unknown",
-    posterUrl = thumbnail_url
+    posterUrl = thumbnailUrl
 )

@@ -4,35 +4,38 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * Consolidated stream metadata across movies, series and live TV.
+ */
 @Entity(
     tableName = "stream",
     indices = [
-        Index("stream_type"),
+        Index("streamType"),
         Index("year"),
-        Index("tmdb_id"),
-        Index("epg_channel_id")
+        Index("tmdbId"),
+        Index("epgChannelId")
     ]
 )
 data class StreamEntity(
     @PrimaryKey
-    val stream_id: Int,
+    val streamId: Int,
     val title: String?,
     val year: Int?,
-    val stream_type: String?,
-    val thumbnail_url: String?,
-    val banner_url: String?,
-    val tmdb_id: Int?,
-    val media_type: String?,
-    val tmdb_synced_at: Long?,
-    val provider_id: Long?,
-    val container_extension: String?,
-    val epg_channel_id: String?,
-    val tv_archive: Int?,
-    val tv_archive_duration: Int?,
-    val direct_source: String?,
-    val custom_sid: String?,
+    val streamType: String?,
+    val thumbnailUrl: String?,
+    val bannerUrl: String?,
+    val tmdbId: Int?,
+    val mediaType: String?,
+    val tmdbSyncedAt: Long?,
+    val providerId: Long?,
+    val containerExtension: String?,
+    val epgChannelId: String?,
+    val tvArchive: Int?,
+    val tvArchiveDuration: Int?,
+    val directSource: String?,
+    val customSid: String?,
     val rating: Float?,
-    val rating_5based: Float?,
+    val rating5Based: Float?,
     val added: Long?,
     val plot: String?,
     val cast: String?,

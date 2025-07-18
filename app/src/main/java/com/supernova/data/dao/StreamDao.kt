@@ -11,7 +11,7 @@ interface StreamDao {
     @Query("SELECT * FROM stream ORDER BY title ASC")
     fun getAllStreams(): Flow<List<StreamEntity>>
 
-    @Query("SELECT * FROM stream WHERE stream_id = :id")
+    @Query("SELECT * FROM stream WHERE streamId = :id")
     suspend fun getStreamById(id: Int): StreamEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -26,7 +26,7 @@ interface StreamDao {
     @Delete
     suspend fun deleteStream(stream: StreamEntity)
 
-    @Query("DELETE FROM stream WHERE stream_id = :id")
+    @Query("DELETE FROM stream WHERE streamId = :id")
     suspend fun deleteStreamById(id: Int)
 
     // FTS operations
@@ -36,16 +36,16 @@ interface StreamDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStreamFtsList(ftsList: List<StreamFts>)
 
-    @Query("SELECT * FROM stream WHERE tmdb_id IN (:ids)")
+    @Query("SELECT * FROM stream WHERE tmdbId IN (:ids)")
     suspend fun getByTmdbIds(ids: List<Int>): List<StreamEntity>
 
-    @Query("SELECT * FROM stream WHERE tmdb_id = :tmdbId LIMIT 1")
+    @Query("SELECT * FROM stream WHERE tmdbId = :tmdbId LIMIT 1")
     suspend fun getStreamByTmdb(tmdbId: Int): StreamEntity?
 
     @Query(
         """
         SELECT s.* FROM stream s
-        JOIN stream_fts fts ON s.stream_id = fts.rowid
+        JOIN stream_fts fts ON s.streamId = fts.rowid
         WHERE stream_fts MATCH :query
         ORDER BY s.title ASC
         """

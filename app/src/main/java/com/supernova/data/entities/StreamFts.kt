@@ -5,12 +5,12 @@ import androidx.room.Entity
 import androidx.room.Fts4
 import androidx.room.PrimaryKey
 
-@Fts4
+@Fts4(contentEntity = StreamEntity::class)
 @Entity(tableName = "stream_fts")
 data class StreamFts(
     @PrimaryKey
     @ColumnInfo(name = "rowid")
-    val stream_id: Int,
+    val streamId: Int,
     val title: String?,
     val plot: String?,
     val director: String?,

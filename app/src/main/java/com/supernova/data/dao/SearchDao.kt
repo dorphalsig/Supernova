@@ -20,9 +20,9 @@ interface SearchDao {
 
     @Query(
         """
-        SELECT s.stream_id AS id, s.title AS title, s.stream_type AS type, s.thumbnail_url AS posterUrl, NULL AS startAt,
+        SELECT s.streamId AS id, s.title AS title, s.streamType AS type, s.thumbnailUrl AS posterUrl, NULL AS startAt,
             CASE WHEN lower(s.title) = :q THEN 0 WHEN lower(s.title) LIKE :q || '%' THEN 1 ELSE 2 END AS relevance
-        FROM stream s JOIN stream_fts ON s.stream_id = stream_fts.rowid
+        FROM stream s JOIN stream_fts ON s.streamId = stream_fts.rowid
         WHERE stream_fts MATCH :q AND length(:q) >= 3
         """
     )
