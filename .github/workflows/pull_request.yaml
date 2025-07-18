@@ -19,8 +19,7 @@ jobs:
 
       - name: Run Tests
         id: gradle_test
-        run: ./gradlew test
-        continue-on-error: true
+        run: ./gradlew test > test_output.log 2>&1 || true
 
       - name: Handle PR Workflow
         env:
@@ -28,77 +27,9 @@ jobs:
           MERGE_TOKEN: ${{ secrets.MERGE_TOKEN }}
           GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
           FAILURE_GIST_ID: ${{ secrets.FAILURE_GIST_ID }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF_NAME: ${{ github.head_ref }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
-          set -e
-
-          # Get commit message and extract issue number
-          COMMIT_MSG="$(git log -1 --pretty=%B)"
-          ISSUE=$(echo "$COMMIT_MSG" | grep -oE "#[0-9]+" | head -1 | grep -oE "[0-9]+")
-          if [ -z "$ISSUE" ]; then
-            echo "No issue reference in commit message."
-            exit 0
-          fi
-
-          BRANCH="${{ github.head_ref }}"
-          REPO="${{ github.repository }}"
-          SHA="${{ github.sha }}"
-          RUN_URL="https://github.com/$REPO/actions/runs/${{ github.run_id }}"
-
-          # Helper for commenting on issue
-          comment_on_issue() {
-            MSG="$1"
-            curl -s -X POST \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              -d "{\"body\": \"$MSG\"}" \
-              "https://api.github.com/repos/$REPO/issues/$ISSUE/comments"
-          }
-
-          if [ "${{ steps.gradle_test.outcome }}" == "success" ]; then
-            REBASE=$(curl -s -X PUT \
-              -H "Authorization: token $MERGE_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              -d "{\"merge_method\":\"rebase\"}" \
-              "https://api.github.com/repos/$REPO/pulls/${{ github.event.number }}/merge")
-
-            if echo "$REBASE" | grep -q '"merged": true'; then
-              MSG="✅ **Tests passed and branch \`$BRANCH\` was rebased and merged!**
-Branch: \`$BRANCH\`
-Commit: \`$SHA\`
-[Workflow run]($RUN_URL)"
-              # Comment and close the issue
-              curl -s -X POST \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -H "Accept: application/vnd.github.v3+json" \
-                -d "{\"body\": \"$MSG\"}" \
-                "https://api.github.com/repos/$REPO/issues/$ISSUE/comments"
-              curl -s -X PATCH \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -H "Accept: application/vnd.github.v3+json" \
-                -d '{"state": "closed"}' \
-                "https://api.github.com/repos/$REPO/issues/$ISSUE"
-            else
-              REBASE_MSG=$(echo "$REBASE" | jq -r '.message // "Unknown error"')
-              MSG="⚠️ **Tests passed, but auto-rebase failed for branch \`$BRANCH\`. Manual intervention required.**
-Reason: $REBASE_MSG
-Branch: \`$BRANCH\`
-Commit: \`$SHA\`
-[Workflow run]($RUN_URL)"
-              comment_on_issue "$MSG"
-            fi
-          else
-            # Tests failed, collect error context
-            ERROR_CONTEXT=$(./gradlew test --console=plain --continue 2>&1 | grep -A 5 -B 5 -E 'FAILED|ERROR|Exception' | head -30)
-            MSG="❌ **Tests failed for branch \`$BRANCH\`**
-Commit: \`$SHA\`
-[Workflow run]($RUN_URL)
-
-### Error Context
-\`\`\`
-$ERROR_CONTEXT
-\`\`\`"
-            comment_on_issue "$MSG"
-
-            # Append error context to the gist as a JSONL line
-            TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-            ERROR_CONTEXT_ESCAPED=$(printf "%s" "$ERROR_CONTEXT" | jq -_
+          python3 .github/workflows/scripts/handle_failures.py
