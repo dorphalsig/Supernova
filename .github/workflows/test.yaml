@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run Tests & Auto Rebase
 on:
   pull_request:
     branches: [ master ]
@@ -7,96 +7,98 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 17
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Build with Gradle
+
+      - name: Run Tests
         id: gradle_test
         run: ./gradlew test
         continue-on-error: true
-      
-      - name: Log test failures
-        if: steps.gradle_test.outcome == 'failure'
+
+      - name: Handle PR Workflow
         env:
-          GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_TOKEN: ${{ secrets.MERGE_TOKEN }}
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
           FAILURE_GIST_ID: ${{ secrets.FAILURE_GIST_ID }}
         run: |
-          # Get current timestamp
-          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
-          
-          # Get existing gist content
-          EXISTING_CONTENT=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/gists/$FAILURE_GIST_ID" | \
-            jq -r '.files["test_failures.txt"].content // ""')
-          
-          # Create failure report
-          echo "=== TEST FAILURE - $TIMESTAMP ===" > failure_report.txt
-          echo "Repository: ${{ github.repository }}" >> failure_report.txt
-          echo "Branch: ${{ github.head_ref }}" >> failure_report.txt
-          echo "Commit: ${{ github.sha }}" >> failure_report.txt
-          echo "Commit Message: ${{ github.event.head_commit.message }}" >> failure_report.txt
-          echo "Workflow: ${{ github.workflow }}" >> failure_report.txt
-          echo "Run: ${{ github.run_number }}" >> failure_report.txt
-          echo "" >> failure_report.txt
-          
-          # Add detailed test failure information
-          echo "Test failure details:" >> failure_report.txt
-          echo "" >> failure_report.txt
-          
-          # Get test reports if they exist
-          if [ -d "build/reports/tests/test" ]; then
-            echo "--- Test Summary ---" >> failure_report.txt
-            find build/reports/tests/test -name "*.html" -exec echo "Report: {}" \; >> failure_report.txt
+          set -e
+
+          # Get commit message and extract issue number
+          COMMIT_MSG="$(git log -1 --pretty=%B)"
+          ISSUE=$(echo "$COMMIT_MSG" | grep -oE "#[0-9]+" | head -1 | grep -oE "[0-9]+")
+          if [ -z "$ISSUE" ]; then
+            echo "No issue reference in commit message."
+            exit 0
           fi
-          
-          # Get failed test details from test results
-          if [ -d "build/test-results/test" ]; then
-            echo "--- Failed Tests ---" >> failure_report.txt
-            find build/test-results/test -name "*.xml" -exec grep -l "failure\|error" {} \; | while read file; do
-              echo "Failed test file: $file" >> failure_report.txt
-              grep -A 5 -B 2 "failure\|error" "$file" >> failure_report.txt
-              echo "" >> failure_report.txt
-            done
-          fi
-          
-          # Capture gradle output with failures
-          echo "--- Gradle Output ---" >> failure_report.txt
-          ./gradlew test --console=plain --continue 2>&1 | tail -100 >> failure_report.txt
-          echo "" >> failure_report.txt
-          echo "===========================================" >> failure_report.txt
-          echo "" >> failure_report.txt
-          
-          # Combine with existing content
-          NEW_CONTENT=$(cat failure_report.txt)
-          if [ -n "$EXISTING_CONTENT" ]; then
-            COMBINED_CONTENT="$NEW_CONTENT$EXISTING_CONTENT"
-          else
-            COMBINED_CONTENT="$NEW_CONTENT"
-          fi
-          
-          # Update gist
-          cat > gist_payload.json << EOF
-          {
-            "description": "Test failures for ${{ github.repository }}",
-            "files": {
-              "test_failures.txt": {
-                "content": $(echo "$COMBINED_CONTENT" | jq -Rs .)
-              }
-            }
+
+          BRANCH="${{ github.head_ref }}"
+          REPO="${{ github.repository }}"
+          SHA="${{ github.sha }}"
+          RUN_URL="https://github.com/$REPO/actions/runs/${{ github.run_id }}"
+
+          # Helper for commenting on issue
+          comment_on_issue() {
+            MSG="$1"
+            curl -s -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              -d "{\"body\": \"$MSG\"}" \
+              "https://api.github.com/repos/$REPO/issues/$ISSUE/comments"
           }
-          EOF
-          
-          curl -X PATCH \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Content-Type: application/json" \
-            -d @gist_payload.json \
-            "https://api.github.com/gists/$FAILURE_GIST_ID"
-      
-      - name: Fail workflow if tests failed
-        if: steps.gradle_test.outcome == 'failure'
-        run: exit 1
+
+          if [ "${{ steps.gradle_test.outcome }}" == "success" ]; then
+            REBASE=$(curl -s -X PUT \
+              -H "Authorization: token $MERGE_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              -d "{\"merge_method\":\"rebase\"}" \
+              "https://api.github.com/repos/$REPO/pulls/${{ github.event.number }}/merge")
+
+            if echo "$REBASE" | grep -q '"merged": true'; then
+              MSG="✅ **Tests passed and branch \`$BRANCH\` was rebased and merged!**
+Branch: \`$BRANCH\`
+Commit: \`$SHA\`
+[Workflow run]($RUN_URL)"
+              # Comment and close the issue
+              curl -s -X POST \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                -d "{\"body\": \"$MSG\"}" \
+                "https://api.github.com/repos/$REPO/issues/$ISSUE/comments"
+              curl -s -X PATCH \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                -d '{"state": "closed"}' \
+                "https://api.github.com/repos/$REPO/issues/$ISSUE"
+            else
+              REBASE_MSG=$(echo "$REBASE" | jq -r '.message // "Unknown error"')
+              MSG="⚠️ **Tests passed, but auto-rebase failed for branch \`$BRANCH\`. Manual intervention required.**
+Reason: $REBASE_MSG
+Branch: \`$BRANCH\`
+Commit: \`$SHA\`
+[Workflow run]($RUN_URL)"
+              comment_on_issue "$MSG"
+            fi
+          else
+            # Tests failed, collect error context
+            ERROR_CONTEXT=$(./gradlew test --console=plain --continue 2>&1 | grep -A 5 -B 5 -E 'FAILED|ERROR|Exception' | head -30)
+            MSG="❌ **Tests failed for branch \`$BRANCH\`**
+Commit: \`$SHA\`
+[Workflow run]($RUN_URL)
+
+### Error Context
+\`\`\`
+$ERROR_CONTEXT
+\`\`\`"
+            comment_on_issue "$MSG"
+
+            # Append error context to the gist as a JSONL line
+            TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            ERROR_CONTEXT_ESCAPED=$(printf "%s" "$ERROR_CONTEXT" | jq -_
