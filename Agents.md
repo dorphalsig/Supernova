@@ -68,13 +68,13 @@ Each task must:
 
 ```bash
 # Compile code
-./build.py assembleDebug
+./gradlew assembleDebug
 
 # Run JVM unit tests only
-./build.py testDebugUnitTest
+./gradlew testDebugUnitTest
 
 # Full agent validation (compile + unit tests)
-./build.py :app:assembleDebug :app:testDebugUnitTest
+./gradlew :app:assembleDebug :app:testDebugUnitTest
 ```
 After each run go through the `/tmp/build_error_context.md` file to check for any issues.
 If any errors persist, detail all of them in the Work summary with filename and line number.
