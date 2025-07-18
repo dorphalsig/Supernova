@@ -36,7 +36,7 @@ jobs:
           # Create failure report
           echo "=== TEST FAILURE - $TIMESTAMP ===" > failure_report.txt
           echo "Repository: ${{ github.repository }}" >> failure_report.txt
-          echo "Branch: ${{ github.ref_name }}" >> failure_report.txt
+          echo "Branch: ${{ github.head_ref }}" >> failure_report.txt
           echo "Commit: ${{ github.sha }}" >> failure_report.txt
           echo "Workflow: ${{ github.workflow }}" >> failure_report.txt
           echo "Run: ${{ github.run_number }}" >> failure_report.txt
