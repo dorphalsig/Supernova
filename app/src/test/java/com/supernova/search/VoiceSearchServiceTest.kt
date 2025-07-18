@@ -8,14 +8,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
+
 import kotlin.test.assertEquals
 
+/**
+ * Unit tests for [VoiceSearchService].
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33])
 class VoiceSearchServiceTest {
     private lateinit var provider: VoiceInputProvider
     private lateinit var repo: EnhancedSearchRepository
