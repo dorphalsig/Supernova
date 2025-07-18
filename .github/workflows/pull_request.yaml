@@ -24,7 +24,7 @@ jobs:
 
       - name: Handle PR Workflow
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
           MERGE_TOKEN: ${{ secrets.MERGE_TOKEN }}
           GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
           FAILURE_GIST_ID: ${{ secrets.FAILURE_GIST_ID }}
