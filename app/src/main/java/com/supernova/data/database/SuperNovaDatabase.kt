@@ -36,8 +36,6 @@ import com.supernova.data.entities.ProfileEntity
 import com.supernova.data.entities.ProviderConfigEntity
 import com.supernova.data.entities.SeriesCategoryEntity
 import com.supernova.data.entities.SeriesEntity
-import com.supernova.data.entities.StreamEntity
-import com.supernova.data.entities.StreamFts
 import com.supernova.data.entities.UserProfileEntity
 import com.supernova.data.entities.WatchHistoryEntity
 import com.supernova.data.entities.ReactionEntity

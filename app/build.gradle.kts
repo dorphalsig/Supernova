@@ -150,3 +150,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
+hilt {
+    enableAggregatingTask = false
+}
