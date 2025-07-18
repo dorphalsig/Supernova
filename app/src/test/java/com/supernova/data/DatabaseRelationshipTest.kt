@@ -2,7 +2,8 @@ package com.supernova.data
 
 import android.content.Context
 import androidx.room.Room
-import androidx.test.core.app.ApplicationProvider
+import io.mockk.every
+import io.mockk.mockk
 import com.supernova.data.dao.MovieDao
 import com.supernova.data.dao.SeriesDao
 import com.supernova.data.dao.EpgDao
@@ -14,12 +15,9 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
 import java.io.IOException
 
-@RunWith(RobolectricTestRunner::class)
 class DatabaseRelationshipTest {
 
     private lateinit var db: SupernovaDatabase
@@ -29,7 +27,8 @@ class DatabaseRelationshipTest {
 
     @Before
     fun setup() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
+        val context = mockk<Context>(relaxed = true)
+        every { context.applicationContext } returns context
         db = Room.inMemoryDatabaseBuilder(context, SupernovaDatabase::class.java)
             .allowMainThreadQueries()
             .build()
