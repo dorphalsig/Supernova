@@ -1,25 +1,101 @@
 name: Run Tests
-
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
-
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 17
-
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-
       - name: Build with Gradle
+        id: gradle_test
         run: ./gradlew test
+        continue-on-error: true
+      
+      - name: Log test failures
+        if: steps.gradle_test.outcome == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
+          FAILURE_GIST_ID: ${{ secrets.FAILURE_GIST_ID }}
+        run: |
+          # Get current timestamp
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          
+          # Get existing gist content
+          EXISTING_CONTENT=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/gists/$FAILURE_GIST_ID" | \
+            jq -r '.files["test_failures.txt"].content // ""')
+          
+          # Create failure report
+          echo "=== TEST FAILURE - $TIMESTAMP ===" > failure_report.txt
+          echo "Repository: ${{ github.repository }}" >> failure_report.txt
+          echo "Branch: ${{ github.ref_name }}" >> failure_report.txt
+          echo "Commit: ${{ github.sha }}" >> failure_report.txt
+          echo "Workflow: ${{ github.workflow }}" >> failure_report.txt
+          echo "Run: ${{ github.run_number }}" >> failure_report.txt
+          echo "" >> failure_report.txt
+          
+          # Add detailed test failure information
+          echo "Test failure details:" >> failure_report.txt
+          echo "" >> failure_report.txt
+          
+          # Get test reports if they exist
+          if [ -d "build/reports/tests/test" ]; then
+            echo "--- Test Summary ---" >> failure_report.txt
+            find build/reports/tests/test -name "*.html" -exec echo "Report: {}" \; >> failure_report.txt
+          fi
+          
+          # Get failed test details from test results
+          if [ -d "build/test-results/test" ]; then
+            echo "--- Failed Tests ---" >> failure_report.txt
+            find build/test-results/test -name "*.xml" -exec grep -l "failure\|error" {} \; | while read file; do
+              echo "Failed test file: $file" >> failure_report.txt
+              grep -A 5 -B 2 "failure\|error" "$file" >> failure_report.txt
+              echo "" >> failure_report.txt
+            done
+          fi
+          
+          # Capture gradle output with failures
+          echo "--- Gradle Output ---" >> failure_report.txt
+          ./gradlew test --console=plain --continue 2>&1 | tail -100 >> failure_report.txt
+          echo "" >> failure_report.txt
+          echo "===========================================" >> failure_report.txt
+          echo "" >> failure_report.txt
+          
+          # Combine with existing content
+          NEW_CONTENT=$(cat failure_report.txt)
+          if [ -n "$EXISTING_CONTENT" ]; then
+            COMBINED_CONTENT="$NEW_CONTENT$EXISTING_CONTENT"
+          else
+            COMBINED_CONTENT="$NEW_CONTENT"
+          fi
+          
+          # Update gist
+          cat > gist_payload.json << EOF
+          {
+            "description": "Test failures for ${{ github.repository }}",
+            "files": {
+              "test_failures.txt": {
+                "content": $(echo "$COMBINED_CONTENT" | jq -Rs .)
+              }
+            }
+          }
+          EOF
+          
+          curl -X PATCH \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: application/json" \
+            -d @gist_payload.json \
+            "https://api.github.com/gists/$FAILURE_GIST_ID"
+      
+      - name: Fail workflow if tests failed
+        if: steps.gradle_test.outcome == 'failure'
+        run: exit 1
