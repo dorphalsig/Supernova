@@ -38,6 +38,7 @@ jobs:
           echo "Repository: ${{ github.repository }}" >> failure_report.txt
           echo "Branch: ${{ github.head_ref }}" >> failure_report.txt
           echo "Commit: ${{ github.sha }}" >> failure_report.txt
+          echo "Commit Message: ${{ github.event.head_commit.message }}" >> failure_report.txt
           echo "Workflow: ${{ github.workflow }}" >> failure_report.txt
           echo "Run: ${{ github.run_number }}" >> failure_report.txt
           echo "" >> failure_report.txt
