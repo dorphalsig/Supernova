@@ -1,5 +1,10 @@
 package com.supernova.data
 
+/**
+ * Unit tests for [SearchDao] verifying search across streams,
+ * live channels and episodes using an in-memory database.
+ */
+
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.room.Room
@@ -12,14 +17,10 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
+
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33])
 class SearchDaoTest {
 
     @get:Rule
