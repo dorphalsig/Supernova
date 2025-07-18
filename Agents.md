@@ -21,14 +21,10 @@ Each task must:
 **Repo Validation Command:**
 
 ```bash
-./gradlew :app:assembleDebug :app:testDebugUnitTest
+./build.py cleanup :app:assembleDebug :app:testDebugUnitTest
 ```
-
-**Do not use** `./gradlew build` — it may trigger unsupported instrumentation steps.
-
-> ℹ️ Agents may also run the build via `build.py`, which wraps Gradle, logs progress, and writes structured error summaries to `/tmp/build_error_context.md`.
-
----
+Each run will take around 10-15 minutes. Be patient and ensure all tests pass.
+**Do not use** `./build.py build` or `./gradlew build`  — it may trigger unsupported instrumentation steps.
 
 ## 3. Code Style & Structure
 
@@ -67,27 +63,19 @@ Each task must:
 ### Test Validation Commands
 
 ```bash
-# Compile code
-./gradlew assembleDebug
-
-# Run JVM unit tests only
-./gradlew testDebugUnitTest
-
-# Full agent validation (compile + unit tests)
-./gradlew :app:assembleDebug :app:testDebugUnitTest
+./build.py clean :app:assembleDebug :app:testDebugUnitTest
 ```
-After each run go through the `/tmp/build_error_context.md` file to check for any issues.
+Each run will take around 10-15 minutes. Be patient and ensure all tests pass.
 If any errors persist, detail all of them in the Work summary with filename and line number.
 ---
 
-## 5. Commit & Merge Rules
+## 5. Commit Procedure
+1. Run chmod +x ./create_issue.py
+2. Run `./create_issue.py --pat "<GITHUB PAT FROM YOUR PROMPT>" --title "<GOALS SUMMARY>" --body "<COMPLETE PROMPT>"` to create a new issue for the task
+   this will return the issue number.
+3. Include the latest output of  /tmp/build_error_context.md in the issue body.
+4. The last line of the commit mus **ALWAYS** be `#<issue number>` to tag the issue when merged.
 
-* All agent output must be self-contained
-* Task boundaries must be preserved (1 template = 1 task)
-* If multiple agents touch the same file, they must:
-
-  * Add comments noting the task name in the diff
-  * Flag for manual review if conflict risk exists
 
 ---
 
@@ -108,19 +96,7 @@ If an agent encounters:
 * Timeouts: Reduce scope and split into smaller subtasks
 
 ---
-
-## 8. Feedback Loop
-
-Agents must update `/tmp/build_error_context.md` if:
-
-* A task causes test failure
-* A compile error is introduced
-
-This ensures subsequent tasks can introspect the failure context and halt if needed.
-
----
-
-## 9. Enforcement
+## 8. Enforcement
 
 All tasks must comply with:
 
@@ -139,4 +115,4 @@ A task is considered done when:
 * All modified files compile
 * Unit tests pass via `testDebugUnitTest`
 * Coverage is maintained or improved
-* Repo state is ready for next task wave
+* Repo state is ready for next task
