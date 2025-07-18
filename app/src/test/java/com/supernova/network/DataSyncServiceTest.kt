@@ -1,11 +1,12 @@
 package com.supernova.network
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.test.core.app.ApplicationProvider
+import android.content.Context
 import androidx.room.Room
 import com.supernova.data.database.SupernovaDatabase
 import com.supernova.network.models.CategoryResponse
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -15,15 +16,10 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33])
 class DataSyncServiceTest {
 
     @get:Rule
@@ -35,7 +31,8 @@ class DataSyncServiceTest {
 
     @Before
     fun setup() {
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val context = mockk<Context>(relaxed = true)
+        every { context.applicationContext } returns context
         db = Room.inMemoryDatabaseBuilder(context, SupernovaDatabase::class.java)
             .allowMainThreadQueries()
             .build()
