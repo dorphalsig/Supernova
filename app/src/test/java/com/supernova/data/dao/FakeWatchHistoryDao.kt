@@ -24,4 +24,12 @@ class FakeWatchHistoryDao : WatchHistoryDao {
     override fun getByUser(userId: Int): Flow<List<WatchHistoryEntity>> = items.asStateFlow()
 
     override fun getContinueWatching(userId: Int): Flow<List<WatchHistoryEntity>> = items.asStateFlow()
+
+    // Fix FakeWatchHistoryDao Missing Method task
+    override suspend fun getRecent(userId: Int): List<WatchHistoryEntity> {
+        return items.value
+            .filter { it.userId == userId }
+            .sortedByDescending { it.watchedAt }
+            .take(10)
+    }
 }
