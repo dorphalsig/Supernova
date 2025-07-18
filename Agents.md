@@ -1,89 +1,142 @@
 # Agents.md
 
-## 1. Project Structure for OpenAI Codex Navigation
+## 1. Agent Role & Execution Context
 
-```text
-/app
-  /src
-    /main
-      /java/com/supernova
-        /api
-        /data
-        /sync
-        /workers
-        /ui
-      /res
-        /layout
-        /values
-/tests
-/docs
+Agents are isolated GPT-based workers executing atomic tasks in a CI-like environment. They are:
+
+* Non-interactive: each task must include all context needed.
+* Stateless across runs: do not assume prior output or project state.
+* Responsible for preserving project integrity: repo must compile, tests must pass.
+
+---
+
+## 2. Task Execution Guarantees
+
+Each task must:
+
+* Leave the project in a compilable, test-passing state
+* Touch only a **single concern** (e.g., one feature, one module, or one architectural layer)
+* Be **mergeable without conflict** with other concurrent tasks
+
+**Repo Validation Command:**
+
+```bash
+./gradlew :app:assembleDebug :app:testDebugUnitTest
 ```
 
-## 2. Application Architecture
+**Do not use** `./gradlew build` — it may trigger unsupported instrumentation steps.
 
-### 2.1 High-Level Components
+> ℹ️ Agents may also run the build via `build.py`, which wraps Gradle, logs progress, and writes structured error summaries to `/tmp/build_error_context.md`.
 
-* **API Layer**: Retrofit/Moshi `ApiService` per-portal with endpoints for live categories, streams, series, movies, EPG (XMLTV), auth.
-* **Persistence**: Room database with FTS4 index on `Stream` and `EpgProgramme`.
-* **Workers**:
+---
 
-  * **LiveSyncWorker**: sync live-streams every 12 hours + on-demand.
-  * **EpgSyncWorker**: sync EPG once per day (XMLTV format).
-* **Secure Storage**: `SecureDataStore` (Tink/AesGcm) for credentials.
-* **UI**: Compose + XML screens for login, profile, home, loading.
+## 3. Code Style & Structure
 
-### 2.2 Frameworks & Libraries
+* Use Kotlin for all Android code
+* Prefer Jetpack Compose for UI
+* One file per class/component
+* Data, UI, and network layers must follow modular separation
 
-* Kotlin, Coroutines, WorkManager, Hilt
-* Retrofit, Moshi, OkHttp
-* Room with FTS4
-* Coil (image caching and preload)
-* Compose + ViewBinding
+### Naming Conventions
 
-### 2.3 Architectural Patterns
+* DAO: `EntityDao.kt`
+* Entity: `EntityNameEntity.kt`
+* ViewModel: `FeatureViewModel.kt`
+* Screen: `FeatureScreen.kt`
 
-* MVVM + Repository + Use-Case layering
-* Single source of truth: DB ← Worker ← ViewModel
+---
 
-## 3. Dead Code Policy
+## 4. Test Policy
 
-Remove unused or deprecated code immediately. Regular lint and static analysis must identify and eliminate dead code.
+### Required Stack
 
-## 4. Programmatic Checks for OpenAI Codex
+* **JUnit**: Test runner (all tests)
+* **MockK**: For mocking dependencies in unit tests
+* **Room (in-memory)**: For DAO testing
 
-Automate the following pre-merge checks:
+### Prohibited
 
-* Unit/UI tests
-* Lint checks
-* Minimum code coverage of 70%
+* ❌ Robolectric (fully removed)
+* ❌ Espresso in new code (allowed for legacy only)
 
-## 5. Unit Tests
+### Required Coverage
 
-Use MockK for ViewModel tests and an in-memory Room DB for repository tests. Target at least 70% coverage.
+* Each task must add or update unit tests for its logic
+* Minimum 70% line coverage (enforced by CI audit step)
 
-## 7. Focus & Navigation
+### Test Validation Commands
 
-Ensure D-pad navigation across all screens; define `nextFocus*` attributes in XML or Compose.
+```bash
+# Compile code
+./build.py assembleDebug
 
-## 8. Feedback Log Requirements
-Each commit must include the following in the commit message:
-* A summary of changes, issues encountered, and resolutions.
-* For each error in each run of the build script, include:
-  * Error message
-  * Steps taken to resolve the error
-  * Any errors present in the `/tmp/build_error_context.md` file at the moment of the commit
+# Run JVM unit tests only
+./build.py testDebugUnitTest
 
+# Full agent validation (compile + unit tests)
+./build.py :app:assembleDebug :app:testDebugUnitTest
+```
+After each run go through the `/tmp/build_error_context.md` file to check for any issues.
 
-## 9. Build & Test Automation Feedback
-1. $1 **BUILD COMMANDS SHOULD BE RUN WITHOUT REDIRECTS OR PIPES**
-2. BE PATIENT, AS THE BUILD MAY TAKE SEVERAL MINUTES, YOU WILL NOT SEE OUTPUT UNTIL 2 MINUTES AFTER THE COMMAND IS EXECUTED
-3. **Full Build**: Run `./build.py :app:assembleDebug :app:testDebugUnitTest`
-4. **Error Analysis**: Review the `/tmp/build_error_context.md` report
-5. **Fix and Repeat**: Address all errors and re-run until successful
+---
+
+## 5. Commit & Merge Rules
+
+* All agent output must be self-contained
+* Task boundaries must be preserved (1 template = 1 task)
+* If multiple agents touch the same file, they must:
+
+  * Add comments noting the task name in the diff
+  * Flag for manual review if conflict risk exists
+
+---
+
+## 6. CI Configuration
+
+* Instrumentation (`androidTest`) is disabled by default
+* Compose Previews are used for UI snapshot validation
+* CI will fail if coverage drops below threshold
+
+---
+
+## 7. Troubleshooting
+
+If an agent encounters:
+
+* Build hangs: Try `--no-daemon`, `--console=plain`, `--max-workers=1`
+* Unknown test failures: Check for leftover Espresso or platform test references
+* Timeouts: Reduce scope and split into smaller subtasks
+
+---
+
+## 8. Feedback Loop
+
+Agents must update `/tmp/build_error_context.md` if:
+
+* A task causes test failure
+* A compile error is introduced
+
+This ensures subsequent tasks can introspect the failure context and halt if needed.
+
+---
+
+## 9. Enforcement
+
+All tasks must comply with:
+
+* `/docs/architecture/*`
+* `/Agents.md`
+* `build.gradle.kts`, `libs.versions.toml`, and module policies
+
+If a policy is unclear, agents must stop and request clarification before proceeding.
+
+---
 
 ## 10. Definition of Done
-* All tests passing
-* Feedback log updated and committed
- 
-## 11. Architecture Documentation
-The architecture documentation is stored in the `/docs` folder. Each chapter is a separate markdown file.
+
+A task is considered done when:
+
+* All modified files compile
+* Unit tests pass via `testDebugUnitTest`
+* Coverage is maintained or improved
+* Repo state is ready for next task wave
