@@ -9,6 +9,11 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+        GRADLE_CACHE_USER: ${{ secrets.GRADLE_CACHE_USER }}
+        GRADLE_CACHE_PASS: ${{ secrets.GRADLE_CACHE_PASS }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GIST_ID: bbdbb3d2fc1677c1724c8dab574bba34
     steps:
       - uses: actions/checkout@v4
 
@@ -41,8 +46,6 @@ jobs:
           name: build_results
 
       - name: Auto-gate / close issue
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           python .github/scripts/merge.py
             --owner ${{ github.repository_owner }}
