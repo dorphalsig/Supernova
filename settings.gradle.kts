@@ -33,7 +33,7 @@ dependencyResolutionManagement {
 
 buildCache {
     local {
-        isEnabled = true
+        isEnabled = false
     }
     remote<HttpBuildCache> {
         url = uri("  https://build-cache-node.onrender.com/cache")    // replace
