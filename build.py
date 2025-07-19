@@ -12,7 +12,8 @@ Key JSON schema
 ```
 {
   "timestamp": "…Z",
-  "pr": 42,                 # omitted in --agent mode
+  "pr": 42,                 # omitted if not provided
+  "branch": "feature/foo",# omitted if not provided
   "task": "testDebugUnitTest",
   "result": "compile_error" | "tests_failed" | "success",
   "exitCode": 1,
@@ -27,11 +28,11 @@ Key JSON schema
 
 Operating modes
 ---------------
-* **CI / gist mode** (default) — appends the JSON blob to `test_failures.txt`
-  in the designated error‑gist.
 * **Agent mode** (`--agent`) — writes the blob to `/tmp/build_results.json`
-  and prints a heartbeat every *N* seconds (default **30**) via a daemon
-  thread so orchestration layers don’t abort long builds.
+  and prints a heartbeat every *N* seconds (default 30) so orchestration
+  layers don’t abort long builds.
+* **Gist mode** (default if `--gist` and `--pat` provided) — also appends the
+  JSON blob to `test_failures.txt` in the designated error‑gist.
 
 Exit‑code mirrors Gradle’s exit‑code so CI checks stay accurate.
 """
@@ -58,7 +59,6 @@ import requests
 KOTLIN_ERR = re.compile(r"e: (/.+?): \((\d+), \d+\): (.+)")
 JAVA_ERR = re.compile(r"(/.+?\.java):(\d+): error: (.+)")
 
-
 # --------------------------------------------------------------------------- #
 # Compile‑error parsing                                                        #
 # --------------------------------------------------------------------------- #
@@ -78,7 +78,6 @@ def parse_compile_errors(stdout: str, limit: int = 10) -> List[Dict[str, Any]]:
         if len(out) >= limit:
             break
     return out
-
 
 # --------------------------------------------------------------------------- #
 # JUnit result parsing                                                         #
@@ -111,7 +110,6 @@ def parse_test_results(task: str, limit: int = 50) -> Dict[str, Any]:
     return {"total": total, "failed": failed, "skipped": skipped,
             "duration": round(dur, 2), "failures": fails}
 
-
 # --------------------------------------------------------------------------- #
 # GitHub Gist integration                                                      #
 # --------------------------------------------------------------------------- #
@@ -129,7 +127,6 @@ def append_to_gist(pat: str, gist_id: str, blob: str) -> None:
     upd = {"files": {"test_failures.txt": {"content": f"{old.rstrip()}\n{blob}\n"}}}
     sess.patch(f"https://api.github.com/gists/{gist_id}", json=upd, timeout=20).raise_for_status()
 
-
 # --------------------------------------------------------------------------- #
 # Heartbeat helper                                                             #
 # --------------------------------------------------------------------------- #
@@ -146,7 +143,6 @@ def start_heartbeat(enabled: bool, interval: int) -> None:
 
     threading.Thread(target=_beat, daemon=True).start()
 
-
 # --------------------------------------------------------------------------- #
 # Main                                                                         #
 # --------------------------------------------------------------------------- #
@@ -154,28 +150,37 @@ def start_heartbeat(enabled: bool, interval: int) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Run Gradle build/tests and emit compact JSON results.")
     ap.add_argument("--task", default=os.getenv("GRADLE_TASK", "testDebugUnitTest"))
-    ap.add_argument("--agent", action="store_true", help="Agent mode (heartbeat + /tmp output)")
-    ap.add_argument("--beat-interval", type=int, default=int(os.getenv("BEAT_INTERVAL", 30)),
+    ap.add_argument("--agent", action="store_true",
+                    help="Agent mode (heartbeat + /tmp output)")
+    ap.add_argument("--beat-interval", type=int,
+                    default=int(os.getenv("BEAT_INTERVAL", 30)),
                     help="Seconds between heartbeat prints (agent mode)")
-    ap.add_argument("--gist", default=os.getenv("GIST_ID"))
-    ap.add_argument("--pat", default=os.getenv("GITHUB_TOKEN"))
-    ap.add_argument("--pr", type=int, default=os.getenv("PR_NUMBER"))
-    ap.add_argument("--branch",type=str, default=os.getenv("BRANCH_NAME"),)
+    ap.add_argument("--gist", default=os.getenv("GIST_ID"),
+                    help="Gist ID for uploading results (gist mode)")
+    ap.add_argument("--pat", default=os.getenv("GIST_PAT"),
+                    help="Personal access token with gist scope")
+    ap.add_argument("--pr", type=int, default=os.getenv("PR_NUMBER"),
+                    help="Pull request number (optional)")
+    ap.add_argument("--branch", default=os.getenv("BRANCH_NAME"),
+                    help="Branch name (optional)")
     args = ap.parse_args()
 
-    if not args.agent and (not args.gist or not args.pat or not args.pr):
-        sys.exit("❌  Missing --gist, --pat or --pr (gist mode)")
+    # Validate gist mode requirements
+    if not args.agent and (not args.gist or not args.pat):
+        sys.exit("❌  Missing --gist or --pat (gist mode)")
 
     start_heartbeat(args.agent, args.beat_interval)
 
     t0 = time.time()
-    proc = subprocess.run(["./gradlew", args.task, "--no-daemon", "--console=plain", "--stacktrace"],
-                          capture_output=True, text=True)
+    proc = subprocess.run([
+        "./gradlew", args.task, "--no-daemon", "--console=plain", "--stacktrace"
+    ], capture_output=True, text=True)
     dur = round(time.time() - t0, 2)
 
     combined = proc.stdout + proc.stderr
     rc = proc.returncode
 
+    # Build payload
     payload: Dict[str, Any] = {
         "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "task": args.task,
@@ -184,12 +189,13 @@ def main() -> None:
         "compileErrors": [],
         "testFailures": []
     }
+    # Optional fields
     if args.pr:
         payload["pr"] = int(args.pr)
-
     if args.branch:
         payload["branch"] = args.branch
 
+    # Parse errors or tests
     if rc != 0:
         payload["result"] = "compile_error"
         payload["compileErrors"] = parse_compile_errors(combined)
@@ -208,15 +214,17 @@ def main() -> None:
 
     blob = json.dumps(payload, separators=(',', ':'))
 
-    if args.agent:
-        Path("/tmp/build_results.json").write_text(blob + "\n", encoding="utf-8")
-        print("✅  JSON results written to /tmp/build_results.json")
-    else:
+    # Always write the local JSON summary
+    Path("/tmp/build_results.json").write_text(blob + "\n", encoding="utf-8")
+
+    if not args.agent:
+        # In gist mode, also append to your Gist
         append_to_gist(args.pat, args.gist, blob)
         print(f"✅  Report appended to gist {args.gist}")
+    else:
+        print("✅  JSON results written to /tmp/build_results.json")
 
     sys.exit(rc)
-
 
 # --------------------------------------------------------------------------- #
 # Self‑test                                                                    #
@@ -226,7 +234,6 @@ def _self_test() -> None:
     line = "/foo/Bar.kt: (12, 5): Bad"
     assert parse_compile_errors(f"e: {line}")[0]["line"] == 12
     print("self‑test OK")
-
 
 if __name__ == "__main__":
     if "--self-test" in sys.argv:
