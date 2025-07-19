@@ -26,7 +26,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3   # cache & wrapper
 
       - name: Run unit tests via helper
-        run: python build.py --task testDebugUnitTest
+        run: python build.py --gist --task testDebugUnitTest
 
       - name: Upload summary
         uses: actions/upload-artifact@v4
