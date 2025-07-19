@@ -13,7 +13,6 @@ jobs:
         GRADLE_CACHE_USER: ${{ secrets.GRADLE_CACHE_USER }}
         GRADLE_CACHE_PASS: ${{ secrets.GRADLE_CACHE_PASS }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GIST_ID: bbdbb3d2fc1677c1724c8dab574bba34
         BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +25,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3   # cache & wrapper
 
       - name: Run unit tests via helper
-        run: python build.py --gist --task testDebugUnitTest
+        run: python build.py --gist bbdbb3d2fc1677c1724c8dab574bba34 --task testDebugUnitTest
 
       - name: Upload summary
         uses: actions/upload-artifact@v4
