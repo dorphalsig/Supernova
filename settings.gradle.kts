@@ -36,8 +36,7 @@ buildCache {
         isEnabled = true
     }
     remote<HttpBuildCache> {
-        url = uri("https://supernova1.rf.gd/")    // replace
-        isPush = (System.getenv("CI") == "true")   // only push on CI
+        url = uri("  https://build-cache-node.onrender.com/cache")    // replace
         credentials {
             username = cacheUser
             password = cachePass
