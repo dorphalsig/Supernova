@@ -160,6 +160,7 @@ def main() -> None:
     ap.add_argument("--gist", default=os.getenv("GIST_ID"))
     ap.add_argument("--pat", default=os.getenv("GITHUB_TOKEN"))
     ap.add_argument("--pr", type=int, default=os.getenv("PR_NUMBER"))
+    ap.add_argument("--branch",type=str, default=os.getenv("BRANCH_NAME"),)
     args = ap.parse_args()
 
     if not args.agent and (not args.gist or not args.pat or not args.pr):
@@ -185,6 +186,9 @@ def main() -> None:
     }
     if args.pr:
         payload["pr"] = int(args.pr)
+
+    if args.branch:
+        payload["branch"] = args.branch
 
     if rc != 0:
         payload["result"] = "compile_error"
