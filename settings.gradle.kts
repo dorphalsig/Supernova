@@ -36,7 +36,7 @@ buildCache {
         isEnabled = false
     }
     remote<HttpBuildCache> {
-        url = uri("  https://build-cache-node.onrender.com/cache")    // replace
+        url = uri("  https://build-cache-node.onrender.com/cache/")    // replace
         credentials {
             username = cacheUser
             password = cachePass
