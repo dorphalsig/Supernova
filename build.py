@@ -114,7 +114,7 @@ def parse_test_results(task: str, limit: int = 50) -> Dict[str, Any]:
 # GitHub Gist integration                                                      #
 # --------------------------------------------------------------------------- #
 
-def append_to_gist(pat: str, gist_id: str, blob: str) -> None:
+def prepend_to_gist(pat: str, gist_id: str, blob: str) -> None:
     sess = requests.Session()
     sess.headers.update({
         "Authorization": f"token {pat}",
@@ -124,7 +124,7 @@ def append_to_gist(pat: str, gist_id: str, blob: str) -> None:
     g = sess.get(f"https://api.github.com/gists/{gist_id}", timeout=20)
     g.raise_for_status()
     old = g.json()["files"].get("test_failures.txt", {}).get("content", "")
-    upd = {"files": {"test_failures.txt": {"content": f"{old.rstrip()}\n{blob}\n"}}}
+    upd = {"files": {"test_failures.txt": {"content": f"{blob}\n{old.rstrip()}"}}}
     sess.patch(f"https://api.github.com/gists/{gist_id}", json=upd, timeout=20).raise_for_status()
 
 # --------------------------------------------------------------------------- #
@@ -219,7 +219,7 @@ def main() -> None:
 
     if not args.agent:
         # In gist mode, also append to your Gist
-        append_to_gist(args.pat, args.gist, blob)
+        prepend_to_gist(args.pat, args.gist, blob)
         print(f"✅  Report appended to gist {args.gist}")
     else:
         print("✅  JSON results written to /tmp/build_results.json")
