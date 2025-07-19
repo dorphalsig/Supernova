@@ -1,0 +1,50 @@
+# .github/workflows/ci.yaml
+name: CI
+
+on:
+  push:          # every branch, so feature branches get feedback too
+    branches: ['*']
+  pull_request:  # PR events (open, sync, reopen)
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v3   # cache & wrapper
+
+      - name: Run unit tests via helper
+        run: python build.py --agent --task testDebugUnitTest
+
+      - name: Upload summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: build_results
+          path: /tmp/build_results.json
+
+  gate-pr:
+    if: github.event_name == 'pull_request'
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download summary
+        uses: actions/download-artifact@v4
+        with:
+          name: build_results
+
+      - name: Auto-gate / close issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          python .github/scripts/merge.py
+            --owner ${{ github.repository_owner }}
+            --repo  ${{ github.event.repository.name }}
+            --pr    ${{ github.event.number }}

@@ -31,6 +31,7 @@ import requests
 
 GH_API = "https://api.github.com"
 
+
 # --------------------------------------------------------------------------- #
 # GitHub helpers                                                               #
 # --------------------------------------------------------------------------- #
@@ -61,11 +62,13 @@ def find_or_create_issue(pat: str, owner: str, repo: str, branch: str) -> Dict[s
 
 
 def comment_issue(pat: str, owner: str, repo: str, num: int, body: str) -> None:
-    gh_request(pat, "POST", f"{GH_API}/repos/{owner}/{repo}/issues/{num}/comments", json={"body": body})
+    gh_request(pat, "POST", f"{GH_API}/repos/{owner}/{repo}/issues/{num}/comments",
+               json={"body": body})
 
 
 def add_commit_comment(pat: str, owner: str, repo: str, sha: str, body: str) -> None:
-    gh_request(pat, "POST", f"{GH_API}/repos/{owner}/{repo}/commits/{sha}/comments", json={"body": body})
+    gh_request(pat, "POST", f"{GH_API}/repos/{owner}/{repo}/commits/{sha}/comments",
+               json={"body": body})
 
 
 def get_pr(pat: str, owner: str, repo: str, num: int) -> Dict[str, Any]:
@@ -88,11 +91,13 @@ def merge_pr(pat: str, owner: str, repo: str, pr_num: int, sha: str) -> None:
 
 
 def close_issue(pat: str, owner: str, repo: str, num: int) -> None:
-    gh_request(pat, "PATCH", f"{GH_API}/repos/{owner}/{repo}/issues/{num}", json={"state": "closed"})
+    gh_request(pat, "PATCH", f"{GH_API}/repos/{owner}/{repo}/issues/{num}",
+               json={"state": "closed"})
 
 
 def delete_branch(pat: str, owner: str, repo: str, branch: str) -> None:
     gh_request(pat, "DELETE", f"{GH_API}/repos/{owner}/{repo}/git/refs/heads/{branch}")
+
 
 # --------------------------------------------------------------------------- #
 # Error summariser                                                             #
@@ -106,6 +111,7 @@ def summarise_errors(res: Dict[str, Any]) -> str:
         return f"**{res['failedTests']} failing tests**\n" + "\n".join(
             f"* {t['test']} — {t['msg']}" for t in res["testFailures"])
     return "Unknown gate failure"
+
 
 # --------------------------------------------------------------------------- #
 # Main                                                                         #
@@ -143,13 +149,20 @@ def main() -> None:
             comment_issue(args.pat, args.owner, args.repo, issue["number"],
                           "PR Gate Green, No conflicts. Auto merged")
             close_issue(args.pat, args.owner, args.repo, issue["number"])
-            delete_branch(args.pat, args.owner, args.repo, branch)
-        else:
-            comment_issue(args.pat, args.owner, args.repo, issue["number"],
-                          f"PR Gate Green. Conflicts exist: {pr.get('mergeable_state', 'unknown')}")
+            merge_resp = gh_request("PUT", f"/repos/{repo}/pulls/{pr}/merge",
+                                    json={"merge_method": "rebase"})
+            if merge_resp.json().get("merged"):
+                delete_branch(args.pat, args.owner, args.repo, branch)
+            else:
+                comment_issue(args.pat, args.owner, args.repo, issue["number"],
+                              f"PR Gate Green, No conflicts. Auto merge failed: {merge_resp.get('message', 'unknown error')}")
+
     else:
         comment_issue(args.pat, args.owner, args.repo, issue["number"],
-                      f"PR Gate Red\n\n{summarise_errors(res)}")
+                      f"PR Gate Green. Conflicts exist: {pr.get('mergeable_state', 'unknown')}")
+    else:
+    comment_issue(args.pat, args.owner, args.repo, issue["number"],
+                  f"PR Gate Red\n\n{summarise_errors(res)}")
 
 
 if __name__ == "__main__":
