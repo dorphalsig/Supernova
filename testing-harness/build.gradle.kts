@@ -4,7 +4,10 @@ plugins {
 }
 
 dependencies {
+    // JSON parsing (for JsonFixtureLoader)
     implementation(libs.moshi)
+    
+    // Core testing
     testImplementation(libs.jupiter.api)
     testRuntimeOnly(libs.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
