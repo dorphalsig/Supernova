@@ -4,11 +4,15 @@ plugins {
 }
 
 dependencies {
-    // JSON parsing (for JsonFixtureLoader)
+    // Network testing (for BaseSyncTest)
+    implementation(libs.retrofit)
+    implementation(libs.converter.moshi)
     implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.mockwebserver)
     
-    // Core testing
-    testImplementation(libs.jupiter.api)
+    // Core testing framework
+    api(libs.jupiter.api)
     testRuntimeOnly(libs.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.mockk)
