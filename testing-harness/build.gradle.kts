@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${libs.versions.kotlinxCoroutinesTest.get()}")
     testImplementation(libs.jupiter.api)
     testRuntimeOnly(libs.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
