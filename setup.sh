@@ -3,7 +3,7 @@ export ANDROID_HOME="/opt/sdk"
 export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 cd /workspace
 mkdir -p "$ANDROID_HOME"
-curl -s -o /dev/null "https://build-cache-node.onrender.com/"
+apt-get update && apt-get install -y gh curl unzip
 echo "Downloading Android command line tools..."
 curl -L "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip" -o tools.zip
 
