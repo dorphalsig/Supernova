@@ -1,9 +1,9 @@
 package com.supernova.testing
 
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.sql.DriverManager
-import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class DbAssertionHelpersTest : TestEntityFactory() {
