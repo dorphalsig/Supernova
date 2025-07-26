@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    // Core testing
     testImplementation(libs.jupiter.api)
     testRuntimeOnly(libs.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
