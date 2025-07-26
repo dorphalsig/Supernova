@@ -8,7 +8,7 @@ This guide defines the enforceable constraints, scaffolding, and responsibilitie
 
 * **Platform**: Android TV, non-touch, low-end (≤512MB RAM)
 * **UI**: Jetpack Compose only
-* **Minimum SDK**: 21
+* **Minimum SDK**: 26
 * **Architecture**: MVVM + Repository + Room
 * **Persistence**: Room (DAO-enforced, FTS4 only)
 * **Media Loading**: Coil
@@ -108,7 +108,7 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
 
 ## 7. qaGate Enforcement
 
-* Agents must run `./gradlew testDebugUnitTest` before committing any task
+* Agents must run `./gradlew test` before committing any task
 * If the build fails at `:app:qaGate`, agents must:
   - Parse `app/build/reports/check-results.json`
   - Read `qaGateSummary.overallSuccess`
@@ -130,9 +130,11 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
     - Commit hash
     - Summary of issues from JSON
     - All `paste.rs` links
-* No commit is allowed if `testDebugUnitTest` fails and escalation has not been performed
+* No commit is allowed without a passing `qaGate` or 4 failed attempts and an issue created
 * All successful commits must include:
   - Task name
+  - Initial instructions
+  - Brief description of changes
   - Final `paste.rs` report link
   - Note if auto-fixes were applied
 
