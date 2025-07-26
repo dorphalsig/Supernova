@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "title": "Stream 1",
+  "category_id": 1,
+  "stream_type": "LIVE",
+  "is_live": true,
+  "number": 100
+}
