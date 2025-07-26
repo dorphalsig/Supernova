@@ -1,13 +1,13 @@
 package com.supernova.testing
 
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import retrofit2.http.GET
-import kotlin.test.Test
+import java.io.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.BeforeEach
-import java.io.IOException
 
 class BaseSyncTestTest : BaseSyncTest() {
     private interface EchoService {

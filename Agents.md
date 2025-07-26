@@ -15,6 +15,9 @@ This guide defines the enforceable constraints, scaffolding, and responsibilitie
 * **Network**: Retrofit + Moshi
 * **Async**: Coroutines + WorkManager
 * **No XML layouts, JUnit4, Robolectric, or AppSearch**
+* **Version Lock**: Do not change versions of libraries or build targets.
+* **Mandatory Gradle Plugins**
+  - com.supernova.testgate 
 
 ---
 
