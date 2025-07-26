@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 export ANDROID_HOME="/opt/sdk"
 export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+# shellcheck disable=SC2164
 cd /workspace
 mkdir -p "$ANDROID_HOME"
 apt-get update && apt-get install -y gh curl unzip
@@ -22,6 +23,7 @@ bash -c "yes | sdkmanager --sdk_root=\"${ANDROID_HOME}\" --licenses 2>&1 | tail 
 echo "Downloading SDK Tools..."
 bash -c "yes | sdkmanager --sdk_root=\"${ANDROID_HOME}\" \"platform-tools\" \"build-tools;34.0.0\" \"platforms;android-34\" 2>&1"
 
+# shellcheck disable=SC2164
 cd /workspace/Supernova
 
 if ! ./gradlew --version &>/dev/null; then

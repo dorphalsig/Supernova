@@ -108,7 +108,7 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
 
 ## 7. qaGate Enforcement
 
-* Agents must run `./gradlew buildTestUnittests` before committing any task
+* Agents must run `./gradlew testDebugUnitTest` before committing any task
 * If the build fails at `:app:qaGate`, agents must:
   - Parse `app/build/reports/check-results.json`
   - Read `qaGateSummary.overallSuccess`
@@ -130,7 +130,7 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
     - Commit hash
     - Summary of issues from JSON
     - All `paste.rs` links
-* No commit is allowed if `buildTestUnittests` fails and escalation has not been performed
+* No commit is allowed if `testDebugUnitTest` fails and escalation has not been performed
 * All successful commits must include:
   - Task name
   - Final `paste.rs` report link
