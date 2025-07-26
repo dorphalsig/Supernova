@@ -34,6 +34,8 @@ androidxEspresso = "3.6.1"
 coreTesting = "2.2.0"
 androidxTestCore = "1.6.1"
 androidxTestRules = "1.6.1"
+sqliteDriver = "2.5.1"
+sqliteJdbc = "3.45.1.0"
 
 [libraries]
 # Core + Compose
@@ -68,8 +70,11 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 # Networking
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
+mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "loggingInterceptor" }
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
+moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
 
 # Persistence
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
@@ -104,6 +109,9 @@ androidx-core-testing = { group = "androidx.arch.core", name = "core-testing", v
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
+androidx-sqlite-driver = { group = "androidx.sqlite", name = "sqlite-driver", version.ref = "sqliteDriver" }
+sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqliteJdbc" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

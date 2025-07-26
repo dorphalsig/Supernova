@@ -5,7 +5,15 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlin.test)
+
+   // Network testing (for BaseSyncTest)
+    implementation(libs.retrofit)
+    implementation(libs.converter.moshi)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.mockwebserver)
+    
+    // Core testing framework
     testImplementation(libs.jupiter.api)
     testRuntimeOnly(libs.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
