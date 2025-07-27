@@ -1,4 +1,4 @@
-package com.supernova.app
+package com.supernova
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
