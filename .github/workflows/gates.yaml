@@ -148,3 +148,24 @@ jobs:
       - uses: peter-evans/rebase@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  enable-auto-merge:
+    needs:
+      - check-banned
+      - check-test-structure
+      - check-fails
+      - check-compile-errors
+      - check-coroutines
+      - check-ignored
+      - generate-results
+    if: ${{ success() && github.event.pull_request.merged == false }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Enable GitHub auto-merge
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          merge-method: squash  # or "merge" / "rebase"
