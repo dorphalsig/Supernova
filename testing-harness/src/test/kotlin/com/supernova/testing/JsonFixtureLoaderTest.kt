@@ -9,13 +9,13 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class JsonFixtureLoaderTest {
+class JsonFixtureLoaderTest : TestEntityFactory() {
     private val loader = JsonFixtureLoader()
 
     @Test
     fun `loadRaw caches fixture`() = runTest {
-        val first = loader.loadRaw("sample_response.json")
-        val second = loader.loadRaw("sample_response.json")
+        val first = loader.loadJsonFixture("sample_response.json")
+        val second = loader.loadJsonFixture("sample_response.json")
         assertEquals(first, second)
         assertEquals(1, loader.cache.size)
     }
