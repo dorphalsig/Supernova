@@ -24,7 +24,6 @@ mockk = "1.14.5"
 coreTesting = "2.2.0"
 androidxTest = "1.6.1"
 androidxJunit = "1.2.1"
-sqliteJdbc = "3.50.3.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -97,4 +96,3 @@ androidx-core-testing = { group = "androidx.arch.core", name = "core-testing", v
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTest" }
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTest" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
-# sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqliteJdbc" }

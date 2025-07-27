@@ -20,48 +20,49 @@ This guide defines the enforceable constraints, scaffolding, and responsibilitie
   - com.supernova.testgate 
 
 ---
-
 ## 2. Test Harness (REQUIRED)
 
 All tasks must **reuse the shared test harness** components below:
 
-```
-(test-harness
-  (module :testing-harness)
-  (package-root com.supernova.testing)
-  (enforced true)
+### Module
+- **Name**: `testing-harness`
+- **Package Root**: `com.supernova.testing`
+- **Enforced**: `true`
 
-  (components
-    (BaseRoomTest :layer "data")
-    (BaseSyncTest :layer "sync")
-    (TestEntityFactory :layer "all")
-    (CoroutineTestUtils :layer "all")
-    (DbAssertionHelpers :layer "data")
-    (JsonFixtureLoader :layer "sync")
-    (MockWebServerExtensions :layer "sync")
-    (UiStateTestHelpers :layer "ui")
-    (PreviewFactories :layer "ui")
-    (SyncScenarioFactory :layer "sync")
-  )
+### Components by Layer
+- **Data**
+  - `BaseRoomTest`
+  - `DbAssertionHelpers`
+- **Sync**
+  - `BaseSyncTest`
+  - `JsonFixtureLoader`
+  - `MockWebServerExtensions`
+  - `SyncScenarioFactory`
+- **UI**
+  - `UiStateTestHelpers`
+  - `PreviewFactories`
+- **All Layers**
+  - `TestEntityFactory`
+  - `CoroutineTestUtils`
 
-  (requirements
-    :shared_module_only true
-    :allowed_packages ["com.supernova.testing.*"]
-    :disallowed_packages ["data.*", "sync.*", "ui.*"]
-    :gradle_dependency_required true
-    :minimum_coverage 70
-    :coroutines_enforced true
-  )
+### Requirements
+- Must use shared module only
+- Allowed packages: `com.supernova.testing.*`
+- Disallowed packages: `data.*`, `sync.*`, `ui.*`
+- Gradle dependency must be present
+- Minimum test coverage: **70%**
+- Coroutines required for async code
+- Tests should extend the provided base classes. 
+- **DO NOT** modify anything in the `testing-harness` module.
 
-  (agent-rules
-    :reuse_required true
-    :no_inline_entities true
-    :no_room_or_retrofit_mocks true
-    :one_fixture_per_task true
-    :unit_test_for_helper true
-  )
-)
-```
+### Agent Rules
+- Reuse of components is **mandatory**
+- No inline entity definitions
+- No mocks for Room or Retrofit
+- Only one fixture per task
+- Helpers must be covered by unit tests
+- DO NOT modify the `testing-harness` module
+- Do NOT modify gradle.properties
 
 ---
 
@@ -143,7 +144,8 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
 
 Example commit message:
 ```
-fix: Add BaseRoomTest to FavoritesDaoTest
+feat: Create SupernovaDatabase and core DAOs
+
 
 qaGate passed after 2 retries. Report: https://paste.rs/abc12
 ```
