@@ -53,6 +53,10 @@ android {
             "META-INF/AL2.0", "META-INF/LGPL2.1"
         )
     }
+
+    hilt {
+        enableAggregatingTask = false
+    }
 }
 
 dependencies {
@@ -60,6 +64,9 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material:material")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.runtime.ktx)
