@@ -11,7 +11,9 @@
 /native
 .DS_Store
 build
+
 /captures
+/testing-harness
 .externalNativeBuild
 .cxx
 local.properties
