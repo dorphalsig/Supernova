@@ -14,12 +14,12 @@ class UiStateTestHelpersTest {
         javaClass.classLoader!!.getResource("fixtures/ui_state_success.json")!!.readText()
 
     @Test
-    fun `loading assertion`() = runTest {
+    fun `loading assertion`() = runTest() {
         UiStateTestHelpers.assertLoading(UiState.Loading)
     }
 
     @Test
-    fun `success assertion`() = runTest {
+    fun `success assertion`() = runTest() {
         val data = loadFixture()
         UiStateTestHelpers.assertSuccess(UiState.Success(data)) {
             assertEquals(data, it)
@@ -27,7 +27,7 @@ class UiStateTestHelpersTest {
     }
 
     @Test
-    fun `error assertion`() = runTest {
+    fun `error assertion`() = runTest() {
         val err = IllegalStateException("boom")
         UiStateTestHelpers.assertError(UiState.Error(err)) {
             assertEquals(err, it)
@@ -35,7 +35,7 @@ class UiStateTestHelpersTest {
     }
 
     @Test
-    fun `collect states from flow`() = runTest {
+    fun `collect states from flow`() = runTest() {
         val flow = MutableStateFlow<UiState<String>>(UiState.Loading)
         val updater = launch { flow.value = UiState.Success("done") }
         val states = flow.collectStates(2)
@@ -44,7 +44,7 @@ class UiStateTestHelpersTest {
     }
 
     @Test
-    fun `viewmodel state test`() = runTest {
+    fun `viewmodel state test`() = runTest() {
         class ExampleVm : UiStateTestHelpers.TestViewModel<String>(UiState.Loading) {
             suspend fun emit() { setState(UiState.Success("ok")) }
         }
@@ -54,7 +54,7 @@ class UiStateTestHelpersTest {
     }
 
     @Test
-    fun `focus navigation`() = runTest {
+    fun `focus navigation`() = runTest() {
         val focus = UiStateTestHelpers.FocusState()
         focus.moveNext(5)
         focus.moveNext(5)
@@ -63,7 +63,7 @@ class UiStateTestHelpersTest {
     }
 
     @Test
-    fun `navigation tracker records routes`() = runTest {
+    fun `navigation tracker records routes`() = runTest() {
         val tracker = UiStateTestHelpers.NavigationTracker()
         tracker.navigate("details/1")
         tracker.navigate("player/1")

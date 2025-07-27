@@ -115,7 +115,7 @@ class DbAssertionHelpersTest : TestEntityFactory() {
         javaClass.classLoader!!.getResource("fixtures/search_results.json")!!.readText()
 
     @Test
-    fun rowCount_entity_list_assertions() = runTest {
+    fun rowCount_entity_list_assertions() = runTest() {
         val db = createDb()
         val category = TestEntityFactory.category()
         val stream = TestEntityFactory.stream(categoryId = category.id)
@@ -136,7 +136,7 @@ class DbAssertionHelpersTest : TestEntityFactory() {
     }
 
     @Test
-    fun search_state_and_cascade() = runTest {
+    fun search_state_and_cascade() = runTest() {
         val db = createDb()
         val category = TestEntityFactory.category()
         val stream1 = TestEntityFactory.stream(id = 1L, title = "Alpha", categoryId = category.id)

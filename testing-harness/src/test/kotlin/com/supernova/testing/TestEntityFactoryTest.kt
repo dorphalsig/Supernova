@@ -12,7 +12,7 @@ class TestEntityFactoryTest : TestEntityFactory() {
     private fun loadStreamFixture(): String =
         javaClass.classLoader!!.getResource("fixtures/stream.json")!!.readText()
     @Test
-    fun `stream defaults`() = runTest {
+    fun `stream defaults`() = runTest() {
         val json = loadStreamFixture()
         val s = TestEntityFactory.stream()
         assertEquals(1L, s.id)
@@ -22,7 +22,7 @@ class TestEntityFactoryTest : TestEntityFactory() {
     }
 
     @Test
-    fun `stream overrides`() = runTest {
+    fun `stream overrides`() = runTest() {
         val custom = TestEntityFactory.stream(id = 2L, title = "Custom", isLive = false)
         assertEquals(2L, custom.id)
         assertEquals("Custom", custom.title)
@@ -30,45 +30,45 @@ class TestEntityFactoryTest : TestEntityFactory() {
     }
 
     @Test
-    fun `program defaults`() = runTest {
+    fun `program defaults`() = runTest() {
         val p = TestEntityFactory.program()
         assertEquals(1L, p.id)
         assertEquals(p.start + 3_600_000L, p.end)
     }
 
     @Test
-    fun `episode defaults`() = runTest {
+    fun `episode defaults`() = runTest() {
         val e = TestEntityFactory.episode()
         assertEquals(1, e.seasonNum)
         assertEquals("poster_1.jpg", e.poster)
     }
 
     @Test
-    fun `category defaults`() = runTest {
+    fun `category defaults`() = runTest() {
         val c = TestEntityFactory.category()
         assertEquals("Category 1", c.name)
     }
 
     @Test
-    fun `profile defaults`() = runTest {
+    fun `profile defaults`() = runTest() {
         val p = TestEntityFactory.profile()
         assertEquals("user1", p.username)
     }
 
     @Test
-    fun `favorite defaults`() = runTest {
+    fun `favorite defaults`() = runTest() {
         val f = TestEntityFactory.favorite()
         assertEquals(1L, f.profileId)
     }
 
     @Test
-    fun `watchHistory defaults`() = runTest {
+    fun `watchHistory defaults`() = runTest() {
         val w = TestEntityFactory.watchHistory()
         assertEquals(0, w.percentWatched)
     }
 
     @Test
-    fun `recommendation consumed by lambda`() = runTest {
+    fun `recommendation consumed by lambda`() = runTest() {
         val consumer = mockk<(Recommendation) -> Unit>(relaxed = true)
         val rec = TestEntityFactory.recommendation()
         consumer(rec)
@@ -76,7 +76,7 @@ class TestEntityFactoryTest : TestEntityFactory() {
     }
 
     @Test
-    fun `tmdbMetadata defaults`() = runTest {
+    fun `tmdbMetadata defaults`() = runTest() {
         val t = TestEntityFactory.tmdbMetadata()
         assertEquals(100L, t.tmdbId)
         assertTrue(t.genres.isEmpty())

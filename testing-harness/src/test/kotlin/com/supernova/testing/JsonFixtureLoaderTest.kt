@@ -13,15 +13,15 @@ class JsonFixtureLoaderTest {
     private val loader = JsonFixtureLoader()
 
     @Test
-    fun `loadRaw caches fixture`() = runTest {
-        val first = loader.loadRaw("sample_response.json")
-        val second = loader.loadRaw("sample_response.json")
+    fun `loadRaw caches fixture`() = runTest() {
+        val first = loader.loadJsonFixture("sample_response.json")
+        val second = loader.loadJsonFixture("sample_response.json")
         assertEquals(first, second)
         assertEquals(1, loader.cache.size)
     }
 
     @Test
-    fun `loadAsMap parses json`() = runTest {
+    fun `loadAsMap parses json`() = runTest() {
         val map = loader.loadAsMap("sample_response.json")
         val status = map["status"]
         assertTrue(status is JsonPrimitive)
@@ -30,12 +30,12 @@ class JsonFixtureLoaderTest {
     }
 
     @Test
-    fun `missing fixture throws`() = runTest {
+    fun `missing fixture throws`() = runTest() {
         assertFailsWith<IllegalArgumentException> { loader.loadRaw("missing.json") }
     }
 
     @Test
-    fun `invalid json fails validation`() = runTest {
+    fun `invalid json fails validation`() = runTest() {
         assertFalse(loader.validateJson("{ invalid", setOf("status")))
     }
 }

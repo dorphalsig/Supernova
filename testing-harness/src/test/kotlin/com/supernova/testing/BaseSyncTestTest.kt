@@ -26,7 +26,7 @@ class BaseSyncTestTest : BaseSyncTest() {
     }
 
     @Test
-    fun `successful json response`() = runTest {
+    fun `successful json response`() = runTest() {
         val json = loadJsonFixture("echo.json")
         enqueueJsonResponse(json)
 
@@ -37,14 +37,14 @@ class BaseSyncTestTest : BaseSyncTest() {
     }
 
     @Test
-    fun `http error response`() = runTest {
+    fun `http error response`() = runTest() {
         enqueueJsonResponse("{}", code = 404)
         val response = runCatching { service.echo() }
         assertTrue(response.isFailure)
     }
 
     @Test
-    fun `network failure`() = runTest {
+    fun `network failure`() = runTest() {
         enqueueNetworkFailure()
         assertFailsWith<IOException> { service.echo() }
     }
