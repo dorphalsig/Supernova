@@ -5,6 +5,11 @@ plugins {
     id("com.supernova.testgate")
 }
 
+// Allow JsonFixtureLoaderTest to bypass structure checks since it only tests
+// utility behavior without extending a base class.
+extra["allowBadStructureTestClasses"] =
+    "com.supernova.testing.JsonFixtureLoaderTest"
+
 android {
     namespace = "com.supernova.testing"
     compileSdk = 35
