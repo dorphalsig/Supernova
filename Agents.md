@@ -16,8 +16,11 @@ This guide defines the enforceable constraints, scaffolding, and responsibilitie
 * **Async**: Coroutines + WorkManager
 * **No XML layouts, JUnit4, Robolectric, or AppSearch**
 * **Version Lock**: Do not change versions of libraries or build targets.
-* **Mandatory Gradle Plugins**
-  - com.supernova.testgate 
+* **Mandatory Gradle Plugins**: com.supernova.testgate 
+* **Testing Framework**: JUnit5 + MockK only
+* **Test Structure**: Unit tests only, no instrumentation tests
+* **Test Directory**: src/test/kotlin only, no src/androidTest
+* **Version Lock**: Do not change versions of libraries or build targets
 
 ---
 
@@ -152,13 +155,43 @@ qaGate passed after 2 retries. Report: https://paste.rs/abc12
 
 ## 7. Required Quality Gates
 
-| Check                      | Enforced? |
-| -------------------------- | --------- |
-| Test coverage ≥70%         | ✅         |
-| 1 JSON fixture per task    | ✅         |
-| No Robolectric             | ✅         |
-| No JUnit4                  | ✅         |
-| Coroutine test wrappers    | ✅         |
-| Dead code removal (static) | ✅         |
+- Test coverage >= 70%
+- 1 JSON fixture per task
+- No Robolectric
+- No JUnit4
+- Coroutine test wrappers
+- Dead code removal (static)
+- No instrumentation tests
+- JUnit5 + MockK only
+- No banned testing imports
+- Version lock compliance
+
+## 7.5. Testing Framework Enforcement
+
+**Mandatory Testing Stack:**
+- JUnit5 (@Test, @BeforeEach, @AfterEach) only
+- MockK for mocking
+- kotlin.test for assertions
+- kotlinx.coroutines.test for runTest
+
+**Prohibited Testing Frameworks:**
+- JUnit4 (@RunWith, AndroidJUnit4) — Use JUnit5 @Test instead
+- Robolectric — Use BaseRoomTest instead
+- Espresso (all components) — Unit tests only
+- Compose UI Test — Use UiStateTestHelpers instead
+- AndroidX Test runners — Unit tests only
+- Instrumentation tests — Unit tests only
+- @Ignore annotations — Fix or remove test
+
+**Test Directory Structure:**
+- ALLOWED: src/test/kotlin/ — All tests here
+- BANNED: src/androidTest/ — Prohibited entirely
+- BANNED: src/sharedTest/ — Not allowed
+
+**Test Directory Structure:**
+- ALLOWED: src/test/kotlin/ — All tests here
+- BANNED: src/androidTest/ — Prohibited entirely
+- BANNED: src/sharedTest/ — Not allowed
+
 
 --- END

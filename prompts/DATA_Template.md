@@ -8,6 +8,7 @@ Add or modify Room entities, relationships, and DAOs with full test coverage.
 - [Explain DAO methods (inserts, queries, joins, FTS4 matches)]
 
 ## Rules
+- Read Agents.md
 - All data access must go through DAO (no raw SQL for FTS-backed tables)
 - FTS4 + shadow table pattern required for search
 

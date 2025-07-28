@@ -43,6 +43,7 @@ abstract class BaseRoomTest<T : RoomDatabase> {
 
     @BeforeEach
     fun setUp() {
+        Dispatchers.setMain(dispatcher)
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
             context,
