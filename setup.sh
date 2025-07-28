@@ -39,5 +39,5 @@ else
 fi
 
 echo "Configuring gradle..."
-./gradlew dependencies
+bash ./gradlew dependencies --build-cache --no-configuration-cache
 echo "Setup complete - ready!"
