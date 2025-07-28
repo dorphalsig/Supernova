@@ -54,7 +54,7 @@ abstract class BaseRoomTest<T : RoomDatabase> {
             context,
             databaseClass.java
         )
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration(true)
             .setQueryExecutor(Executors.newSingleThreadExecutor())
             .setTransactionExecutor(Executors.newSingleThreadExecutor())
             .build()
