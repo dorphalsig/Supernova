@@ -70,5 +70,6 @@ dependencies {
     testImplementation(libs.junit.jupiter) // already covered in implementation, but retained here if split is needed
     testImplementation(libs.mockk) // Used in TestEntityFactoryTest.kt
     testImplementation(libs.sqlite.jdbc)
+    implementation(libs.androidx.test.core)
 
 }

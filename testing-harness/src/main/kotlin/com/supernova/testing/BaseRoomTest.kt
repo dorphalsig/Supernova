@@ -1,9 +1,8 @@
 package com.supernova.testing
 
+import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import android.app.Application
-import android.content.ContextWrapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -18,6 +17,7 @@ import java.util.concurrent.Executors
 import kotlin.reflect.KClass
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import androidx.test.core.app.ApplicationProvider
 
 /**
  * Base class for Room DAO tests using an in-memory database.
@@ -43,18 +43,12 @@ abstract class BaseRoomTest<T : RoomDatabase> {
 
     @BeforeEach
     fun setUp() {
-        Dispatchers.setMain(dispatcher)
-        val context = object : ContextWrapper(Application()) {
-            override fun getSystemService(name: String): Any? = null
-            private fun tmp() = java.io.File(System.getProperty("java.io.tmpdir") ?: ".")
-            override fun getCacheDir() = tmp()
-            override fun getFilesDir() = tmp()
-        }
+        val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
             context,
             databaseClass.java
         )
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration(dropAllTables = true)
             .setQueryExecutor(Executors.newSingleThreadExecutor())
             .setTransactionExecutor(Executors.newSingleThreadExecutor())
             .build()
