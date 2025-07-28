@@ -103,6 +103,10 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.core.testing)
+    testImplementation(project(":testing-harness"))
+    testImplementation(libs.serialization)
+    testImplementation(libs.kotlin.test)
+    testImplementation(project(":testing-harness"))
 
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.rules)

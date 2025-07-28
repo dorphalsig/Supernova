@@ -1,0 +1,18 @@
+{
+  "categories": [
+    {"category_id": 1, "category_name": "News"}
+  ],
+  "streams": [
+    {"stream_id": 10, "name": "CNN", "category_id": 1, "stream_type": "live"}
+  ],
+  "programs": [
+    {
+      "id": 101,
+      "epg_channel_id": 10,
+      "start": "2024-01-01 10:00:00",
+      "end": "2024-01-01 11:00:00",
+      "title": "Morning News",
+      "description": "Daily news"
+    }
+  ]
+}
