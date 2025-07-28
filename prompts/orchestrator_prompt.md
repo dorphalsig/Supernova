@@ -24,8 +24,6 @@ Generate waves of parallel, atomic tasks for Supernova IPTV Android app developm
 - Architecture
   Doc: https://github.com/dorphalsig/Supernova/blob/master/Supernova%20-%20Architecture%20Design%20Document.md
 - Repo URL: https://github.com/dorphalsig/Supernova/
-- Error
-  Gist: https://gist.githubusercontent.com/dorphalsig/52c9f181e73a65e61a5770021c695e61/raw/gradle_output.log
 
 ## Workflow
 
@@ -56,36 +54,19 @@ RECOMMENDATIONS: [Next wave with conflict resolution]
 ```
 
 ### 2. TASK GENERATION
+- Choose and use the correct prompt templae according to the task type:
+  - prompts/DATA_Template.md
+  - prompts/UI_Template.md
+  - prompt/Integration_Template.md
 
-**Structure (5 backticks):**
+- **DO NOT** Reference other tasks. If context is needed from other tasks write the information once again
 
-```````
-**Task ID**: wave_N_task_M
-**Title**: [GitHub issue/PR title]
-**Problem**: [Clear issue description]
-
-**Files**:
-- [Exact paths to create/modify]
-
-**Dependencies**: 
-    [Required files/classes from other tasks]
-
-**Interfaces**: 
-    [Contracts this task defines]
-
-**Steps**:
-1. [Specific actionable steps]
-2. [Testing requirements]
-
-**Success**: [Measurable outcomes, ≥70% coverage]
-```````
 
 **Agent Context Only:**
-
-- Reference appropriate template (ui_prompt.txt/data_layer.txt/integration_glue.txt)
 - Read Agents.md for project guidelines
 - Use existing UI components (SearchBar, MediaCard, etc.)
 - JUnit5 + MockK only, no invalid @Ignore
+- Agents are Stateless and Isolated. They do not know about other tasks
 
 ### 3. OUTPUT OPTIMIZATION
 
@@ -100,10 +81,11 @@ RECOMMENDATIONS: [Next wave with conflict resolution]
 
 ### 4. PARALLELIZATION RULES
 
-- Max 7 tasks per wave
-- No file conflicts between tasks
+- Max 7-12  tasks per wave
+- Minimize shared files between tasks. Avoid potential merge conflicts!
 - No dependencies within same wave
-- Single-layer scope (UI, data, or integration)
+- 1 task = 1 responsibility = 1 layer 
+- Maximize agent usage
 
 **CONFLICT DETECTION ALGORITHM**
 
@@ -116,7 +98,7 @@ RECOMMENDATIONS: [Next wave with conflict resolution]
 
 **PARALLELIZATION CONSTRAINTS**
 
-- NO shared file modifications (build.gradle.kts, AndroidManifest.xml, etc.)
+- Minimize shared file modifications (build.gradle.kts, AndroidManifest.xml, etc.)
 - NO hidden dependencies (Task B using Task A classes)
 - NO interface violations (implementations without contracts)
 - NO configuration conflicts (multiple tasks same configs)

@@ -11,6 +11,10 @@ android {
     namespace = "com.supernova.app"
     compileSdk = 35
 
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+
     defaultConfig {
         applicationId = "com.supernova.app"
         minSdk = 26
@@ -114,6 +118,27 @@ dependencies {
 
     // MockWebServer
     testImplementation(libs.mockwebserver)
+
+    // Video playback (Wave 6)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.common)
+
+    // Navigation (Wave 4+)
+    implementation(libs.androidx.navigation.compose)
+
+    // Secure storage (Wave 2+)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.security.crypto)
+
+    // Additional Compose UI (Wave 3+)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.foundation)
+
+    // Debug/Development
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
 
 tasks.withType<Test> {
