@@ -13,7 +13,7 @@
 build
 
 /captures
-/testing-harness
+#/testing-harness
 .externalNativeBuild
 .cxx
 local.properties
