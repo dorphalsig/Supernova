@@ -26,7 +26,7 @@ bash -c "yes | sdkmanager --sdk_root=\"${ANDROID_HOME}\" \"platform-tools\" \"bu
 # shellcheck disable=SC2164
 cd /workspace/Supernova
 
-if ! ./gradlew --version &>/dev/null; then
+if ! bash ./gradlew --version &>/dev/null; then
     echo "No Gradle wrapper found. Trying to bootstrap..."
     if command -v gradle >/dev/null 2>&1; then
         gradle wrapper --gradle-version 8.14.3
