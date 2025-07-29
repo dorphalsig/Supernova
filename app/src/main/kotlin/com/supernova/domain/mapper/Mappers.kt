@@ -6,6 +6,7 @@ import com.supernova.domain.model.Program
 import com.supernova.network.dto.CategoryDto
 import com.supernova.network.dto.StreamDto
 import com.supernova.network.dto.ProgramDto
+import com.supernova.data.CategoryEntity
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -13,15 +14,15 @@ import java.time.format.DateTimeParseException
 private val PROGRAM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
 fun CategoryDto.toDomain(): Category = Category(
-    id = category_id,
-    name = category_name
+    id = categoryId,
+    name = categoryName
 )
 
 fun StreamDto.toDomain(): Stream = Stream(
-    id = stream_id,
+    id = streamId,
     name = name,
-    categoryId = category_id,
-    streamType = stream_type
+    categoryId = categoryId,
+    streamType = streamType
 )
 
 fun ProgramDto.toDomain(): Program {
@@ -29,7 +30,7 @@ fun ProgramDto.toDomain(): Program {
     val endTime = parseDate(end)
     return Program(
         id = id,
-        epgChannelId = epg_channel_id,
+        epgChannelId = epgChannelId,
         start = startTime,
         end = endTime,
         title = title,
@@ -42,3 +43,8 @@ private fun parseDate(value: String): LocalDateTime = try {
 } catch (_: DateTimeParseException) {
     LocalDateTime.MIN
 }
+
+fun CategoryEntity.toDomain(): Category = Category(
+    id = id,
+    name = name
+)
