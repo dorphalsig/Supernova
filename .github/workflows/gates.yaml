@@ -33,6 +33,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ github.repository_owner }}:${{ github.head_ref }}
 
+  debug-rebase-output:
+    needs: auto-rebase-if-needed
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "REB = ${{ needs.auto-rebase-if-needed.outputs.rebased }}"
+
   generate-results:
     needs: auto-rebase-if-needed
     if: |
