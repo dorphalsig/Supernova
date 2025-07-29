@@ -32,7 +32,7 @@ jobs:
         uses: peter-evans/rebase@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          head: ${{ github.head_ref }}
+          head: ${{ github.repository_owner }}:${{ github.head_ref }}
 
       - id: check
         run: echo "rebased=${{ steps.rebase.outputs.rebased }}" >> "$GITHUB_OUTPUT"
