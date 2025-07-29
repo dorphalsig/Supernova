@@ -23,7 +23,9 @@ import androidx.test.core.app.ApplicationProvider
  * Base class for Room DAO tests using an in-memory database.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-abstract class BaseRoomTest<T : RoomDatabase> {
+abstract class BaseRoomTest<T : RoomDatabase>(
+    private val context: Context = ApplicationProvider.getApplicationContext()
+) {
 
     /** Coroutine dispatcher used for database operations. */
     protected open val dispatcher: TestDispatcher = StandardTestDispatcher()
@@ -44,7 +46,6 @@ abstract class BaseRoomTest<T : RoomDatabase> {
     @BeforeEach
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-        val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
             context,
             databaseClass.java

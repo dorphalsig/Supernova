@@ -7,6 +7,8 @@ import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
+import android.content.Context
+import io.mockk.mockk
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -30,7 +32,8 @@ abstract class TestDb : RoomDatabase() {
     abstract fun dao(): TestDao
 }
 
-class BaseRoomTestTest : BaseRoomTest<TestDb>() {
+private val fakeCtx = mockk<Context>(relaxed = true)
+class BaseRoomTestTest : BaseRoomTest<TestDb>(fakeCtx) {
     lateinit var dao: TestDao
 
     override val databaseClass = TestDb::class
