@@ -130,14 +130,15 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
     - remove banned imports
 * Every failed attempt must log and include the `paste.rs` report link
 * If all 4 attempts fail:
-  - Open a GitHub issue using the GitHub CLI (`gh`)
-  - Use `$PAT` from environment for authentication
-  - Title: `qaGate failure: unresolvable after 4 attempts`
+  - Open a GitHub issue using the GitHub CLI (`gh`). Repo is: dorphalsig/Supernova
+  - Title: `qaGate failed for <task-name>`
   - Include in body:
     - Commit hash
     - Summary of issues from JSON
-    - All `paste.rs` links
-* No commit is allowed without a passing `qaGate` or 4 failed attempts and an issue created
+    - The last `paste.rs` link
+* Commits are allowed only if:
+  * qaGate passes successfully
+  * 3 retries were attempted, you create a GitHub issue describing what was done and what the problem is and linking the paste.rs, and the issue is linked in the commit message
 * All successful commits must include:
   - Task name
   - Initial instructions

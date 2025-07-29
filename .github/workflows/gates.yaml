@@ -6,7 +6,13 @@ permissions:
   pull-requests: write
 
 on:
+  # 1) PR events against main
   pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches: [ main ]
+
+  # 2) Pushes to main (for any non-merge commit)
+  push:
     branches: [ main ]
   workflow_dispatch: {}
     
@@ -36,14 +42,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ github.repository_owner }}:${{ github.head_ref }}
-
-      - id: check
-        run: echo "rebased=${{ steps.rebase.outputs.rebased }}" >> "$GITHUB_OUTPUT"
+      - run: echo "rebased=${{ steps.rebase.outputs.rebased }}" >> $GITHUB_OUTPUT
 
   generate-results:
     name: Generate Results
     needs: auto-rebase-if-needed
-    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    if: ${{  needs.auto-rebase-if-needed.outputs.rebased == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +64,7 @@ jobs:
   check-compile-errors:
     name: Check Compile Errors
     needs: generate-results
-    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    if: ${{  needs.auto-rebase-if-needed.outputs.rebased == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -78,7 +82,7 @@ jobs:
   check-banned:
     name: Check Banned Imports
     needs: generate-results
-    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    if: ${{  needs.auto-rebase-if-needed.outputs.rebased == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -96,7 +100,7 @@ jobs:
   check-coroutines:
     name: Check Coroutines Usage
     needs: generate-results
-    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    if: ${{  needs.auto-rebase-if-needed.outputs.rebased == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -114,7 +118,7 @@ jobs:
   check-ignored:
     name: Check Ignored Usage
     needs: generate-results
-    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    if: ${{  needs.auto-rebase-if-needed.outputs.rebased == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -132,7 +136,7 @@ jobs:
   check-test-structure:
     name: Check Test Structure
     needs: generate-results
-    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    if: ${{  needs.auto-rebase-if-needed.outputs.rebased == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -150,7 +154,7 @@ jobs:
   check-fails:
     name: Check Test Failures
     needs: generate-results
-    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    if: ${{  needs.auto-rebase-if-needed.outputs.rebased == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -170,7 +174,7 @@ jobs:
   check-coverage:
     name: Check Coverage
     needs: generate-results
-    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    if: ${{  needs.auto-rebase-if-needed.outputs.rebased == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -190,7 +194,7 @@ jobs:
   check-detekt:
     name: Check Detekt
     needs: generate-results
-    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    if: ${{  needs.auto-rebase-if-needed.outputs.rebased == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
