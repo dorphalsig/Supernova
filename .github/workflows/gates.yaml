@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Generate check-results.json
-        run: bash ./gradlew :app:test
+        run: bash ./gradlew detekt ktlintCheck jacocoMergedReport :app:test
 
       - name: Upload results
         uses: actions/upload-artifact@v4
@@ -129,6 +129,40 @@ jobs:
             exit 1
           fi
 
+  check-coverage:
+    needs: generate-results
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: check-results
+
+      - name: Validate coverage
+        run: |
+          SUCCESS=$(jq '.checkCoverage.success' check-results.json)
+          COV=$(jq '.checkCoverage.coverage' check-results.json)
+          THRESH=$(jq '.checkCoverage.threshold' check-results.json)
+          if [ "$SUCCESS" != "true" ]; then
+            echo "::error::Coverage $COV% below threshold $THRESH%"
+            exit 1
+          fi
+
+  check-detekt:
+    needs: generate-results
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: check-results
+
+      - name: Validate Detekt
+        run: |
+          SUCCESS=$(jq '.checkDetekt.success' check-results.json)
+          if [ "$SUCCESS" != "true" ]; then
+            jq -r '.checkDetekt.errors[] | "::error::" + .' check-results.json
+            exit 1
+          fi
+
 
   auto-rebase-if-clean:
     needs:
@@ -138,6 +172,8 @@ jobs:
       - check-compile-errors
       - check-coroutines
       - check-ignored
+      - check-coverage
+      - check-detekt
       - generate-results
     if: ${{ success() && github.event.pull_request.merged == false }}
     runs-on: ubuntu-latest
@@ -149,23 +185,25 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
   enable-auto-merge:
-      needs:
-        - check-banned
-        - check-test-structure
-        - check-fails
-        - check-compile-errors
-        - check-coroutines
-        - check-ignored
-        - generate-results
-      if: ${{ success() && github.event.pull_request.merged == false }}
-      runs-on: ubuntu-latest
-      permissions:
-        contents: write
-        pull-requests: write
-      steps:
-        - uses: actions/checkout@v4
-        - name: Enable GitHub auto-merge
-          uses: peter-evans/enable-pull-request-automerge@v3
-          with:
-            token: ${{ secrets.GITHUB_TOKEN }}
-            merge-method: rebase  # changed from squash
+    needs:
+      - check-banned
+      - check-test-structure
+      - check-fails
+      - check-compile-errors
+      - check-coroutines
+      - check-ignored
+      - check-coverage
+      - check-detekt
+      - generate-results
+    if: ${{ success() && github.event.pull_request.merged == false }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable GitHub auto-merge
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          merge-method: rebase  # changed from squash
