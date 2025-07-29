@@ -86,6 +86,7 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.guava)
     testImplementation(libs.kotlinx.coroutines.test)
 
     // Hilt
@@ -115,6 +116,7 @@ dependencies {
     testImplementation(libs.serialization)
     testImplementation(libs.kotlin.test)
     testImplementation(project(":testing-harness"))
+    testImplementation(libs.androidx.test.core)
 
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.rules)
