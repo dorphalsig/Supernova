@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#check heck
 export ANDROID_HOME="/opt/sdk"
 export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 # shellcheck disable=SC2164
