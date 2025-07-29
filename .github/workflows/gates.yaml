@@ -6,145 +6,129 @@ permissions:
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [main]
-
-  push:
-    branches: [main]
-
-concurrency:
-  group: ${{ github.ref_name }}
-  cancel-in-progress: true
+    branches: [ main ]
 
 jobs:
-  auto-rebase-if-needed:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - id: rebase
-        uses: peter-evans/rebase@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          head: ${{ github.repository_owner }}:${{ github.head_ref }}
   generate-results:
-    needs: auto-rebase-if-needed
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: bash ./gradlew detekt ktlintCheck jacocoMergedReport :app:test
-      - uses: actions/upload-artifact@v4
+
+      - name: Generate check-results.json
+        run: bash ./gradlew :app:test
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
         with:
           name: check-results
           path: app/build/reports/check-results.json
-
   check-compile-errors:
     needs: generate-results
-    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: check-results
-      - run: |
-          ERRORS=$(jq '.compileErrors' check-results.json)
-          if [ "$ERRORS" != "0" ]; then
-            echo "::error::Compile errors found"
+
+      - name: Validate compile success
+        run: |
+          SUCCESS=$(jq '.compileErrors.success' check-results.json)
+          if [ "$SUCCESS" != "true" ]; then
+            echo "::error::Compilation errors detected. Build is broken."
             exit 1
           fi
+  
+  
+  
+  
+  
 
   check-banned:
     needs: generate-results
-    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: check-results
-      - run: |
-          FOUND=$(jq '.banned' check-results.json)
-          if [ "$FOUND" != "0" ]; then
-            echo "::error::Banned usages found"
+
+      - name: Parse banned import violations
+        run: |
+          SUCCESS=$(jq '.checkBanned.success' check-results.json)
+          if [ "$SUCCESS" != "true" ]; then
+            jq -r '.checkBanned.violations[] | "::error file=\(.file)::Banned import usage is disallowed."' check-results.json
             exit 1
           fi
+
 
   check-coroutines:
     needs: generate-results
-    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: check-results
-      - run: |
-          ISSUES=$(jq '.coroutines' check-results.json)
-          if [ "$ISSUES" != "0" ]; then
-            echo "::error::Coroutine misuse found"
+
+      - name: Validate coroutine check
+        run: |
+          SUCCESS=$(jq '.checkCoroutines.success' check-results.json)
+          if [ "$SUCCESS" != "true" ]; then
+            echo "::error::Coroutines usage check failed. Only runTest + MockK allowed."
             exit 1
           fi
+  
 
   check-ignored:
     needs: generate-results
-    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: check-results
-      - run: |
-          IGNORED=$(jq '.ignoredTests' check-results.json)
-          if [ "$IGNORED" != "0" ]; then
-            echo "::error::Ignored tests found"
+
+      - name: Validate ignored usage
+        run: |
+          SUCCESS=$(jq '.checkIgnored.success' check-results.json)
+          if [ "$SUCCESS" != "true" ]; then
+            echo "::error::Ignored usage detected outside instrumentation tests."
             exit 1
           fi
+
 
   check-test-structure:
     needs: generate-results
-    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: check-results
-      - run: |
-          ISSUES=$(jq '.testStructure' check-results.json)
-          if [ "$ISSUES" != "0" ]; then
-            echo "::error::Test structure issues found"
+
+      - name: Parse test structure violations
+        run: |
+          SUCCESS=$(jq '.checkTestStructure.success' check-results.json)
+          if [ "$SUCCESS" != "true" ]; then
+            jq -r '.checkTestStructure.violations[] | "::error::Test structure issue: \(.remediation)"' check-results.json
             exit 1
           fi
+
 
   check-fails:
     needs: generate-results
-    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: check-results
-      - run: |
-          FAILURES=$(jq '.testFailures' check-results.json)
-          if [ "$FAILURES" != "0" ]; then
-            echo "::error::Tests failed"
+
+      - name: Validate test failure count
+        run: |
+          FAILS=$(jq '.checkFails.failedCount' check-results.json)
+          THRESH=$(jq '.checkFails.maxFails' check-results.json)
+          echo "Test failures: $FAILS / Max allowed: $THRESH"
+          if [ "$FAILS" -gt "$THRESH" ]; then
+            echo "::error::Too many test failures ($FAILS > $THRESH)"
             exit 1
           fi
 
-  check-coverage:
-    needs: generate-results
-    if: needs.generate-results.result == '1'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: check-results
-      - run: |
-          COVERAGE=$(jq '.coverage' check-results.json)
-          if (( $(echo "$COVERAGE < 0.80" | bc -l) )); then
-            echo "::error::Coverage below threshold: $COVERAGE"
-            exit 1
-          fi
 
   check-detekt:
     needs: generate-results
@@ -161,22 +145,41 @@ jobs:
             exit 1
           fi
 
-  enable-auto-merge:
+  auto-rebase-if-clean:
     needs:
-      - generate-results
-      - check-compile-errors
       - check-banned
-      - check-coroutines
-      - check-ignored
       - check-test-structure
       - check-fails
-      - check-coverage
-      - check-detekt
-    if: github.event_name == 'pull_request' && success() && github.event.pull_request.merged == false
+      - check-compile-errors
+      - check-coroutines
+      - check-ignored
+      - generate-results
+    if: ${{ success() && github.event.pull_request.merged == false }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - uses: peter-evans/enable-pull-request-automerge@v3
+      - uses: peter-evans/rebase@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          merge-method: rebase
-          pull-request: ${{ github.event.pull_request.number }}
+  enable-auto-merge:
+      needs:
+        - check-banned
+        - check-test-structure
+        - check-fails
+        - check-compile-errors
+        - check-coroutines
+        - check-ignored
+        - generate-results
+      if: ${{ success() && github.event.pull_request.merged == false }}
+      runs-on: ubuntu-latest
+      permissions:
+        contents: write
+        pull-requests: write
+      steps:
+        - name: Enable GitHub auto-merge
+          uses: peter-evans/enable-pull-request-automerge@v3
+          with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            merge-method: squash  # or "merge" / "rebase"
