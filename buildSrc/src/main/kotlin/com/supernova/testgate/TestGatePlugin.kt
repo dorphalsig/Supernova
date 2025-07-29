@@ -583,6 +583,58 @@ class TestGatePlugin : Plugin<Project> {
         return startTime
     }
 
+    private fun checkCoverage(minCoverage: Int): Long {
+        val startTime = System.currentTimeMillis()
+        val report = project.buildDir.resolve("reports/jacoco/jacocoMergedReport/jacocoMergedReport.xml")
+        val errors = mutableListOf<String>()
+        var coverage = 0.0
+        if (report.exists()) {
+            val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(report)
+            val counters = doc.getElementsByTagName("counter")
+            var missed = 0.0
+            var covered = 0.0
+            for (i in 0 until counters.length) {
+                val e = counters.item(i) as Element
+                if (e.getAttribute("type") == "INSTRUCTION") {
+                    missed += e.getAttribute("missed").toDouble()
+                    covered += e.getAttribute("covered").toDouble()
+                }
+            }
+            if (covered + missed > 0) {
+                coverage = 100 * covered / (missed + covered)
+            }
+            if (coverage < minCoverage) {
+                errors += "Coverage %.2f%% below threshold %d%%".format(coverage, minCoverage)
+            }
+        }
+        recordTaskResult(
+            "checkCoverage",
+            startTime,
+            errors,
+            emptyList(),
+            mapOf("coverage" to coverage, "threshold" to minCoverage)
+        )
+        return startTime
+    }
+
+    private fun checkDetekt(): Long {
+        val startTime = System.currentTimeMillis()
+        val report = project.buildDir.resolve("reports/detekt/detekt.xml")
+        val errors = mutableListOf<String>()
+        if (report.exists()) {
+            val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(report)
+            val findings = doc.getElementsByTagName("error")
+            for (i in 0 until findings.length) {
+                val e = findings.item(i) as Element
+                if (e.getAttribute("severity").equals("error", true)) {
+                    errors += e.getAttribute("message")
+                }
+            }
+        }
+        recordTaskResult("checkDetekt", startTime, errors, emptyList(), mapOf("errorCount" to errors.size))
+        return startTime
+    }
+
     // Configuration extraction
     private val maxFails: Int
         get() = project.findProperty("maxFails")?.toString()?.toIntOrNull() ?: 0
@@ -673,6 +725,16 @@ class TestGatePlugin : Plugin<Project> {
             description = "Record compile errors to JSON"
             doLast { recordCompileErrors() }
         }
+        project.tasks.register("checkCoverage") {
+            group = "verification"
+            description = "Fail if code coverage is below threshold"
+            doLast { checkCoverage(80) }
+        }
+        project.tasks.register("checkDetekt") {
+            group = "verification"
+            description = "Fail if Detekt reports any errors"
+            doLast { checkDetekt() }
+        }
         project.tasks.register("checkTestStructure") {
             group = "verification"
             description =
@@ -689,7 +751,9 @@ class TestGatePlugin : Plugin<Project> {
                 "checkIgnored",
                 "recordTestResults",
                 "checkTestStructure",
-                "recordCompileErrors"
+                "recordCompileErrors",
+                "checkCoverage",
+                "checkDetekt"
             )
             doLast { qaGateCheck() }
         }
@@ -707,7 +771,9 @@ class TestGatePlugin : Plugin<Project> {
             "checkIgnored",
             "testResults",
             "checkTestStructure",
-            "compileErrors"
+            "compileErrors",
+            "checkCoverage",
+            "checkDetekt"
         ).forEach { taskKey ->
             val taskResult = results[taskKey] as? Map<*, *>
             if (taskResult?.get("success") == false) {
@@ -731,7 +797,7 @@ class TestGatePlugin : Plugin<Project> {
             it["qaGateSummary"] = mapOf(
                 "overallSuccess" to failures.isEmpty(),
                 "failedChecks" to failures.size,
-                "totalChecks" to 7,
+                "totalChecks" to 9,
                 "checksSummary" to summary,
                 "timestamp" to Instant.now().toString()
             )

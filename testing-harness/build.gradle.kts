@@ -2,6 +2,9 @@ plugins {
     id("com.android.library")
     kotlin("android")
     kotlin("plugin.serialization") version "2.2.0"
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
+    id("jacoco")
     id("com.supernova.testgate")
 }
 
