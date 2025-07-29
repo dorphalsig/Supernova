@@ -16,9 +16,3 @@ fun LoadingSpinner(modifier: Modifier = Modifier) {
         CircularProgressIndicator(Modifier.align(Alignment.Center))
     }
 }
-
-@Composable
-@androidx.compose.ui.tooling.preview.Preview
-private fun LoadingSpinnerPreview() {
-    LoadingSpinner()
-}

@@ -14,10 +14,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
 /**
- * Simple media card combining [FocusableCard] with an image and title.
+ * Simple media card combining [focusableCard] with an image and title.
  */
 @Composable
-fun MediaCard(
+fun mediaCard(
     posterUrl: String,
     title: String,
     modifier: Modifier = Modifier,
@@ -40,13 +40,4 @@ fun MediaCard(
             )
         }
     }
-}
-
-@Composable
-@androidx.compose.ui.tooling.preview.Preview
-private fun MediaCardPreview() {
-    MediaCard(
-        posterUrl = "",
-        title = "Preview"
-    )
 }

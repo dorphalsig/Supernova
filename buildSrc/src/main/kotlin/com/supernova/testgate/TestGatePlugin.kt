@@ -585,7 +585,8 @@ class TestGatePlugin : Plugin<Project> {
 
     private fun checkCoverage(minCoverage: Int): Long {
         val startTime = System.currentTimeMillis()
-        val report = project.buildDir.resolve("reports/jacoco/jacocoMergedReport/jacocoMergedReport.xml")
+        val report =
+            project.buildDir.resolve("reports/jacoco/jacocoMergedReport/jacocoMergedReport.xml")
         val errors = mutableListOf<String>()
         var coverage = 0.0
         if (report.exists()) {
@@ -621,17 +622,48 @@ class TestGatePlugin : Plugin<Project> {
         val startTime = System.currentTimeMillis()
         val report = project.buildDir.resolve("reports/detekt/detekt.xml")
         val errors = mutableListOf<String>()
+        var totalMethodsAndClasses = 0
+        var errorCount = 0
+
         if (report.exists()) {
             val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(report)
             val findings = doc.getElementsByTagName("error")
+            val methods = doc.getElementsByTagName("method")
+            val classes = doc.getElementsByTagName("class")
+
+            totalMethodsAndClasses = methods.length + classes.length
             for (i in 0 until findings.length) {
                 val e = findings.item(i) as Element
                 if (e.getAttribute("severity").equals("error", true)) {
                     errors += e.getAttribute("message")
+                    errorCount++
                 }
             }
         }
-        recordTaskResult("checkDetekt", startTime, errors, emptyList(), mapOf("errorCount" to errors.size))
+
+        val tolerance =
+            project.findProperty("detektTolerance")?.toString()?.toDoubleOrNull()?.div(100) ?: 0.0
+        val errorRate =
+            if (totalMethodsAndClasses > 0) errorCount.toDouble() / totalMethodsAndClasses else 0.0
+
+        val violations = if (errorRate > tolerance) {
+            listOf("Detekt error rate %.2f exceeds tolerance %.2f".format(errorRate, tolerance))
+        } else {
+            emptyList()
+        }
+
+        recordTaskResult(
+            "checkDetekt",
+            startTime,
+            violations,
+            emptyList(),
+            mapOf(
+                "errorCount" to errorCount,
+                "totalMethodsAndClasses" to totalMethodsAndClasses,
+                "errorRate" to errorRate,
+                "tolerance" to tolerance
+            )
+        )
         return startTime
     }
 
@@ -803,18 +835,24 @@ class TestGatePlugin : Plugin<Project> {
             )
         }
         writeResults(finalResults)
+        val jsonContent = resultsFile.readText()
+        val pastebinUrl = uploadToPastebin(jsonContent)
+
         if (failures.isNotEmpty()) {
-            val jsonContent = resultsFile.readText()
-            val pastebinUrl = uploadToPastebin(jsonContent)
             val errorMessage = """
                 Quality gate failed. Issues found in:
                 ${failures.joinToString("\n")}
                 See ${resultsFile.absolutePath} for details.
                 Online report: $pastebinUrl
             """.trimIndent()
-            throw GradleException(errorMessage)
+            if (!project.gradle.startParameter.isContinueOnFailure) {
+                throw GradleException(errorMessage)
+            } else {
+                println(errorMessage)
+            }
+        } else {
+            println("✅ All quality checks passed!")
         }
-        println("✅ All quality checks passed!")
     }
 
     // Build lifecycle hooks

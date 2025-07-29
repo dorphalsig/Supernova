@@ -1,11 +1,12 @@
 package com.supernova.network.dto
 
 import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Json
 
 @JsonClass(generateAdapter = true)
 data class StreamDto(
-    val stream_id: Int,
+    @Json(name = "stream_id") val streamId: Int,
     val name: String,
-    val category_id: Int,
-    val stream_type: String
+    @Json(name = "category_id") val categoryId: Int,
+    @Json(name = "stream_type") val streamType: String
 )

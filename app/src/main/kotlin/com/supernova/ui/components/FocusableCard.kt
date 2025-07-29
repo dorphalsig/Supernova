@@ -26,9 +26,3 @@ fun FocusableCard(
         Box(Modifier.fillMaxSize(), content = content)
     }
 }
-
-@Composable
-@androidx.compose.ui.tooling.preview.Preview
-private fun FocusableCardPreview() {
-    FocusableCard {}
-}
