@@ -6,11 +6,11 @@ permissions:
 
 on:
   pull_request:
-    types: [ opened, synchronize, reopened ]
-    branches: [ main ]
+    types: [opened, synchronize, reopened]
+    branches: [main]
 
   push:
-    branches: [ main ]
+    branches: [main]
 
 concurrency:
   group: ${{ github.ref_name }}
@@ -20,8 +20,6 @@ jobs:
   auto-rebase-if-needed:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    outputs:
-      rebased: ${{ steps.rebase.outputs.rebased_count }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,6 +43,7 @@ jobs:
 
   check-compile-errors:
     needs: generate-results
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -59,6 +58,7 @@ jobs:
 
   check-banned:
     needs: generate-results
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -73,7 +73,7 @@ jobs:
 
   check-coroutines:
     needs: generate-results
-    
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -88,6 +88,7 @@ jobs:
 
   check-ignored:
     needs: generate-results
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -102,7 +103,7 @@ jobs:
 
   check-test-structure:
     needs: generate-results
-    
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -117,6 +118,7 @@ jobs:
 
   check-fails:
     needs: generate-results
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -131,7 +133,7 @@ jobs:
 
   check-coverage:
     needs: generate-results
-    
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -146,6 +148,7 @@ jobs:
 
   check-detekt:
     needs: generate-results
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -169,7 +172,7 @@ jobs:
       - check-fails
       - check-coverage
       - check-detekt
-    if: success()
+    if: github.event_name == 'pull_request' && success() && github.event.pull_request.merged == false
     runs-on: ubuntu-latest
     steps:
       - uses: peter-evans/enable-pull-request-automerge@v3
