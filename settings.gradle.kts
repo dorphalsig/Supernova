@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "Supernova"
 include(":app")
 include(":testing-harness")
+include(":data")
