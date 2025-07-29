@@ -115,6 +115,7 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
 ## 7. qaGate Enforcement
 
 * Agents must run `./gradlew test` before committing any task
+* If gradle exits with code 0 = no errors. else see next step
 * If the build fails at `:app:qaGate`, agents must:
   - Parse `app/build/reports/check-results.json`
   - Read `qaGateSummary.overallSuccess`
