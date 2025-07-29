@@ -21,8 +21,8 @@ class MappersTest : TestEntityFactory() {
         val fixture = loader.loadAsMap("mappers_fixture.json")
         val obj = fixture["category"]!!.jsonObject
         val dto = CategoryDto(
-            category_id = obj["category_id"]!!.jsonPrimitive.int,
-            category_name = obj["category_name"]!!.jsonPrimitive.content
+            categoryId = obj["category_id"]!!.jsonPrimitive.int,
+            categoryName = obj["category_name"]!!.jsonPrimitive.content
         )
         val domain = dto.toDomain()
         assertEquals(1, domain.id)
@@ -34,10 +34,10 @@ class MappersTest : TestEntityFactory() {
         val fixture = loader.loadAsMap("mappers_fixture.json")
         val obj = fixture["stream"]!!.jsonObject
         val dto = StreamDto(
-            stream_id = obj["stream_id"]!!.jsonPrimitive.int,
+            streamId = obj["stream_id"]!!.jsonPrimitive.int,
             name = obj["name"]!!.jsonPrimitive.content,
-            category_id = obj["category_id"]!!.jsonPrimitive.int,
-            stream_type = obj["stream_type"]!!.jsonPrimitive.content
+            categoryId = obj["category_id"]!!.jsonPrimitive.int,
+            streamType = obj["stream_type"]!!.jsonPrimitive.content
         )
         val domain = dto.toDomain()
         assertEquals(10, domain.id)
@@ -52,7 +52,7 @@ class MappersTest : TestEntityFactory() {
         val obj = fixture["program"]!!.jsonObject
         val dto = ProgramDto(
             id = obj["id"]!!.jsonPrimitive.int,
-            epg_channel_id = obj["epg_channel_id"]!!.jsonPrimitive.int,
+            epgChannelId = obj["epg_channel_id"]!!.jsonPrimitive.int,
             start = obj["start"]!!.jsonPrimitive.content,
             end = obj["end"]!!.jsonPrimitive.content,
             title = obj["title"]!!.jsonPrimitive.content,
@@ -68,7 +68,7 @@ class MappersTest : TestEntityFactory() {
     fun `program dto maps with invalid date uses min`() = runTest {
         val dto = ProgramDto(
             id = 2,
-            epg_channel_id = 5,
+            epgChannelId = 5,
             start = "bad", end = "bad",
             title = "Bad", description = "Bad"
         )

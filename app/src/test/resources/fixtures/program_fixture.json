@@ -1,0 +1,10 @@
+{
+  "program": {
+    "id": 5,
+    "epg_channel_id": 1,
+    "start": 1000,
+    "end": 2000,
+    "title": "Test Program",
+    "description": "Fixture program"
+  }
+}
