@@ -131,6 +131,9 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.security.crypto)
 
+    // Data module
+    implementation(project(":data"))
+
     // Additional Compose UI (Wave 3+)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
