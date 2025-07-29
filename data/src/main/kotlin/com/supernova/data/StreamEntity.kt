@@ -4,6 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "stream")
-internal data class StreamEntity(
-    @PrimaryKey val id: Int = 0
+data class StreamEntity(
+    @PrimaryKey val id: Int,
+    val name: String,
+    val categoryId: Int,
+    val streamType: String
 )
