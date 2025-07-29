@@ -20,6 +20,8 @@ media3 = "1.7.1"
 datastore = "1.1.7"
 navigation = "2.9.2"
 security = "1.1.0-beta01"
+detekt = "1.23.6"
+ktlint = "11.6.0"
 
 # Testing
 junit5 = "5.13.4"
@@ -36,6 +38,8 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt-plugin = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 
 [libraries]
 
