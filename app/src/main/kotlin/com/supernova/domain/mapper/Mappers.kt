@@ -13,15 +13,15 @@ import java.time.format.DateTimeParseException
 private val PROGRAM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
 fun CategoryDto.toDomain(): Category = Category(
-    id = category_id,
-    name = category_name
+    id = categoryId,
+    name = categoryName
 )
 
 fun StreamDto.toDomain(): Stream = Stream(
-    id = stream_id,
+    id = streamId,
     name = name,
-    categoryId = category_id,
-    streamType = stream_type
+    categoryId = categoryId,
+    streamType = streamType
 )
 
 fun ProgramDto.toDomain(): Program {
@@ -29,7 +29,7 @@ fun ProgramDto.toDomain(): Program {
     val endTime = parseDate(end)
     return Program(
         id = id,
-        epgChannelId = epg_channel_id,
+        epgChannelId = epgChannelId,
         start = startTime,
         end = endTime,
         title = title,
