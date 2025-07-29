@@ -1,7 +1,11 @@
 package com.supernova.data
 
 import androidx.room.Dao
+import androidx.room.Query
 
 /** Placeholder DAO for categories. */
 @Dao
-abstract class CategoryDao : BaseDao<PlaceholderEntity>()
+interface CategoryDao {
+    @Query("SELECT 1")
+    suspend fun noop(): Int
+}

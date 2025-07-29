@@ -7,8 +7,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import com.supernova.data.PlaceholderEntity
-import com.supernova.data.BaseDao
 import javax.inject.Singleton
 
 /**
@@ -28,7 +26,4 @@ object DataModule {
             .fallbackToDestructiveMigration()
             .build()
     }
-
-    @Provides
-    fun provideBaseDao(db: SupernovaDatabase): BaseDao<PlaceholderEntity> = db.baseDao()
 }

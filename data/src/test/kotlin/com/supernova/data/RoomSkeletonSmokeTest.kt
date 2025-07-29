@@ -7,15 +7,18 @@ import kotlin.test.Test
 import kotlin.test.assertNotNull
 
 private val fakeCtx = mockk<Context>(relaxed = true)
-class SupernovaDatabaseTest : BaseRoomTest<SupernovaDatabase>(fakeCtx) {
+class RoomSkeletonSmokeTest : BaseRoomTest<SupernovaDatabase>(fakeCtx) {
+
     override val databaseClass = SupernovaDatabase::class
 
     override fun initDaos(db: SupernovaDatabase) {
-        // No-op: empty database
+        // no-op
     }
 
     @Test
-    fun databaseOpens() = runBlockingTest {
-        assertNotNull(db)
+    fun daoGetters_areAccessible() = runBlockingTest {
+        assertNotNull(db.categoryDao())
+        assertNotNull(db.streamDao())
+        assertNotNull(db.programDao())
     }
 }
