@@ -42,7 +42,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ github.repository_owner }}:${{ github.head_ref }}
-
+  test:
+    needs: auto-rebase-if-needed
+    runs-on: ubuntu-latest
+    steps:
+      - name: this-sucks
+        run: echo "${{ needs.auto-rebase-if-needed.outputs.rebased }}"
 
   generate-results:
     name: Generate Results
@@ -50,7 +55,7 @@ jobs:
     if: needs.auto-rebase-if-needed.outputs.rebased == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses:
 
       - name: Generate check-results.json
         run: bash ./gradlew detekt ktlintCheck jacocoMergedReport :app:test
