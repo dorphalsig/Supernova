@@ -51,6 +51,7 @@ abstract class BaseRoomTest<T : RoomDatabase>(
             databaseClass.java
         )
             .fallbackToDestructiveMigration(dropAllTables = true)
+            .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
             .setQueryExecutor(Executors.newSingleThreadExecutor())
             .setTransactionExecutor(Executors.newSingleThreadExecutor())
             .build()
