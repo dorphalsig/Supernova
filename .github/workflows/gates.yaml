@@ -192,7 +192,6 @@ jobs:
     if: github.event_name == 'pull_request' && success() && github.event.pull_request.merged == false
     runs-on: ubuntu-latest
     steps:
-      - uses:
       - uses: peter-evans/enable-pull-request-automerge@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
