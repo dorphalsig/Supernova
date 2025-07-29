@@ -9,14 +9,45 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
+  auto-rebase-if-needed:
+    name: Auto Rebase If Needed
+    runs-on: ubuntu-latest
+    outputs:
+      rebased: ${{ steps.check.outputs.rebased }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: rebase
+        name: Attempt rebase onto main
+        uses: peter-evans/rebase@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ github.repository_owner }}:${{ github.head_ref }}
+
+      - id: check
+        run: echo "rebased=${{ steps.rebase.outputs.rebased }}" >> "$GITHUB_OUTPUT"
+
   generate-results:
+    name: Generate Results
+    needs: auto-rebase-if-needed
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Generate check-results.json
-        run: bash ./gradlew :app:test
+        run: bash ./gradlew detekt ktlintCheck jacocoMergedReport :app:test
 
       - name: Upload results
         uses: actions/upload-artifact@v4
@@ -25,7 +56,9 @@ jobs:
           path: app/build/reports/check-results.json
 
   check-compile-errors:
+    name: Check Compile Errors
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -41,7 +74,9 @@ jobs:
           fi
 
   check-banned:
+    name: Check Banned Imports
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -57,7 +92,9 @@ jobs:
           fi
 
   check-coroutines:
+    name: Check Coroutines Usage
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -73,7 +110,9 @@ jobs:
           fi
 
   check-ignored:
+    name: Check Ignored Usage
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -89,7 +128,9 @@ jobs:
           fi
 
   check-test-structure:
+    name: Check Test Structure
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -105,7 +146,9 @@ jobs:
           fi
 
   check-fails:
+    name: Check Test Failures
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -122,11 +165,46 @@ jobs:
             exit 1
           fi
 
-  # ────────────────────────────────────────────────────────────────────────────────
-  # Last two jobs: only these have been modified below
-  # ────────────────────────────────────────────────────────────────────────────────
+  check-coverage:
+    name: Check Coverage
+    needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: check-results
 
-  auto-rebase-if-clean:
+      - name: Validate coverage
+        run: |
+          SUCCESS=$(jq '.checkCoverage.success' check-results.json)
+          COV=$(jq '.checkCoverage.coverage' check-results.json)
+          THRESH=$(jq '.checkCoverage.threshold' check-results.json)
+          if [ "$SUCCESS" != "true" ]; then
+            echo "::error::Coverage $COV% below threshold $THRESH%"
+            exit 1
+          fi
+
+  check-detekt:
+    name: Check Detekt
+    needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: check-results
+
+      - name: Validate Detekt
+        run: |
+          SUCCESS=$(jq '.checkDetekt.success' check-results.json)
+          if [ "$SUCCESS" != "true" ]; then
+            jq -r '.checkDetekt.errors[] | "::error::" + .' check-results.json
+            exit 1
+          fi
+
+  enable-auto-merge:
+    name: Enable Auto Merge
     needs:
       - check-banned
       - check-test-structure
@@ -134,6 +212,8 @@ jobs:
       - check-compile-errors
       - check-coroutines
       - check-ignored
+      - check-coverage
+      - check-detekt
       - generate-results
     if: ${{ success() && github.event.pull_request.merged == false }}
     runs-on: ubuntu-latest
@@ -141,26 +221,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-
-      - name: Rebase onto main
-        uses: peter-evans/rebase@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  enable-auto-merge:
-    # Now depend on the rebase job so it always runs *after* we’ve rebased
-    needs: [ auto-rebase-if-clean ]
-    if: ${{ success() && github.event.pull_request.merged == false }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Enable GitHub auto-merge
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
