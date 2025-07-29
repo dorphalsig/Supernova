@@ -4,6 +4,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "program")
-internal data class ProgramEntity(
-    @PrimaryKey val id: Int = 0
+data class ProgramEntity(
+    @PrimaryKey val id: Int,
+    val epgChannelId: Int,
+    val start: String,
+    val end: String,
+    val title: String,
+    val description: String
 )

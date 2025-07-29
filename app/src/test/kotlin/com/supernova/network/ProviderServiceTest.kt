@@ -37,7 +37,7 @@ class ProviderServiceTest : BaseSyncTest() {
         val result = service.getCategories(username = "u", password = "p")
 
         assertEquals(1, result.size)
-        assertEquals("News", result.first().category_name)
+        assertEquals("News", result.first().categoryName)
         assertRequest("/player_api.php?action=get_live_categories&username=u&password=p")
     }
 
@@ -50,7 +50,7 @@ class ProviderServiceTest : BaseSyncTest() {
         val result = service.getStreams(categoryId = 1, username = "u", password = "p")
 
         assertEquals(1, result.size)
-        assertEquals(10, result.first().stream_id)
+        assertEquals(10, result.first().streamId)
         assertRequest("/player_api.php?action=get_live_streams&category_id=1&username=u&password=p")
     }
 
