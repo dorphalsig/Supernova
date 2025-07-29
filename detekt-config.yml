@@ -1,9 +1,33 @@
-build:
-  maxIssues: 0
+build: { maxIssues: 0 }
+
 config:
   validation: true
   warningsAsErrors: true
-processors:
-  active: true
-console-reports:
-  active: true
+
+processors: { active: true }
+
+console-reports: { active: true }
+
+style:
+  UnusedImports: { active: true }
+
+naming: { active: false }
+
+formatting: { active: false }
+
+comments: { active: false }
+
+complexity: { active: false }
+
+potential-bugs:
+  UnusedPrivateMember: { active: true }
+  UnusedParameter: { active: true }
+  UnusedLocalVariable: { active: true }
+
+code-smell: { active: false }
+
+performance: { active: false }
+
+exceptions: { active: false }
+
+empty-blocks: { active: false }
