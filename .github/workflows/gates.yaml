@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   auto-rebase-if-needed:
+    name: Auto Rebase If Needed
     runs-on: ubuntu-latest
     outputs:
       rebased: ${{ steps.check.outputs.rebased }}
@@ -38,6 +39,7 @@ jobs:
         run: echo "rebased=${{ steps.rebase.outputs.rebased }}" >> "$GITHUB_OUTPUT"
 
   generate-results:
+    name: Generate Results
     needs: auto-rebase-if-needed
     if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
@@ -54,6 +56,7 @@ jobs:
           path: app/build/reports/check-results.json
 
   check-compile-errors:
+    name: Check Compile Errors
     needs: generate-results
     if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
@@ -71,6 +74,7 @@ jobs:
           fi
 
   check-banned:
+    name: Check Banned Imports
     needs: generate-results
     if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
@@ -88,6 +92,7 @@ jobs:
           fi
 
   check-coroutines:
+    name: Check Coroutines Usage
     needs: generate-results
     if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
@@ -105,6 +110,7 @@ jobs:
           fi
 
   check-ignored:
+    name: Check Ignored Usage
     needs: generate-results
     if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
@@ -122,6 +128,7 @@ jobs:
           fi
 
   check-test-structure:
+    name: Check Test Structure
     needs: generate-results
     if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
@@ -139,6 +146,7 @@ jobs:
           fi
 
   check-fails:
+    name: Check Test Failures
     needs: generate-results
     if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
@@ -158,6 +166,7 @@ jobs:
           fi
 
   check-coverage:
+    name: Check Coverage
     needs: generate-results
     if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
@@ -177,6 +186,7 @@ jobs:
           fi
 
   check-detekt:
+    name: Check Detekt
     needs: generate-results
     if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
@@ -194,6 +204,7 @@ jobs:
           fi
 
   enable-auto-merge:
+    name: Enable Auto Merge
     needs:
       - check-banned
       - check-test-structure
