@@ -21,7 +21,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     outputs:
-      rebased: ${{ steps.rebase.outputs.rebased }}
+      rebased: ${{ steps.rebase.outputs.rebased_count }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,17 +32,22 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           head: ${{ github.repository_owner }}:${{ github.head_ref }}
-
+  test:
+    needs: auto-rebase-if-needed
+    runs-on: ubuntu-latest
+    steps:
+      - name: this-sucks
+        run: echo "${{ needs.auto-rebase-if-needed.outputs.rebased_count }}"
   debug-rebase-output:
     needs: auto-rebase-if-needed
     runs-on: ubuntu-latest
     steps:
-      - run: echo "REB = ${{ needs.auto-rebase-if-needed.outputs.rebased }}"
+      - run: echo "REB = ${{ needs.auto-rebase-if-needed.outputs.rebased_count }}"
 
   generate-results:
     needs: auto-rebase-if-needed
     if: |
-      (github.event_name == 'pull_request' && needs.auto-rebase-if-needed.outputs.rebased == 'true') ||
+      (github.event_name == 'pull_request' && needs.auto-rebase-if-needed.outputs.rebased_count == '1') ||
       (github.event_name == 'push' && !startsWith(github.head_commit.message, 'Merge pull request'))
     runs-on: ubuntu-latest
     steps:
@@ -55,7 +60,7 @@ jobs:
 
   check-compile-errors:
     needs: generate-results
-    if: needs.generate-results.result == 'success'
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -70,7 +75,7 @@ jobs:
 
   check-banned:
     needs: generate-results
-    if: needs.generate-results.result == 'success'
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -85,7 +90,7 @@ jobs:
 
   check-coroutines:
     needs: generate-results
-    if: needs.generate-results.result == 'success'
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -100,7 +105,7 @@ jobs:
 
   check-ignored:
     needs: generate-results
-    if: needs.generate-results.result == 'success'
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -115,7 +120,7 @@ jobs:
 
   check-test-structure:
     needs: generate-results
-    if: needs.generate-results.result == 'success'
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -130,7 +135,7 @@ jobs:
 
   check-fails:
     needs: generate-results
-    if: needs.generate-results.result == 'success'
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -145,7 +150,7 @@ jobs:
 
   check-coverage:
     needs: generate-results
-    if: needs.generate-results.result == 'success'
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -160,7 +165,7 @@ jobs:
 
   check-detekt:
     needs: generate-results
-    if: needs.generate-results.result == 'success'
+    if: needs.generate-results.result == '1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -187,7 +192,7 @@ jobs:
     if: github.event_name == 'pull_request' && success() && github.event.pull_request.merged == false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses:
       - uses: peter-evans/enable-pull-request-automerge@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
