@@ -1,3 +1,4 @@
+# File: .github/workflows/gates.yaml
 name: Quality Gates
 
 permissions:
@@ -8,8 +9,37 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
+  auto-rebase-if-needed:
+    runs-on: ubuntu-latest
+    outputs:
+      rebased: ${{ steps.check.outputs.rebased }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: rebase
+        name: Attempt rebase onto main
+        uses: peter-evans/rebase@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          head: ${{ github.head_ref }}
+
+      - id: check
+        run: echo "rebased=${{ steps.rebase.outputs.rebased }}" >> "$GITHUB_OUTPUT"
+
   generate-results:
+    needs: auto-rebase-if-needed
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,8 +52,10 @@ jobs:
         with:
           name: check-results
           path: app/build/reports/check-results.json
+
   check-compile-errors:
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -37,14 +69,10 @@ jobs:
             echo "::error::Compilation errors detected. Build is broken."
             exit 1
           fi
-  
-  
-  
-  
-  
 
   check-banned:
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -59,9 +87,9 @@ jobs:
             exit 1
           fi
 
-
   check-coroutines:
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -75,10 +103,10 @@ jobs:
             echo "::error::Coroutines usage check failed. Only runTest + MockK allowed."
             exit 1
           fi
-  
 
   check-ignored:
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -93,9 +121,9 @@ jobs:
             exit 1
           fi
 
-
   check-test-structure:
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -110,9 +138,9 @@ jobs:
             exit 1
           fi
 
-
   check-fails:
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -131,6 +159,7 @@ jobs:
 
   check-coverage:
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -149,6 +178,7 @@ jobs:
 
   check-detekt:
     needs: generate-results
+    if: ${{ needs.auto-rebase-if-needed.outputs.rebased == '0' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -163,27 +193,6 @@ jobs:
             exit 1
           fi
 
-
-  auto-rebase-if-clean:
-    needs:
-      - check-banned
-      - check-test-structure
-      - check-fails
-      - check-compile-errors
-      - check-coroutines
-      - check-ignored
-      - check-coverage
-      - check-detekt
-      - generate-results
-    if: ${{ success() && github.event.pull_request.merged == false }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - uses: peter-evans/rebase@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
   enable-auto-merge:
     needs:
       - check-banned
@@ -206,4 +215,5 @@ jobs:
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          merge-method: rebase  # changed from squash
+          merge-method: rebase
+          pull-request: ${{ github.event.pull_request.number }}
