@@ -1,7 +1,6 @@
 *.iml
 .gradle
 /local.properties
-/.*
 /kotlin-profile
 /caches
 /android
@@ -11,7 +10,7 @@
 /native
 .DS_Store
 build
-
+.*
 /captures
 /testing-harness
 .externalNativeBuild

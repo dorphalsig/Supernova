@@ -452,13 +452,13 @@ forbidden = \["Robolectric", "JUnit4"]
 fixture\_policy = "1 JSON fixture per task"
 coroutines\_required = true
 frameworks = \["JUnit5", "MockK", "runTest"]
+daos = \{mocked: true, instantiation: "mockk<YourDao>()", stubbing: "every { dao.method() } returns flowOf(mockedData)"}
 forbidden = \["Robolectric", "JUnit4"]
 fixture\_policy = "1 JSON fixture per task"
 coroutines\_required = true
 
 ### 8.1\_harness\_components
 
-* BaseRoomTest  # in-memory Room DB setup for DAOs and entity tests
 * BaseSyncTest  # Retrofit + MockWebServer integration base
 * TestEntityFactory  # Builders for test Stream, Episode, Category, etc.
 * CoroutineTestUtils  # runTest, advanceUntilIdle, dispatcher wrappers

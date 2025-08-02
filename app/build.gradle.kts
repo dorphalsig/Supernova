@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.plugin)
     alias(libs.plugins.ksp)
-    id("com.supernova.testgate")
 }
 
 android {
@@ -130,9 +129,6 @@ dependencies {
     // Secure storage (Wave 2+)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.security.crypto)
-
-    // Data module
-    implementation(project(":data"))
 
     // Additional Compose UI (Wave 3+)
     implementation(libs.androidx.compose.ui)

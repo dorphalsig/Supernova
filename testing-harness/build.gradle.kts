@@ -2,7 +2,6 @@ plugins {
     id("com.android.library")
     kotlin("android")
     kotlin("plugin.serialization") version "2.2.0"
-    id("com.supernova.testgate")
 }
 
 android {
@@ -31,6 +30,15 @@ android {
 
     testOptions {
         targetSdk = 35
+    }
+
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md"
+            )
+        }
     }
 
 }

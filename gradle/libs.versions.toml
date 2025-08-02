@@ -29,6 +29,7 @@ coreTesting = "2.2.0"
 androidxTest = "1.6.1"
 androidxJunit = "1.2.1"
 sqliteJdbc = "3.50.3.0"
+detekt = "1.23.8"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -36,6 +37,8 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt-plugin = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+testgate = {id="com.supernova.testgate"}
 
 [libraries]
 
