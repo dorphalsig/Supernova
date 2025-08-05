@@ -13,10 +13,21 @@ class TestGatePlugin : Plugin<Project> {
             registered = true
             val collector = ErrorCollectorListener()
             project.gradle.addListener(collector)
-            project.gradle.buildFinished {
-                ReportCoordinator.handleBuildFinished(project.rootProject, collector.allResults)
+
+            project.gradle.taskGraph.whenReady {
+                val hasRelevantTasks = allTasks.any { task ->
+                    task.name.contains("test", ignoreCase = true) ||
+                            task.name.contains("compile", ignoreCase = true) ||
+                            task.name.contains("jacoco", ignoreCase = true) ||
+                            task.name.contains("detekt", ignoreCase = true)
+                }
+
+                if (hasRelevantTasks) {
+                    project.gradle.buildFinished {
+                        ReportCoordinator.handleBuildFinished(project.rootProject, collector.allResults)
+                    }
+                }
             }
         }
-        // no per-project registration needed beyond this
     }
 }

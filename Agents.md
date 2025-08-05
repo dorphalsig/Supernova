@@ -113,7 +113,7 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
 ---
 
 ## 7. Code Review
-After writing code check:
+After finishing creating / modifying each class, perform the following code check:
 * Have the requirements been met?
 * is it as simple as can be made respecting the requirements?
 * Follows Single Responsibility principle?
@@ -124,13 +124,13 @@ After writing code check:
 * Uses non-deprecated APIs?
 * Are there tests that cover the behavior?
 
-**Make sure all these items pass before committing. If they dont, fix them before committing**
+**Make sure all these items pass before committing. If they dont, fix them**
 
 ---
 
 ## 8. testGate Enforcement
 
-* Run `./gradlew :<module worked upon>:testGate` before committing any task
+* Run `./gradlew :<module worked upon>:test` before committing any task
   - testGate pass? -> code review -> commit
   - testGate fail -> read <project root>/build/testgate-report.json + fix. Max retry = 2.
     - pass? -> code review -> commit

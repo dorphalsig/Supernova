@@ -1,0 +1,109 @@
+#
+# PR Quality Gate
+#
+# Runs on every pull-request event, keeps the branch up-to-date with `main`,
+# executes the TestGate plugin, checks merge-ability and – if everything is green –
+# force-rebases the PR branch onto the latest `main`.
+#
+name: PR Quality Gate
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+permissions:
+  contents: write          # allow pushing the rebase
+  pull-requests: write     # allow commenting if TestGate fails
+  actions: read
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false    # skip drafts
+    env:
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+
+
+    steps:
+      # ──────────────────────────────────────────────
+      # 1. Checkout & bring branch up to date
+      # ──────────────────────────────────────────────
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Rebase onto latest ${{ env.MAIN_BRANCH }}
+        id: rebase
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git fetch origin $MAIN_BRANCH
+          # Attempt a non-interactive rebase
+          if ! git rebase origin/$MAIN_BRANCH ; then
+            echo "::warning::Automatic rebase failed – will merge instead"
+            git rebase --abort
+            git merge --no-edit origin/$MAIN_BRANCH
+          fi
+
+      # ──────────────────────────────────────────────
+      # 2. Run TestGate and capture its output
+      # ──────────────────────────────────────────────
+      - name: Run TestGate
+        id: testgate
+        run: |
+          set +e
+          LOG=$(./gradlew --no-daemon testGate 2>&1)
+          EXIT=$?
+          echo "$LOG"
+          echo "log<<EOF"      >> $GITHUB_OUTPUT    # expose for later steps
+          echo "$LOG"          >> $GITHUB_OUTPUT
+          echo "EOF"           >> $GITHUB_OUTPUT
+          echo "exit_code=$EXIT" >> $GITHUB_OUTPUT
+          exit $EXIT
+        continue-on-error: true                      # we handle the failure explicitly
+
+      - name: Fail workflow on TestGate errors (and surface message)
+        if: steps.testgate.outputs.exit_code != '0'
+        run: |
+          echo "::error::TestGate failed:\n${{ steps.testgate.outputs.log }}"
+          exit 1
+
+      # ──────────────────────────────────────────────
+      # 3. Check merge-ability via GitHub API
+      # ──────────────────────────────────────────────
+      - name: Check PR mergeability
+        id: merge_check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {data: pr} = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              pull_number: context.issue.number
+            });
+            core.notice(`mergeable = ${pr.mergeable}`);
+            core.setOutput('mergeable', pr.mergeable);
+
+      # ──────────────────────────────────────────────
+      # 4. Push rebase back only when ▸ TestGate passed ▸ PR is mergeable
+      # ──────────────────────────────────────────────
+      - name: Push rebased branch
+        if: steps.testgate.outputs.exit_code == '0' && steps.merge_check.outputs.mergeable == 'true'
+        run: |
+          git push --force-with-lease origin HEAD:${GITHUB_HEAD_REF}
+
+      # ──────────────────────────────────────────────
+      # 5. Optional: add success-comment (kept minimal / SRP)
+      # ──────────────────────────────────────────────
+      - name: Comment success
+        if: success() && steps.merge_check.outputs.mergeable == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ TestGate passed and branch rebased onto **${{ env.MAIN_BRANCH }}**.'
+            })
