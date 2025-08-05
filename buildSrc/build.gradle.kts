@@ -9,6 +9,6 @@ repositories {
 
 dependencies {
     // Moshi for JSON
-    implementation("com.squareup.moshi:moshi:1.15.2")
+    implementation(libs.moshi)
     // XML parsing and Java Compiler API are on the JDK
 }

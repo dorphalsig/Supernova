@@ -1,83 +1,50 @@
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
 plugins {
-    id("com.android.library")
-    kotlin("android")
-    kotlin("plugin.serialization") version "2.2.0"
+    kotlin("jvm")
+    alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "com.supernova.testing"
-    compileSdk = 35
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
-    defaultConfig {
-        minSdk = 26
-        targetSdk = 35
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+tasks.withType<KotlinJvmCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
+}
 
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
-
-    testOptions {
-        targetSdk = 35
-    }
-
-    packaging {
-        resources {
-            excludes += setOf(
-                "META-INF/LICENSE.md",
-                "META-INF/LICENSE-notice.md"
-            )
-        }
-    }
-
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 dependencies {
-    // Kotlin & Coroutines
+    // Core Kotlin
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.test)
 
-    // Room (for in-memory DB testing)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.room.testing)
+    // JSON handling
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.serialization)
 
-    // Retrofit & OkHttp
+    // HTTP testing
     implementation(libs.retrofit)
     implementation(libs.converter.moshi)
     implementation(libs.okhttp)
     implementation(libs.mockwebserver)
 
-    // Moshi
-    implementation(libs.moshi)
-    implementation(libs.moshi.kotlin)
-
-    // Kotlinx Serialization
-    implementation(libs.serialization)
-
-    // JUnit 5 (Jupiter)
+    // Testing
     implementation(libs.junit.jupiter.api)
     implementation(libs.junit.jupiter.engine)
-
-    // Kotlin Test (assertions)
     implementation(libs.kotlin.test)
 
-    //tests
-    testImplementation(libs.junit.jupiter) // already covered in implementation, but retained here if split is needed
-    testImplementation(libs.mockk) // Used in TestEntityFactoryTest.kt
-    testImplementation(libs.sqlite.jdbc)
-    implementation(libs.androidx.test.core)
-
+    // Test-only dependencies
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
 }

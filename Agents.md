@@ -112,50 +112,56 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
 
 ---
 
-## 7. qaGate Enforcement
+## 7. Code Review
+After writing code check:
+* Have the requirements been met?
+* is it as simple as can be made respecting the requirements?
+* Follows Single Responsibility principle?
+* Is the code easy to read?
+* is it DRY?
+* Are separations of concerned followed?
+* Syntax Valid (lint)
+* Uses non-deprecated APIs?
+* Are there tests that cover the behavior?
 
-* Agents must run `./gradlew test` before committing any task
-* If gradle exits with code 0 = no errors. else see next step
-* If the build fails at `:app:qaGate`, agents must:
-  - Parse `app/build/reports/check-results.json`
-  - Read `qaGateSummary.overallSuccess`
-  - Extract remediation hints from:
-    - `checkTestStructure.violations[].remediation`
-    - `checkFails.failedCount`
-    - `checkBanned.violations[].file`
-    - `compileErrors.success`
-  - Retry up to 3 times (4 total attempts), applying fixes using patterns like:
-    - extend `BaseRoomTest`, `BaseSyncTest`, `UiStateTestHelpers`
-    - apply `runTest + MockK`
-    - remove banned imports
-* Every failed attempt must log and include the `paste.rs` report link
-* If all 4 attempts fail:
-  - Open a GitHub issue using the GitHub CLI (`gh`). Repo is: dorphalsig/Supernova
-  - Title: `qaGate failed for <task-name>`
-  - Include in body:
-    - Commit hash
-    - Summary of issues from JSON
-    - The last `paste.rs` link
+**Make sure all these items pass before committing. If they dont, fix them before committing**
+
+---
+
+## 8. testGate Enforcement
+
+* Run `./gradlew :<module worked upon>:testGate` before committing any task
+  - testGate pass? -> code review -> commit
+  - testGate fail -> read <project root>/build/testgate-report.json + fix. Max retry = 2.
+    - pass? -> code review -> commit
+    - fail? -> gh issue. Repo = dorphalsig/Supernova. Title = where + problem. Body = errors + actions + suggestions + paste.rs link
+    
 * Commits are allowed only if:
-  * qaGate passes successfully
-  * 3 retries were attempted, you create a GitHub issue describing what was done and what the problem is and linking the paste.rs, and the issue is linked in the commit message
-* All successful commits must include:
+  - qaGate passes successfully OR 2 retries + issue
+  - code review checklist passes 
+  
+* All commits must include:
   - Task name
   - Initial instructions
   - Brief description of changes
-  - Final `paste.rs` report link
-  - Note if auto-fixes were applied
+  - Link to issue if QA fails after 3 attempts
 
 Example commit message:
 ```
-fix: Add BaseRoomTest to FavoritesDaoTest
-
-qaGate passed after 2 retries. Report: https://paste.rs/abc12
+fail: Add BaseRoomTest to FavoritesDaoTest
+ - implemented test methods using BaseRoomTest
+ - error: java.lang.RuntimeException: Exception while computing database live data.
+        at androidx.room.RoomTrackingLiveData$1.run(RoomTrackingLiveData.java:92)
+        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1162)
+        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:636)
+        at java.lang.Thread.run(Thread.java:764)
+ - retried 2 times and testGate still fails
+ - ticket: Ref. #51
 ```
 
 ---
 
-## 7. Required Quality Gates
+## 9. Required Quality Gates
 
 - Test coverage >= 70%
 - 1 JSON fixture per task
@@ -168,7 +174,7 @@ qaGate passed after 2 retries. Report: https://paste.rs/abc12
 - No banned testing imports
 - Version lock compliance
 
-## 7.5. Testing Framework Enforcement
+## 10. Testing Framework Enforcement
 
 **Mandatory Testing Stack:**
 - JUnit5 (@Test, @BeforeEach, @AfterEach) only
