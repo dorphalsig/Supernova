@@ -114,15 +114,16 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
 
 ## 7. Code Review
 After finishing creating / modifying each class, perform the following code check:
-* Have the requirements been met?
+* Have the functional & non functional requirements been met?
 * is it as simple as can be made respecting the requirements?
-* Follows Single Responsibility principle?
+* Follows Single Responsibility principle? 
+  (its ok to aggregate functionality in closely-related, tiny classes into a single one, as long as
+  it doesnt end up being very large)
 * Is the code easy to read?
 * is it DRY?
-* Are separations of concerned followed?
 * Syntax Valid (lint)
 * Uses non-deprecated APIs?
-* Are there tests that cover the behavior?
+* Should there be tests that cover the behavior? Are they implemented?
 
 **Make sure all these items pass before committing. If they dont, fix them**
 

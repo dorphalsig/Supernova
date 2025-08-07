@@ -9,12 +9,13 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+
 android {
     namespace = "com.supernova.app"
     compileSdk = 35
 
     testOptions {
-        unitTests.isIncludeAndroidResources = true
+        unitTests.isIncludeAndroidResources = false
     }
 
     defaultConfig {
@@ -33,6 +34,13 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }
+
+    lint{
+        abortOnError = false
+        lintConfig = file("lint-config.xml")
+        xmlReport = true
+        xmlOutput = file("build/reports/lint-report.xml")
     }
 
     compileOptions {

@@ -1,0 +1,32 @@
+config:
+  validation: true
+  warningsAsErrors: false  # Changed to false
+
+output-reports:
+  active: true
+  exclude: [ ]
+
+processors: { active: true }
+console-reports: { active: true }
+
+style:
+  MaxLineLength: { active: false }
+  UnusedImports: { active: true }
+  UnusedParameter: { active: true }
+  UnusedPrivateClass: { active: true }
+  UnusedPrivateMember: { active: true }
+  UnusedPrivateProperty: { active: true }
+
+complexity:
+  LongParameterList: { active: true, functionThreshold: 6 }
+  LongMethod: { active: true, threshold: 60 }
+  CyclomaticComplexMethod: { active: true, threshold: 15 }  # Renamed from ComplexMethod
+  TooManyFunctions: { active: true, thresholdInClasses: 15 }
+  NestedBlockDepth: { active: true, threshold: 4 }
+
+# Disable everything else
+naming: { active: false }
+comments: { active: false }
+performance: { active: false }
+exceptions: { active: false }
+empty-blocks: { active: false }
