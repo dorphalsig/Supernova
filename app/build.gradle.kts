@@ -36,7 +36,7 @@ android {
         }
     }
 
-    lint{
+    lint {
         abortOnError = false
         lintConfig = file("lint-config.xml")
         xmlReport = true
@@ -101,7 +101,6 @@ dependencies {
 
     // Networking
     implementation(libs.retrofit)
-    implementation(libs.converter.gson)
     implementation(libs.converter.moshi)
     implementation(libs.moshi)
     implementation(libs.moshi.kotlin)
@@ -112,19 +111,13 @@ dependencies {
     implementation(libs.coil.compose)
 
     // Testing
-    testImplementation(libs.junit.jupiter.api)
-    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.junit5)
     testImplementation(libs.mockk)
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.core.testing)
-    testImplementation(project(":testing-harness"))
     testImplementation(libs.serialization)
     testImplementation(libs.kotlin.test)
     testImplementation(project(":testing-harness"))
-
-    androidTestImplementation(libs.androidx.test.core)
-    androidTestImplementation(libs.androidx.test.rules)
-    androidTestImplementation(libs.androidx.junit)
 
     // MockWebServer
     testImplementation(libs.mockwebserver)
@@ -149,8 +142,4 @@ dependencies {
 
     // Debug/Development
     debugImplementation(libs.androidx.compose.ui.tooling)
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }

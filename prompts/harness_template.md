@@ -14,6 +14,7 @@ Extend the testing-harness module with new shared testing utilities that will be
 - Follow established patterns from BaseRoomTest, UiStateTestHelpers, etc.
 - Place in testing-harness/src/main/kotlin/com/supernova/testing/
 - Must extend/compose existing harness, not replace it
+- Prefer moshi for anything JSON 
 
 ## Test Harness
 - Test new harness components with simple inline test data

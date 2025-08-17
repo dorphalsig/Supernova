@@ -9,6 +9,11 @@ output-reports:
 processors: { active: true }
 console-reports: { active: true }
 
+testgate:
+  RequireHarnessAnnotationOnTests:
+    active: true
+    includes: [ '**/src/test/**', '**/src/androidTest/**' ]
+
 style:
   MaxLineLength: { active: false }
   UnusedImports: { active: true }
@@ -16,6 +21,12 @@ style:
   UnusedPrivateClass: { active: true }
   UnusedPrivateMember: { active: true }
   UnusedPrivateProperty: { active: true }
+  ForbiddenMethodCall:
+    active: true
+    includes: [ '**/src/test/**', '**/src/androidTest/**' ]
+    methods:
+      - 'kotlinx.coroutines.runBlocking'
+      - 'java.lang.Thread.sleep'
 
 complexity:
   LongParameterList: { active: true, functionThreshold: 6 }
@@ -23,6 +34,12 @@ complexity:
   CyclomaticComplexMethod: { active: true, threshold: 15 }  # Renamed from ComplexMethod
   TooManyFunctions: { active: true, thresholdInClasses: 15 }
   NestedBlockDepth: { active: true, threshold: 4 }
+
+coroutines:
+  InjectDispatcher:
+    active: true
+    excludes: [ '**/src/test/**', '**/src/androidTest/**' ]
+    dispatcherNames: [ 'IO', 'Default', 'Unconfined' ]
 
 # Disable everything else
 naming: { active: false }

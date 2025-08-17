@@ -11,9 +11,9 @@ repositories {
 
 gradlePlugin {
     plugins {
-        create("testGate") {
-            id = "com.supernova.testgate"
-            implementationClass = "com.supernova.testgate.TestGatePlugin"
+        create("testGateConvention") {
+            id = "com.supernova.testgate.convention"
+            implementationClass = "com.supernova.testgate.convention.TestGateConventionPlugin"
         }
     }
 }
@@ -23,7 +23,7 @@ dependencies {
     implementation(gradleTestKit())
     // We reference these plugin classes in code; keep them compileOnly so consumers don’t get them transitively
     compileOnly(libs.gradle)                // com.android.tools.build:gradle:<agp version from catalog>
-    compileOnly(libs.detekt.gradle.plugin)  // detekt-gradle-plugin:<detekt version from catalog>
+    //compileOnly(libs.detekt.gradle.plugin)  // detekt-gradle-plugin:<detekt version from catalog>
 
 
     testImplementation(gradleApi())

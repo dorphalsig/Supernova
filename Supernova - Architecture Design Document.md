@@ -79,7 +79,6 @@ screens = \[
 ]
 
 ### 3.2 Navigation Flow
-
 * Launch starts at `Splash` → `Config` (if needed) → `ProfileSelection`
 * Post-login route lands at `Home`
 * Navigation is single-activity, Compose-based

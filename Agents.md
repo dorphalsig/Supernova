@@ -6,7 +6,7 @@ This guide defines the enforceable constraints, scaffolding, and responsibilitie
 
 ## 1. Project Constraints
 
-* **Platform**: Android TV, non-touch, low-end (≤512MB RAM)
+* **Platform**: Android TV, non-touch, low-end (≤512 MB RAM)
 * **UI**: Jetpack Compose only
 * **Minimum SDK**: 26
 * **Architecture**: MVVM + Repository + Room
@@ -14,63 +14,58 @@ This guide defines the enforceable constraints, scaffolding, and responsibilitie
 * **Media Loading**: Coil
 * **Network**: Retrofit + Moshi
 * **Async**: Coroutines + WorkManager
-* **No XML layouts, JUnit4, Robolectric, or AppSearch**
-* **Version Lock**: Do not change versions of libraries or build targets.
-* **Mandatory Gradle Plugins**: com.supernova.testgate 
-* **Testing Framework**: JUnit5 + MockK only
-* **Test Structure**: Unit tests only, no instrumentation tests
-* **Test Directory**: src/test/kotlin only, no src/androidTest
+* **No**: XML layouts, JUnit4, Robolectric, AppSearch
 * **Version Lock**: Do not change versions of libraries or build targets
+* **Mandatory Gradle Plugins**: `com.supernova.testgate`
+* **Testing Framework**: JUnit 5 + MockK only
+* **Test Structure**: Unit tests only, no instrumentation tests
+* **Test Directory**: `src/test/kotlin` only (no `src/androidTest`)
 
 ---
 
 ## 2. Test Harness (REQUIRED)
 
-All tasks must **reuse the shared test harness** components below:
+All tasks must **reuse the shared test harness** components:
 
-```
-(test-harness
-  (module :testing-harness)
-  (package-root com.supernova.testing)
-  (enforced true)
+* **Module**: `:testing-harness`
+* **Package root**: `com.supernova.testing`
+* **Enforced**: `true`
 
-  (components
-    (BaseRoomTest :layer "data")
-    (BaseSyncTest :layer "sync")
-    (TestEntityFactory :layer "all")
-    (CoroutineTestUtils :layer "all")
-    (DbAssertionHelpers :layer "data")
-    (JsonFixtureLoader :layer "sync")
-    (MockWebServerExtensions :layer "sync")
-    (UiStateTestHelpers :layer "ui")
-    (PreviewFactories :layer "ui")
-    (SyncScenarioFactory :layer "sync")
-  )
+### Components
 
-  (requirements
-    :shared_module_only true
-    :allowed_packages ["com.supernova.testing.*"]
-    :disallowed_packages ["data.*", "sync.*", "ui.*"]
-    :gradle_dependency_required true
-    :minimum_coverage 70
-    :coroutines_enforced true
-  )
+* `BaseRoomTest` (layer: data)
+* `BaseSyncTest` (layer: sync)
+* `TestEntityFactory` (layer: all)
+* `CoroutineTestUtils` (layer: all)
+* `DbAssertionHelpers` (layer: data)
+* `JsonFixtureLoader` (layer: sync)
+* `MockWebServerExtensions` (layer: sync)
+* `UiStateTestHelpers` (layer: ui)
+* `PreviewFactories` (layer: ui)
+* `SyncScenarioFactory` (layer: sync)
 
-  (agent-rules
-    :reuse_required true
-    :no_inline_entities true
-    :no_room_or_retrofit_mocks true
-    :one_fixture_per_task true
-    :unit_test_for_helper true
-  )
-)
-```
+### Requirements
+
+* Shared module only
+* Allowed packages: `com.supernova.testing.*`
+* Disallowed packages: `data.*`, `sync.*`, `ui.*`
+* Gradle dependency required
+* Minimum coverage: 70%
+* Coroutines enforced
+
+### Agent Rules
+
+* Reuse required
+* No inline entities
+* No Room or Retrofit mocks
+* One fixture per task
+* Unit test for helper
 
 ---
 
-## 3. Mandatory Reuse (UI Components)
+## 3. Mandatory Reuse — UI Components
 
-When generating UI tasks, agents must reuse the following components:
+When generating UI tasks, agents must reuse:
 
 * `FocusableCard`
 * `FocusableButton`
@@ -83,9 +78,10 @@ When generating UI tasks, agents must reuse the following components:
 
 ---
 
-## 4. Mandatory Reuse (Screen Definitions)
+## 4. Mandatory Reuse — Screens
 
-When implementing or modifying screens, agents must base the layout on the canonical wireframes defined in the architecture document §12. Each screen includes a mapping of which components to reuse.
+When implementing or modifying screens, agents must base the layout on the canonical wireframes defined in the architecture document (§ 12).
+Each screen includes a mapping of which components to reuse.
 
 ---
 
@@ -96,13 +92,13 @@ Only the following workers are allowed in MVP:
 * `SyncWorker` — triggers EPG/catalog updates on launch
 * `RecWorker` — weekly personalization update
 
-All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from MVP.
+All others (e.g. `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from MVP.
 
 ---
 
 ## 6. Functional Rules to Enforce
 
-* **Room + FTS4 only**, never use FTS5
+* Room + FTS4 only; never use FTS5
 * All FTS-backed tables must be mutated via DAO
 * No raw SQL for search tables
 * Sync is **atomic** — no partial fallback
@@ -112,42 +108,53 @@ All others (e.g., `DetailCacheWorker`, `FTSIndexWorker`) are **excluded** from M
 
 ---
 
-## 7. Code Review
-After finishing creating / modifying each class, perform the following code check:
-* Have the functional & non functional requirements been met?
-* is it as simple as can be made respecting the requirements?
-* Follows Single Responsibility principle? 
-  (its ok to aggregate functionality in closely-related, tiny classes into a single one, as long as
-  it doesnt end up being very large)
-* Is the code easy to read?
-* is it DRY?
-* Syntax Valid (lint)
-* Uses non-deprecated APIs?
-* Should there be tests that cover the behavior? Are they implemented?
+## 7. Code Review Checklist
 
-**Make sure all these items pass before committing. If they dont, fix them**
+After finishing creating/modifying each class:
+
+* Have the functional & non-functional requirements been met?
+* Is the solution as simple as possible while respecting the requirements?
+* **SOLID compliance** (overall judgment, not dogmatic box-ticking).
+* Readability: clear naming, clear flow, minimal cognitive load.
+* DRY where it meaningfully increases reuse and maintainability.
+* **Avoid micro-abstractions:** don’t split into tiny classes/methods used only once. If reuse is low and the unit is small, **merge it** with closely related responsibilities **provided the resulting artifact remains reasonably sized and coherent**.
+* Syntax/lint passes; non-deprecated APIs only.
+* Appropriate tests exist and cover behavior (happy path + key edge cases).
+
+**Make sure all items pass before committing. If not, fix them.**
 
 ---
 
 ## 8. testGate Enforcement
 
-* Run `./gradlew :<module worked upon>:test` before committing any task
-  - testGate pass? -> code review -> commit
-  - testGate fail -> read <project root>/build/testgate-report.json + fix. Max retry = 2.
-    - pass? -> code review -> commit
-    - fail? -> gh issue. Repo = dorphalsig/Supernova. Title = where + problem. Body = errors + actions + suggestions + paste.rs link
-    
-* Commits are allowed only if:
-  - qaGate passes successfully OR 2 retries + issue
-  - code review checklist passes 
-  
-* All commits must include:
-  - Task name
-  - Initial instructions
-  - Brief description of changes
-  - Link to issue if QA fails after 3 attempts
+* Run:
 
-Example commit message:
+  ```bash
+  ./gradlew :<module worked upon>:test
+  ```
+
+  before committing any task.
+
+  * testGate pass → code review → commit
+  * testGate fail → read `<project root>/build/testgate-report.json` and fix (max retry = 2)
+
+    * Pass → code review → commit
+    * Fail → create GitHub issue (Repo = `dorphalsig/Supernova`) with title = where + problem, body = errors + actions + suggestions + paste.rs link
+
+* Commits allowed only if:
+
+  * qaGate passes successfully OR 2 retries + issue created
+  * Code review checklist passes
+
+* Commit message must include:
+
+  * Task name
+  * Initial instructions
+  * Brief description of changes
+  * Link to issue if QA fails after 3 attempts
+
+**Example commit message:**
+
 ```
 fail: Add BaseRoomTest to FavoritesDaoTest
  - implemented test methods using BaseRoomTest
@@ -164,43 +171,40 @@ fail: Add BaseRoomTest to FavoritesDaoTest
 
 ## 9. Required Quality Gates
 
-- Test coverage >= 70%
-- 1 JSON fixture per task
-- No Robolectric
-- No JUnit4
-- Coroutine test wrappers
-- Dead code removal (static)
-- No instrumentation tests
-- JUnit5 + MockK only
-- No banned testing imports
-- Version lock compliance
+* Test coverage ≥ 70%
+* 1 JSON fixture per task
+* No Robolectric
+* No JUnit4
+* Coroutine test wrappers required
+* Dead code removal (static)
+* No instrumentation tests
+* JUnit 5 + MockK only
+* No banned testing imports
+* Version lock compliance
+
+---
 
 ## 10. Testing Framework Enforcement
 
-**Mandatory Testing Stack:**
-- JUnit5 (@Test, @BeforeEach, @AfterEach) only
-- MockK for mocking
-- kotlin.test for assertions
-- kotlinx.coroutines.test for runTest
+**Mandatory Testing Stack**
 
-**Prohibited Testing Frameworks:**
-- JUnit4 (@RunWith, AndroidJUnit4) — Use JUnit5 @Test instead
-- Robolectric — Use BaseRoomTest instead
-- Espresso (all components) — Unit tests only
-- Compose UI Test — Use UiStateTestHelpers instead
-- AndroidX Test runners — Unit tests only
-- Instrumentation tests — Unit tests only
-- @Ignore annotations — Fix or remove test
+* JUnit 5 (`@Test`, `@BeforeEach`, `@AfterEach`) only
+* MockK for mocking
+* `kotlin.test` for assertions
+* `kotlinx.coroutines.test` for `runTest`
 
-**Test Directory Structure:**
-- ALLOWED: src/test/kotlin/ — All tests here
-- BANNED: src/androidTest/ — Prohibited entirely
-- BANNED: src/sharedTest/ — Not allowed
+**Prohibited**
 
-**Test Directory Structure:**
-- ALLOWED: src/test/kotlin/ — All tests here
-- BANNED: src/androidTest/ — Prohibited entirely
-- BANNED: src/sharedTest/ — Not allowed
+* JUnit 4 (`@RunWith`, `AndroidJUnit4`) — use JUnit 5 instead
+* Robolectric — use `BaseRoomTest` instead
+* Espresso — unit tests only
+* Compose UI Test — use `UiStateTestHelpers` instead
+* AndroidX Test runners — unit tests only
+* Instrumentation tests — unit tests only
+* `@Ignore` annotations — fix or remove test
 
+**Test Directory Structure**
 
---- END
+* ALLOWED: `src/test/kotlin/` — all tests here
+* BANNED: `src/androidTest/` — prohibited entirely
+* BANNED: `src/sharedTest/` — not allowed

@@ -45,3 +45,4 @@ buildCache {
 rootProject.name = "Supernova"
 include(":app")
 include(":testing-harness")
+includeBuild("build-logic")

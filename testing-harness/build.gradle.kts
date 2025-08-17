@@ -40,8 +40,7 @@ dependencies {
     implementation(libs.mockwebserver)
 
     // Testing
-    implementation(libs.junit.jupiter.api)
-    implementation(libs.junit.jupiter.engine)
+    implementation(libs.junit5)
     implementation(libs.kotlin.test)
 
     // Test-only dependencies
