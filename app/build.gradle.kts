@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+kotlin.compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
 
 android {
     namespace = "com.supernova.app"
@@ -48,12 +49,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    tasks.withType<KotlinJvmCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-            freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
-        }
-    }
     buildFeatures {
         compose = true
     }

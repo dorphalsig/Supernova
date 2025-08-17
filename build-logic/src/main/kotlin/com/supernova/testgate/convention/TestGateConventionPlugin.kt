@@ -1,9 +1,12 @@
 package com.supernova.testgate.convention
 
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.variant.AndroidComponentsExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.tasks.JacocoReport
 
 /**
@@ -19,7 +22,8 @@ import org.gradle.testing.jacoco.tasks.JacocoReport
 class TestGateConventionPlugin : Plugin<Project> {
 
     private val androidPlugins = listOf("com.android.application", "com.android.library")
-    private val kotlinPlugins = listOf("org.jetbrains.kotlin.jvm", "org.jetbrains.kotlin.multiplatform")
+    private val kotlinPlugins =
+        listOf("org.jetbrains.kotlin.jvm", "org.jetbrains.kotlin.multiplatform")
 
     override fun apply(target: Project) = with(target) {
         // Exposed flags for consumers (e.g., TestGate analyzers)
@@ -37,7 +41,7 @@ class TestGateConventionPlugin : Plugin<Project> {
 
     // --- Apply baseline plugins ---------------------------------------------------------------
     private fun Project.applyPlugins() {
-        pluginManager.apply("com.supernova.testgate")
+        //pluginManager.apply("com.supernova.testgate")
         (androidPlugins + kotlinPlugins).forEach { pid ->
             pluginManager.withPlugin(pid) {
                 pluginManager.apply("io.gitlab.arturbosch.detekt")
@@ -52,7 +56,11 @@ class TestGateConventionPlugin : Plugin<Project> {
         val detektConfig = rootProject.file("detekt-config.yml")
         tasks.withType(Detekt::class.java).configureEach {
             config.setFrom(detektConfig)
-            reports { xml.required.set(true); html.required.set(false); txt.required.set(false); sarif.required.set(false) }
+            reports {
+                xml.required.set(true); html.required.set(false); txt.required.set(false); sarif.required.set(
+                false
+            )
+            }
             ignoreFailures = true
         }
     }
@@ -88,63 +96,90 @@ class TestGateConventionPlugin : Plugin<Project> {
     private fun Project.configureJacocoForAndroid() {
         androidPlugins.forEach { pid ->
             pluginManager.withPlugin(pid) {
-                // Turn on coverage for debug (extend as needed)
+                // Keep your debug unit-test coverage toggle
                 (extensions.findByName("android") as? CommonExtension<*, *, *, *, *, *>)?.let { android ->
                     android.buildTypes.getByName("debug") { enableUnitTestCoverage = true }
                 }
-                // For every Android unit-test task (test<Variant>UnitTest), register a matching JacocoReport
-                tasks.matching { it.name.startsWith("test") && it.name.endsWith("UnitTest") }
-                    .configureEach {
-                        val testTaskName = name
-                        val variant = testTaskName.removePrefix("test").removeSuffix("UnitTest") // e.g., Debug, Release
-                        val variantLower = variant.replaceFirstChar { it.lowercase() }
-                        val reportTaskName = "jacoco${variant}UnitTestReport"
 
-                        // Surface the most recent variant (useful for consumers that only care about one)
-                        extensions.extraProperties["currentTestVariant"] = variant
+                // SAFE registration point: Android Components API
+                val ac = extensions.getByType(AndroidComponentsExtension::class.java)
+                ac.onVariants { variant ->
+                    val variantName = variant.name                 // e.g., "debug"
+                    val Variant = variantName.replaceFirstChar { it.uppercase() } // "Debug"
+                    val testTaskName = "test${Variant}UnitTest"
+                    val reportTaskName = "jacoco${Variant}UnitTestReport"
 
-                        val reportTask = tasks.register(reportTaskName, JacocoReport::class.java) { 
-                            dependsOn(this)
-                            configureReports()
+                    // Reuse helper to register the report task
+                    val reportTask = configureJacocoAndroidTasks(
+                        reportTaskName = reportTaskName,
+                        testTaskName = testTaskName,
+                        variantLower = variantName,
+                        variant = Variant
+                    )
 
-                            // Exec/EC files for this variant
-                            executionData.setFrom(
-                                fileTree(layout.buildDirectory) {
-                                    include(
-                                        "jacoco/${testTaskName}*.exec",
-                                        "jacoco/${testTaskName}*.ec",
-                                        "outputs/unit_test_code_coverage/${variantLower}/${testTaskName}.exec",
-                                        "outputs/unit_test_code_coverage/${variantLower}/${testTaskName}.ec"
-                                    )
-                                }
-                            )
-
-                            // Class dirs for this variant (Java + Kotlin)
-                            classDirectories.setFrom(
-                                files(
-                                    layout.buildDirectory.dir("intermediates/javac/${variantLower}/classes"),
-                                    layout.buildDirectory.dir("tmp/kotlin-classes/${variant}"),
-                                    layout.buildDirectory.dir("tmp/kotlin-classes/${variantLower}")
-                                )
-                            )
-
-                            // Source roots
-                            sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
-                        }
-
-                        // Run per-variant report after the test task
-                        finalizedBy(reportTask)
+                    // Ensure the report runs after the matching test task (lazy + precise)
+                    tasks.withType(Test::class.java).configureEach {
+                        if (name == testTaskName) finalizedBy(reportTask)
                     }
+
+                    // Expose most recent variant for consumers
+                    extensions.extraProperties["currentTestVariant"] = Variant
+                }
             }
         }
+    }
+
+    private fun Project.configureJacocoAndroidTasks(
+        reportTaskName: String,
+        testTaskName: String,
+        variantLower: String,
+        variant: String
+    ): TaskProvider<JacocoReport?> = tasks.register(reportTaskName, JacocoReport::class.java) {
+        // FIX: depend on the test task (not on itself)
+        dependsOn(tasks.named(testTaskName))
+        configureReports()
+
+        // Exec/EC files for this variant
+        executionData.setFrom(
+            fileTree(layout.buildDirectory) {
+                include(
+                    "jacoco/${testTaskName}*.exec",
+                    "jacoco/${testTaskName}*.ec",
+                    "outputs/unit_test_code_coverage/${variantLower}/${testTaskName}.exec",
+                    "outputs/unit_test_code_coverage/${variantLower}/${testTaskName}.ec"
+                )
+            }
+        )
+
+        // Class dirs (Java + Kotlin)
+        classDirectories.setFrom(
+            files(
+                layout.buildDirectory.dir("intermediates/javac/${variantLower}/classes"),
+                layout.buildDirectory.dir("tmp/kotlin-classes/${variant}"),
+                layout.buildDirectory.dir("tmp/kotlin-classes/${variantLower}")
+            )
+        )
+
+        // Sources
+        sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
     }
 
     // --- JUnit wiring (name-based) ------------------------------------------------------------
     private fun Project.configureJUnitWiring() {
         // JVM: finalize `test` -> `jacocoTestReport`
-        pluginManager.withPlugin("org.jetbrains.kotlin.jvm") { wireFinalizer("test", "jacocoTestReport") }
+        pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+            wireFinalizer(
+                "test",
+                "jacocoTestReport"
+            )
+        }
         // KMP: finalize `jvmTest` -> `jacocoTestReport`
-        pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") { wireFinalizer("jvmTest", "jacocoTestReport") }
+        pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+            wireFinalizer(
+                "jvmTest",
+                "jacocoTestReport"
+            )
+        }
         // Android handled in configureJacocoForAndroid() per variant
     }
 

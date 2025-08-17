@@ -7,17 +7,17 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+kotlin.compilerOptions{
+    jvmTarget.set(JvmTarget.JVM_17)
+    freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-tasks.withType<KotlinJvmCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
-    }
-}
+
 
 tasks.withType<Test> {
     useJUnitPlatform()

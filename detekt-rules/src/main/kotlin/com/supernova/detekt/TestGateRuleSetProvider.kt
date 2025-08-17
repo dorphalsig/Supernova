@@ -1,4 +1,4 @@
-package com.supernova.testgate.detekt
+package com.supernova.detekt
 
 import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.api.RuleSet

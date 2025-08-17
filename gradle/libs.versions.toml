@@ -13,7 +13,7 @@ retrofit = "3.0.0"
 okhttp = "5.1.0"
 coil = "2.7.0"
 leanback = "1.2.0"
-coreKtx = "1.17.0"
+coreKtx = "1.16.0"
 activityCompose = "1.10.1"
 moshi = "1.15.2"
 media3 = "1.8.0"
@@ -34,14 +34,13 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt-plugin = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 
 [libraries]
 
 # Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-detekt-api = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref="detekt" }
-detekt-test = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref="detekt" }
+detekt-api = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = "detekt" }
+detekt-test = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref = "detekt" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }

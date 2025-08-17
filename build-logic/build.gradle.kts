@@ -22,8 +22,8 @@ dependencies {
     implementation(gradleApi())
     implementation(gradleTestKit())
     // We reference these plugin classes in code; keep them compileOnly so consumers don’t get them transitively
-    compileOnly(libs.gradle)                // com.android.tools.build:gradle:<agp version from catalog>
-    //compileOnly(libs.detekt.gradle.plugin)  // detekt-gradle-plugin:<detekt version from catalog>
+    implementation(libs.gradle)                // com.android.tools.build:gradle:<agp version from catalog>
+    implementation(libs.detekt.gradle.plugin)  // detekt-gradle-plugin:<detekt version from catalog>
 
 
     testImplementation(gradleApi())
