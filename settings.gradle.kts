@@ -43,7 +43,5 @@ buildCache {
 }
 
 rootProject.name = "Supernova"
-include(":app")
-include(":testing-harness")
-include(":detekt-rules")
 includeBuild("build-logic")
+include(":app", ":domain", ":data", ":network", ":sync", ":security", ":testing-harness", ":testing-instrumented")

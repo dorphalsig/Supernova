@@ -94,7 +94,7 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 
 # Testing
-junit5 = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+junit5 = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit5" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 androidx-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "coreTesting" }
 

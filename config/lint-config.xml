@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Already enabled in your config (keeping as-is) -->
+    <issue id="NewApi" severity="warning" />
+    <issue id="MissingPermission" severity="warning" />
+    <issue id="WrongThread" severity="error" />
+    <issue id="ExportedReceiver" severity="error" />
+    <issue id="UnusedResources" severity="warning" />
+    <issue id="ContentDescription" severity="warning" />
+    <issue id="GradleDependency" severity="warning" />
+
+    <!-- New: high-signal security/platform checks -->
+    <issue id="ExportedActivity" severity="error" />
+    <issue id="ExportedService" severity="error" />
+    <issue id="ExportedProvider" severity="error" />
+    <issue id="CleartextTrafficPermitted" severity="error" />
+    <issue id="TrustAllX509TrustManager" severity="error" />
+    <issue id="HardwareIds" severity="error" />
+    <issue id="AllowBackup" severity="error" />
+    <issue id="QueryPermissionsNeeded" severity="error" />
+
+    <!-- New: correctness (non-pedantic) -->
+    <issue id="CheckResult" severity="warning" />
+    <issue id="StringFormatMatches" severity="warning" />
+    <issue id="Recycle" severity="warning" />
+    <issue id="ServiceCast" severity="warning" />
+
+    <!-- Still ignore the chatty typography lint -->
+    <issue id="TypographyFractions" severity="ignore" />
+    <issue id="TypographyQuotes" severity="ignore" />
+</lint>

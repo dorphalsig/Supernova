@@ -1,5 +1,4 @@
 rootProject.name = "build-logic"
-include(":testgate-conventions", ":testgate-detekt-rules")
 
 dependencyResolutionManagement {
     versionCatalogs {

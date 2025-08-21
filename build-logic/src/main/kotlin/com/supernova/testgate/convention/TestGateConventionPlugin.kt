@@ -5,9 +5,13 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
+import org.gradle.kotlin.dsl.maybeCreate
+import org.gradle.kotlin.dsl.withType
 import org.gradle.testing.jacoco.tasks.JacocoReport
+import java.io.File
 
 /**
  * TestGateConventionPlugin
@@ -32,11 +36,6 @@ class TestGateConventionPlugin : Plugin<Project> {
         extensions.extraProperties["executedTestTasks"] = ""
 
         applyPlugins()
-        configureDetekt()
-        configureAndroidLint()
-        configureJacoco()
-        configureJUnitWiring()
-        captureExecutedTestTasks()
     }
 
     // --- Apply baseline plugins ---------------------------------------------------------------
@@ -47,30 +46,60 @@ class TestGateConventionPlugin : Plugin<Project> {
                 pluginManager.apply("io.gitlab.arturbosch.detekt")
                 pluginManager.apply("jacoco")
                 if (pid in androidPlugins) extensions.extraProperties["isAndroid"] = true
+                wireCustomDetektRules()
+                configureDetekt()
+                configureAndroidLint()
+                configureJacoco()
+                configureJUnitWiring()
+                // NEW: lightweight instrumentation aliases (safe, variant-aware)
+                configureAndroidInstrumentationTasks()
+                captureExecutedTestTasks()
             }
         }
     }
 
     // --- Detekt -------------------------------------------------------------------------------
+
     private fun Project.configureDetekt() {
-        val detektConfig = rootProject.file("detekt-config.yml")
-        tasks.withType(Detekt::class.java).configureEach {
-            config.setFrom(detektConfig)
+        // Use the actual file name you keep in the repo:
+        val detektConfig = File(rootDir, "config/detekt-config.yml")
+        tasks.withType<Detekt>().configureEach {
+            // Point Detekt to your config
+            config.setFrom(files(detektConfig))
+
+            // Reports: enable XML for your audits, keep others off
             reports {
-                xml.required.set(true); html.required.set(false); txt.required.set(false); sarif.required.set(
-                false
-            )
+                xml.required.set(true)
+                html.required.set(true)
+                txt.required.set(true)
+                sarif.required.set(true)
             }
+
+            // Keep build green; your audit will fail the build based on XML later
             ignoreFailures = true
         }
+
     }
+
+    private fun Project.wireCustomDetektRules() {
+        // Option A: consume a built JAR from a known path in the repo
+        // e.g., keep the jar at /tools/testgate-detekt.jar
+        val rulesJar = File(rootDir, "tools/testgate-detekt.jar")
+        if (rulesJar.exists()) {
+            dependencies.add("detektPlugins", files(rulesJar))
+        }
+
+        // Option B (preferred if the rules live in the same build):
+        // dependencies.add("detektPlugins", project(":testgate-detekt"))
+    }
+
 
     // --- Android Lint -------------------------------------------------------------------------
     private fun Project.configureAndroidLint() {
         androidPlugins.forEach { pid ->
             pluginManager.withPlugin(pid) {
                 (extensions.findByName("android") as? CommonExtension<*, *, *, *, *, *>)?.lint {
-                    lintConfig = rootProject.file("lint-config.xml")
+                    lintConfig = File(rootDir,"config/lint-config.xml")
                     abortOnError = false
                     warningsAsErrors = false
                     xmlReport = true
@@ -164,6 +193,44 @@ class TestGateConventionPlugin : Plugin<Project> {
         sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
     }
 
+    // --- Android Instrumentation aliases (safe, opt-in) --------------------------------------
+    /**
+     * Registers variant-aware alias tasks for instrumentation tests:
+     * - instrumented<Variant>Test -> connected<Variant>AndroidTest
+     * - instrumentedTest          -> depends on all instrumented<Variant>Test
+     *
+     * Notes:
+     * - Does **not** change AGP behavior; only provides nicer entrypoints.
+     * - Uses Android Components API to ensure variant names are correct.
+     */
+    private fun Project.configureAndroidInstrumentationTasks() {
+        androidPlugins.forEach { pid ->
+            pluginManager.withPlugin(pid) {
+                val ac = extensions.getByType(AndroidComponentsExtension::class.java)
+                ac.onVariants { variant ->
+                    val variantLower = variant.name                  // e.g., "debug"
+                    val Variant = variantLower.replaceFirstChar { it.uppercase() } // "Debug"
+                    val connectedTask = "connected${Variant}AndroidTest"
+                    val aliasName = "instrumented${Variant}Test"
+
+                    // Per-variant alias (grouped under Verification)
+                    val alias = tasks.register(aliasName) {
+                        group = "verification"
+                        description = "Runs instrumentation tests for ${Variant}"
+                        dependsOn(connectedTask) // by name; AGP will create it
+                    }
+
+                    // Aggregate task across variants
+                    val aggregate: Task = tasks.maybeCreate("instrumentedTest").apply {
+                        group = "verification"
+                        description = "Runs all instrumentation tests for all variants"
+                    }
+                    aggregate.dependsOn(alias)
+                }
+            }
+        }
+    }
+
     // --- JUnit wiring (name-based) ------------------------------------------------------------
     private fun Project.configureJUnitWiring() {
         // JVM: finalize `test` -> `jacocoTestReport`
@@ -192,7 +259,9 @@ class TestGateConventionPlugin : Plugin<Project> {
                 .map { it.name }
                 .filter { name ->
                     name == "test" || name == "jvmTest" ||
-                            (name.startsWith("test") && name.endsWith("UnitTest"))
+                            (name.startsWith("test") && name.endsWith("UnitTest")) ||
+                            name.startsWith("connected") && name.endsWith("AndroidTest") ||
+                            name.startsWith("instrumented") && name.endsWith("Test")
                 }
             if (executed.isNotEmpty()) {
                 extensions.extraProperties["executedTestTasks"] = executed.joinToString(",")
