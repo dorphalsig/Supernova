@@ -1,0 +1,86 @@
+config:
+  validation: true
+  warningsAsErrors: false  # Changed to false
+
+output-reports:
+  active: true
+  exclude: [ ]
+
+processors: { active: true }
+console-reports: { active: true }
+
+testgate:
+  RequireHarnessAnnotationOnTests:
+    active: true
+    includes: [ '**/src/test/**']
+
+style:
+  MaxLineLength: { active: false }
+  UnusedImports: { active: true }
+  UnusedParameter: { active: true }
+  UnusedPrivateClass: { active: true }
+  UnusedPrivateMember: { active: true }
+  UnusedPrivateProperty: { active: true }
+  ForbiddenImport:
+    active: true
+    imports:
+      - 'org.robolectric..*'           # ban Robolectric
+      - 'org.junit.runner.RunWith'     # catches JUnit4 runner usage in unit tests
+      - 'org.junit.Test'
+      - 'androidx.test.espresso..*'
+      - 'androidx.compose.ui.test..*'
+      - 'com.google.gson..*'
+
+  ForbiddenMethodCall:
+    active: true
+    methods:
+      - 'kotlinx.coroutines.runBlocking'
+      - 'java.lang.Thread.sleep'
+      - 'org.json.JSONObject'
+      - 'org.json.JSONArray'
+      - 'okio.BufferedSource.readByteArray'
+      - 'com.squareup.moshi.Types.newParameterizedType'
+      - 'com.androidx.room.Room.inMemoryDatabaseBuilder'
+
+  ForbiddenAnnotation:
+    active: true
+    annotations:
+      - 'org.junit.runner.RunWith'
+      - 'org.junit.Test'
+      - 'androidx.test.ext.junit.runners.AndroidJUnit4'
+      - 'android.support.test.runner.AndroidJUnit4'
+      - 'org.junit.Ignore'
+      - 'org.junit.jupiter.api.Disabled'
+
+complexity:
+  LongParameterList: { active: true, functionThreshold: 6 }
+  LongMethod: { active: true, threshold: 60 }
+  CyclomaticComplexMethod: { active: true, threshold: 15 }  # Renamed from ComplexMethod
+  TooManyFunctions: { active: true, thresholdInClasses: 15 }
+  NestedBlockDepth: { active: true, threshold: 4 }
+
+exceptions:
+  active: true
+  SwallowedException:
+    active: true
+  PrintStackTrace:
+    active: true
+  TooGenericExceptionCaught:
+    active: true
+    severity: warning
+  TooGenericExceptionThrown:
+    active: true
+    severity: warning
+
+
+coroutines:
+  InjectDispatcher:
+    active: true
+    excludes: [ '**/src/test/**', '**/src/androidTest/**' ]
+    dispatcherNames: [ 'IO', 'Default', 'Unconfined' ]
+
+# Disable everything else
+naming: { active: false }
+comments: { active: false }
+performance: { active: false }
+empty-blocks: { active: false }
