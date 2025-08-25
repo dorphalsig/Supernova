@@ -23,7 +23,6 @@ tv-material = "1.0.0"
 moshi = "1.15.2"
 androidx-test = "1.7.0"
 mannodermaus-android-test-core = "1.8.0"
-security-crypto = "1.1.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -81,9 +80,6 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 coil-bom            = { module = "io.coil-kt.coil3:coil-bom", version.ref = "coil-bom" }
 coil3-compose       = "io.coil-kt.coil3:coil-compose"
 coil3-network-okhttp = "io.coil-kt.coil3:coil-network-okhttp"
-
-# --- Security (deprecated upstream but included as requested) ---
-security-crypto = { module = "androidx.security:security-crypto", version.ref = "security-crypto" }
 
 # --- Testing ---
 junit-bom        = { module = "org.junit:junit-bom", version.ref = "junit-bom" }
