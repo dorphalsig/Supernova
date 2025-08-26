@@ -8,7 +8,7 @@ ksp = "2.2.0-2.0.2"
 # BOMs
 compose-bom = "2025.08.00"
 media3-bom  = "1.8.0"
-okhttp-bom  = "5.1.0"
+okhttp-bom  = "4.12.0"         # switched from 5.1.0 → 4.12.0 as requested
 coroutines-bom = "1.10.2"
 junit-bom = "5.13.4"
 coil-bom = "3.3.0"
@@ -32,15 +32,15 @@ ksp                 = { id = "com.google.devtools.ksp",       version.ref = "ksp
 junit5-android      = { id = "de.mannodermaus.android-junit5", version = "1.13.1.0" }
 
 [libraries]
-# --- Compose (use with platform(libs.compose-bom)) ---
+# --- Compose (use with platform(libs.compose.bom)) ---
 compose-bom                 = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
-compose-ui                  = "androidx.compose.ui:ui"
-compose-foundation          = "androidx.compose.foundation:foundation"
-compose-material3           = "androidx.compose.material3:material3"
-compose-runtime             = "androidx.compose.runtime:runtime"
-compose-animation           = "androidx.compose.animation:animation"
-compose-ui-tooling          = "androidx.compose.ui:ui-tooling"
-compose-ui-tooling-preview  = "androidx.compose.ui:ui-tooling-preview"
+compose-ui                  = { module = "androidx.compose.ui:ui" }
+compose-foundation          = { module = "androidx.compose.foundation:foundation" }
+compose-material3           = { module = "androidx.compose.material3:material3" }
+compose-runtime             = { module = "androidx.compose.runtime:runtime" }
+compose-animation           = { module = "androidx.compose.animation:animation" }
+compose-ui-tooling          = { module = "androidx.compose.ui:ui-tooling" }
+compose-ui-tooling-preview  = { module = "androidx.compose.ui:ui-tooling-preview" }
 activity-compose            = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 lifecycle-runtime-compose   = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
@@ -51,44 +51,45 @@ work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "w
 tv-material      = { module = "androidx.tv:tv-material", version.ref = "tv-material" }
 
 # --- Media3 (use with platform(libs.media3-bom)) ---
-media3-bom            = { module = "androidx.media3:media3-bom", version.ref = "media3-bom" }
-media3-exoplayer      = "androidx.media3:media3-exoplayer"
-media3-exoplayer-hls  = "androidx.media3:media3-exoplayer-hls"
-media3-datasource-okhttp = "androidx.media3:media3-datasource-okhttp"
-media3-ui-compose     = "androidx.media3:media3-ui-compose"
+media3-bom               = { module = "androidx.media3:media3-bom", version.ref = "media3-bom" }
+media3-exoplayer         = { module = "androidx.media3:media3-exoplayer" }
+media3-exoplayer-hls     = { module = "androidx.media3:media3-exoplayer-hls" }
+media3-datasource-okhttp = { module = "androidx.media3:media3-datasource-okhttp" }
+media3-ui-compose        = { module = "androidx.media3:media3-ui-compose" }
 
-# --- Networking (use with platform(libs.okhttp-bom)) ---
-okhttp-bom       = { module = "com.squareup.okhttp3:okhttp-bom", version.ref = "okhttp-bom" }
-okhttp           = "com.squareup.okhttp3:okhttp"
-okhttp-logging   = "com.squareup.okhttp3:logging-interceptor"
-moshi            = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
-moshi-kotlin     = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
+# --- Networking (use with platform(libs.okhttp.bom)) ---
+okhttp-bom     = { module = "com.squareup.okhttp3:okhttp-bom", version.ref = "okhttp-bom" }
+okhttp         = { module = "com.squareup.okhttp3:okhttp" }
+okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor" }
+moshi          = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
+moshi-kotlin   = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
 moshi-kotlin-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" } # KSP
 
-# --- Coroutines (use with platform(libs.coroutines-bom)) ---
-coroutines-bom   = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "coroutines-bom" }
-coroutines-core  = "org.jetbrains.kotlinx:kotlinx-coroutines-core"
-coroutines-android = "org.jetbrains.kotlinx:kotlinx-coroutines-android"
-coroutines-test  = "org.jetbrains.kotlinx:kotlinx-coroutines-test"
+# --- Coroutines (use with platform(libs.coroutines.bom)) ---
+coroutines-bom     = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "coroutines-bom" }
+coroutines-core    = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android" }
+coroutines-test    = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test" }
 
 # --- Room (KSP compiler separate) ---
 room-runtime  = { module = "androidx.room:room-runtime",  version.ref = "room" }
 room-ktx      = { module = "androidx.room:room-ktx",      version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" } # KSP
 
-# --- Coil (use with platform(libs.coil-bom)) ---
-coil-bom            = { module = "io.coil-kt.coil3:coil-bom", version.ref = "coil-bom" }
-coil3-compose       = "io.coil-kt.coil3:coil-compose"
-coil3-network-okhttp = "io.coil-kt.coil3:coil-network-okhttp"
+# --- Coil (use with platform(libs.coil.bom)) ---
+coil-bom             = { module = "io.coil-kt.coil3:coil-bom", version.ref = "coil-bom" }
+coil3-compose        = { module = "io.coil-kt.coil3:coil-compose" }
+coil3-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp" }
 
 # --- Testing ---
 junit-bom        = { module = "org.junit:junit-bom", version.ref = "junit-bom" }
-junit5-api       = "org.junit.jupiter:junit-jupiter-api"
-junit5-params    = "org.junit.jupiter:junit-jupiter-params"
-junit5-engine    = "org.junit.jupiter:junit-jupiter-engine"
+junit5-api       = { module = "org.junit.jupiter:junit-jupiter-api" }
+junit5-params    = { module = "org.junit.jupiter:junit-jupiter-params" }
+junit5-engine    = { module = "org.junit.jupiter:junit-jupiter-engine" }
 androidx-test-core   = { module = "androidx.test:core",   version.ref = "androidx-test" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test" }
 junit5-android-test-core = { module = "de.mannodermaus.junit5:android-test-core", version.ref = "mannodermaus-android-test-core" }
+
 # Needed by build-logic (compileOnly)
 gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version = "1.23.8" }
