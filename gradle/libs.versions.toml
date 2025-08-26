@@ -89,6 +89,9 @@ junit5-engine    = "org.junit.jupiter:junit-jupiter-engine"
 androidx-test-core   = { module = "androidx.test:core",   version.ref = "androidx-test" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test" }
 junit5-android-test-core = { module = "de.mannodermaus.junit5:android-test-core", version.ref = "mannodermaus-android-test-core" }
+# Needed by build-logic (compileOnly)
+gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version = "1.23.8" }
 
 [bundles]
 compose        = ["compose-ui","compose-foundation","compose-material3","compose-runtime","compose-animation","activity-compose","lifecycle-runtime-compose","lifecycle-viewmodel-compose"]
