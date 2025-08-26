@@ -106,7 +106,7 @@ room           = ["room-runtime","room-ktx"]
 image          = ["coil3-compose","coil3-network-okhttp"]
 work           = ["work-runtime-ktx"]
 tv-ui          = ["tv-material"]
-security       = ["security-crypto"]
+#security       = ["security-crypto"]
 
 testing-jvm    = ["junit5-api","junit5-params","junit5-engine","coroutines-test"]
 testing-android= ["junit5-api","junit5-params","androidx-test-core","androidx-test-runner","junit5-android-test-core"]
