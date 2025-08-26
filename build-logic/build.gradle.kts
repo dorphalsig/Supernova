@@ -1,32 +1,37 @@
 plugins {
-    `kotlin-dsl`          // uses Gradle’s embedded Kotlin; no separate kotlin plugin version needed
-    `java-gradle-plugin`
+  `kotlin-dsl`
+  `java-gradle-plugin`
 }
 
 repositories {
-    google()
-    mavenCentral()
-    gradlePluginPortal()
+  gradlePluginPortal()
+  google()
+  mavenCentral()
 }
 
 gradlePlugin {
-    plugins {
-        create("testGateConvention") {
-            id = "com.supernova.testgate.convention"
-            implementationClass = "com.supernova.testgate.convention.TestGateConventionPlugin"
-        }
+  plugins {
+    create("testGateConvention") {
+      id = "com.supernova.testgate.convention"
+      implementationClass = "com.supernova.testgate.convention.TestGateConventionPlugin"
     }
+  }
 }
 
 dependencies {
-    implementation(gradleApi())
-    implementation(gradleTestKit())
-    // We reference these plugin classes in code; keep them compileOnly so consumers don’t get them transitively
-    implementation(libs.gradle)                // com.android.tools.build:gradle:<agp version from catalog>
-    implementation(libs.detekt.gradle.plugin)  // detekt-gradle-plugin:<detekt version from catalog>
+  // Gradle APIs
+  implementation(gradleApi())
+  implementation(gradleTestKit())
 
+  // Compile against AGP & Detekt types without leaking them to consumers:
+  compileOnly(conventionLibs.gradle)                 // com.android.tools.build:gradle
+  compileOnly(conventionLibs.detekt.gradle.plugin)   // io.gitlab.arturbosch.detekt:detekt-gradle-plugin
 
-    testImplementation(gradleApi())
-    testImplementation(gradleTestKit())
-    testImplementation(libs.junit5)
+  // Tests: JUnit 5 via BOM + artifacts
+  testImplementation(gradleApi())
+  testImplementation(gradleTestKit())
+  testImplementation(platform(conventionLibs.junit.bom))
+  testImplementation(conventionLibs.junit5.api)
+  testImplementation(conventionLibs.junit5.params)
+  testRuntimeOnly(conventionLibs.junit5.engine)
 }
