@@ -1,0 +1,86 @@
+name: TestGate (non-main)
+
+on:
+  push:
+    branches-ignore: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate_update:
+    name: Ensure branch contains latest main
+    runs-on: ubuntu-latest
+    outputs:
+      up_to_date: ${{ steps.flag.outputs.up_to_date }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Check ancestry
+        id: flag
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --prune origin main
+          if git merge-base --is-ancestor origin/main HEAD; then
+            echo "up_to_date=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "up_to_date=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Rebase onto main (if needed)
+        if: steps.flag.outputs.up_to_date == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rebase origin/main || { echo "::error::Rebase conflict. Resolve manually."; git rebase --abort; exit 1; }
+          git push --force-with-lease
+          echo "Rebased & pushed. This run ends; new run will continue."
+
+  testgate:
+    needs: gate_update
+    if: needs.gate_update.outputs.up_to_date == 'true'
+    uses: ${{ github.repository }}/.github/workflows/testgate_reusable.yml@main
+    secrets: inherit
+    with:
+      java_version: "21"
+      gradle_task: "check"
+
+  finalize:
+    needs: testgate
+    if: |
+      success() &&
+      startsWith(github.ref_name, 'codex') &&
+      (github.event.repository.fork == false)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BRANCH: ${{ github.ref_name }}
+      REPO: ${{ github.repository }}
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Rebase on latest main (race guard), merge PR (rebase), delete branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          PR_JSON=$(gh api -X GET "repos/${REPO}/pulls" -f head="${OWNER}:${BRANCH}" -f state=open)
+          PR_NUMBER=$(echo "$PR_JSON" | jq -r '.[0].number // empty')
+          if [ -z "${PR_NUMBER:-}" ]; then
+            echo "No open PR for ${BRANCH}. Skipping finalize."
+            exit 0
+          fi
+          git fetch --no-tags --prune origin
+          git checkout "$BRANCH"
+          git rebase origin/main || { echo "::error::Rebase conflict during finalize. Leaving PR open."; git rebase --abort; exit 1; }
+          git push --force-with-lease
+          gh api -X PUT "repos/${REPO}/pulls/${PR_NUMBER}/merge" -f merge_method=rebase >/dev/null
+          gh api -X DELETE "repos/${REPO}/git/refs/heads/${BRANCH}" >/dev/null || true
+          echo "PR #${PR_NUMBER} merged (rebase) and branch ${BRANCH} deleted."
