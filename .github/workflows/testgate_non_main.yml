@@ -43,7 +43,7 @@ jobs:
   testgate:
     needs: gate_update
     if: needs.gate_update.outputs.up_to_date == 'true'
-    uses: ${{ github.repository }}/.github/workflows/testgate_reusable.yml@main
+    uses: dorphalsig/Supernova/.github/workflows/testgate_reusable.yml@main
     secrets: inherit
     with:
       java_version: "21"
