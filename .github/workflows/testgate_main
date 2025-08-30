@@ -37,7 +37,7 @@ jobs:
   testgate:
     needs: gate
     if: needs.gate.outputs.run == 'true'
-    uses: ${{ github.repository }}/.github/workflows/testgate_reusable.yml@main
+    uses: dorphalsig/Supernova/.github/workflows/testgate_reusable.yml@main
     secrets: inherit
     with:
       java_version: "21"
