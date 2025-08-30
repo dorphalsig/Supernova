@@ -1,0 +1,44 @@
+name: TestGate (main direct & manual)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Skip PR merge commits
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA:  ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          RES=$(gh api -H "Accept: application/vnd.github+json" "repos/${REPO}/commits/${SHA}/pulls")
+          COUNT=$(echo "$RES" | jq 'length')
+          if [ "$COUNT" -gt 0 ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "This push is a PR merge; skipping."
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Direct push or manual; running TestGate."
+          fi
+
+  testgate:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    uses: ${{ github.repository }}/.github/workflows/testgate_reusable.yml@main
+    secrets: inherit
+    with:
+      java_version: "21"
+      gradle_task: "check"
