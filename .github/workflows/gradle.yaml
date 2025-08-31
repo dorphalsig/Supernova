@@ -1,81 +1,117 @@
 # .github/workflows/bootstrap_gradle_wrapper.yml
+
 name: Bootstrap Gradle Wrapper
 
 on:
-  workflow_dispatch:
-    inputs:
-      gradle_version:
-        description: 'Gradle version to generate (fallback if properties are missing)'
-        required: false
-        default: '8.13'
+workflow_dispatch:
+inputs:
+gradle_version:
+description: ‘Gradle version to generate (fallback if properties are missing)’
+required: false
+default: ‘8.13’
 
 permissions:
-  contents: write
+contents: write
 
 jobs:
-  gen-wrapper:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+gen-wrapper:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout
+uses: actions/checkout@v4
+with:
+fetch-depth: 0
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
+```
+  - name: Set up JDK
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '21'
 
-      # Determine Gradle version: prefer gradle-wrapper.properties if it exists; else use the input
-      - name: Detect Gradle version
-        id: ver
-        shell: bash
-        run: |
-          set -euo pipefail
-          INPUT_VERSION='${{ github.event.inputs.gradle_version }}'
-          if [[ -f gradle/wrapper/gradle-wrapper.properties ]]; then
-            LINE=$(grep -E '^distributionUrl=' gradle/wrapper/gradle-wrapper.properties || true)
-            if [[ -n "$LINE" ]]; then
-              # Extract the version from .../gradle-<ver>-bin.zip or -all.zip
-              V=$(echo "$LINE" | sed -E 's/.*gradle-([0-9.]+)-.*/\1/')
-              if [[ -n "$V" ]]; then
-                echo "version=$V" >> "$GITHUB_OUTPUT"
-                echo "Detected Gradle version from properties: $V"
-                exit 0
-              fi
-            fi
-          fi
-          echo "version=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
-          echo "Using input Gradle version: $INPUT_VERSION"
-
-      # Run Gradle WITHOUT wrapper to generate the wrapper files for the chosen version
-      - name: Generate wrapper (no wrapper present)
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-version: ${{ steps.ver.outputs.version }}
-          arguments: wrapper --gradle-version ${{ steps.ver.outputs.version }}
-
-      - name: Verify wrapper jar exists
-        shell: bash
-        run: |
-          set -euo pipefail
-          ls -la gradle/wrapper || true
-          test -f gradle/wrapper/gradle-wrapper.jar || { echo "::error::gradle-wrapper.jar not found after wrapper task"; exit 1; }
-
-      - name: Commit & push wrapper files
-        env:
-          GIT_AUTHOR_NAME: github-actions[bot]
-          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-          GIT_COMMITTER_NAME: github-actions[bot]
-          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-        shell: bash
-        run: |
-          set -euo pipefail
-          git add gradle/wrapper/ gradlew gradlew.bat
-          if git diff --cached --quiet; then
-            echo "No wrapper changes to commit."
+  # Determine Gradle version: prefer gradle-wrapper.properties if it exists; else use the input
+  - name: Detect Gradle version
+    id: ver
+    shell: bash
+    run: |
+      set -euo pipefail
+      INPUT_VERSION='${{ github.event.inputs.gradle_version }}'
+      if [[ -f gradle/wrapper/gradle-wrapper.properties ]]; then
+        LINE=$(grep -E '^distributionUrl=' gradle/wrapper/gradle-wrapper.properties || true)
+        if [[ -n "$LINE" ]]; then
+          # Extract the version from .../gradle-<ver>-bin.zip or -all.zip
+          V=$(echo "$LINE" | sed -E 's/.*gradle-([0-9.]+)-.*/\1/')
+          if [[ -n "$V" ]]; then
+            echo "version=$V" >> "$GITHUB_OUTPUT"
+            echo "Detected Gradle version from properties: $V"
             exit 0
           fi
-          git commit -m "chore(gradle): add gradle-wrapper.jar (Gradle ${{ steps.ver.outputs.version }})"
-          git push
+        fi
+      fi
+      echo "version=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
+      echo "Using input Gradle version: $INPUT_VERSION"
+
+  # Run Gradle WITHOUT wrapper to generate the wrapper files for the chosen version
+  - name: Generate wrapper (no wrapper present)
+    uses: gradle/gradle-build-action@v2
+    with:
+      gradle-version: ${{ steps.ver.outputs.version }}
+      arguments: wrapper --gradle-version ${{ steps.ver.outputs.version }}
+
+  - name: Verify wrapper files exist
+    shell: bash
+    run: |
+      set -euo pipefail
+      echo "Checking for wrapper files..."
+      ls -la gradle/wrapper/ || true
+      test -f gradle/wrapper/gradle-wrapper.jar || { echo "::error::gradle-wrapper.jar not found after wrapper task"; exit 1; }
+      test -f gradle/wrapper/gradle-wrapper.properties || { echo "::error::gradle-wrapper.properties not found after wrapper task"; exit 1; }
+      test -f gradlew || { echo "::error::gradlew not found after wrapper task"; exit 1; }
+      test -f gradlew.bat || { echo "::error::gradlew.bat not found after wrapper task"; exit 1; }
+      echo "All wrapper files found successfully"
+
+  - name: Make gradlew executable
+    shell: bash
+    run: |
+      chmod +x gradlew
+
+  - name: Check git status before adding files
+    shell: bash
+    run: |
+      echo "Git status before adding wrapper files:"
+      git status
+      echo "Checking if wrapper files are ignored..."
+      git check-ignore gradle/wrapper/gradle-wrapper.jar || echo "gradle-wrapper.jar is not ignored"
+      git check-ignore gradlew || echo "gradlew is not ignored"
+      git check-ignore gradlew.bat || echo "gradlew.bat is not ignored"
+
+  - name: Commit & push wrapper files
+    env:
+      GIT_AUTHOR_NAME: github-actions[bot]
+      GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+      GIT_COMMITTER_NAME: github-actions[bot]
+      GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+    shell: bash
+    run: |
+      set -euo pipefail
+      
+      # Force add wrapper files (they might be in .gitignore)
+      echo "Adding wrapper files to git..."
+      git add -f gradle/wrapper/gradle-wrapper.jar
+      git add -f gradle/wrapper/gradle-wrapper.properties
+      git add -f gradlew
+      git add -f gradlew.bat
+      
+      # Check if there are any changes to commit
+      if git diff --cached --quiet; then
+        echo "No wrapper changes to commit."
+        exit 0
+      fi
+      
+      echo "Changes detected, committing wrapper files..."
+      git status --porcelain
+      git commit -m "chore(gradle): add gradle-wrapper files (Gradle ${{ steps.ver.outputs.version }})"
+      
+      echo "Pushing changes..."
+      git push
+```
