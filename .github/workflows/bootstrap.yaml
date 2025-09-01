@@ -1,0 +1,47 @@
+# .github/workflows/bootstrap_gradle_wrapper.yml
+name: Bootstrap Gradle Wrapper (8.13)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  gen-wrapper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # Install Gradle 8.13 so we can run `gradle wrapper` even if no wrapper exists
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.13
+
+      # Generate wrapper files for Gradle 8.13
+      - name: Generate wrapper
+        run: gradle wrapper --gradle-version 8.13 --no-daemon
+
+      # Commit & push the wrapper artifacts
+      - name: Commit & push
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          set -euo pipefail
+          git add gradle/wrapper/ gradlew gradlew.bat
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git commit -m "chore(gradle): bootstrap wrapper for Gradle 8.13"
+          git push
