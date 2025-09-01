@@ -38,7 +38,7 @@ jobs:
           GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
         run: |
           set -euo pipefail
-          git add gradle/wrapper/ gradlew gradlew.bat
+          git add -f gradle/wrapper/ gradlew gradlew.bat
           if git diff --cached --quiet; then
             echo "No changes."
             exit 0
